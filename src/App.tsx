@@ -17,7 +17,8 @@ import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
-import Home from "./pages/Dashboard/Home";
+import Dashboard from "./pages/Admin/Dashboard";
+import StaffDashboard from "./pages/Staff/StaffDashboard";
 
 export default function App() {
   return (
@@ -25,9 +26,9 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* Dashboard Layout */}
+          {/* Admin Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+            <Route index path="/admin" element={<Dashboard />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -51,6 +52,13 @@ export default function App() {
             {/* Charts */}
             <Route path="/line-chart" element={<LineChart />} />
             <Route path="/bar-chart" element={<BarChart />} />
+          </Route>
+
+
+           {/* Staff Layout */}
+          <Route element={<AppLayout />}>
+            <Route index path="/staff" element={<StaffDashboard />} />
+
           </Route>
 
           {/* Auth Layout */}
