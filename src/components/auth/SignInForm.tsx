@@ -38,20 +38,22 @@ export default function SignInForm() {
 
       const { token, user } = res.data;
 
-      alert('Login failed');
+      alert('Login Succesful');
 
       // store auth data
-      localStorage.setItem("token", token);
+      //localStorage.setItem("token", token);
       localStorage.setItem("role", user.role);
       localStorage.setItem("user", JSON.stringify(user));
 
       // redirect by role
       if (user.role === "admin") {
         navigate("/admin");
-      } else if (user.role === "staff") {
-        navigate("/staff");
+      } else if (user.role === "leadman") {
+        navigate("/accounting");
+      } else if (user.role === "supervisor") {
+        navigate("/invetory");
       } else {
-        navigate("/*");
+        navigate("/");
       }
 
     } catch (err:unknown) {

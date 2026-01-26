@@ -55,7 +55,7 @@ export default function App() {
           </Route>
 
 
-           {/* Staff Layout */}
+           {/* Lead Man Layout */}
           <Route element={<AppLayout />}>
             <Route index path="/staff" element={<StaffDashboard />} />
 

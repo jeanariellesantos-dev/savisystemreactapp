@@ -36,25 +36,7 @@ export default function EcommerceMetrics() {
     
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:gap-6">
       {/* <!-- Metric Item Start --> */}
-      <div className="rounded-2xl border border-gray-200 bg-blue-800 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
 
-        <div className="flex items-start justify-center">
-          <div>
-            <p className="text-title-md font-bold text-white dark:text-gray-400">
-              Welcome to [] System
-            </p>
-
-            <p className="mt-3 text-white text-center text-sm dark:text-white/90">
-               Manage your requests and approvals
-            </p>
-
-            <p className="mt-4 text-white text-center text-sm dark:text-white/90">
-               {dayOfWeek + ', ' + textFormatDate}
-            </p>
-
-          </div>
-        </div>
-      </div>
       {/* <!-- Metric Item End --> */}
 
       {/* <!-- Metric Item Start --> */}

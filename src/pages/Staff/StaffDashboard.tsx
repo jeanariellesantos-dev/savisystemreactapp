@@ -1,5 +1,5 @@
 
-import RecentOrders from "../../components/ecommerce/RecentOrders";
+import RecentOrders from "../../components/ecommerce/RecentRequests";
 import PageMeta from "../../components/common/PageMeta";
 
 export default function StaffDashboard() {
