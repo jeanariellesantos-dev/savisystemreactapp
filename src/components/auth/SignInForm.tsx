@@ -41,27 +41,21 @@ export default function SignInForm() {
       alert('Login Succesful');
 
       // store auth data
-      //localStorage.setItem("token", token);
       localStorage.setItem("role", user.role);
       localStorage.setItem("user", JSON.stringify(user));
 
       // redirect by role
-      if (user.role === "admin") {
+      if (user.role === "ADMINISTRATOR") {
         navigate("/admin");
-      } else if (user.role === "leadman") {
-        navigate("/accounting");
-      } else if (user.role === "supervisor") {
-        navigate("/invetory");
       } else {
-        navigate("/");
+        navigate("/home");
       }
 
     } catch (err:unknown) {
-      console.error(err);
-      alert('Login failed');
+        console.error(err);
+        alert('Login failed');
 
     } finally {
-
       setLoading(false);
     }
   };

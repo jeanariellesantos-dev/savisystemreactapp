@@ -19,6 +19,7 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Dashboard from "./pages/Admin/Dashboard";
 import StaffDashboard from "./pages/Staff/StaffDashboard";
+import Home from "./pages/Dashboard/Home";
 
 export default function App() {
   return (
@@ -28,7 +29,8 @@ export default function App() {
         <Routes>
           {/* Admin Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/admin" element={<Dashboard />} />
+            <Route path="/admin" element={<Dashboard />} />
+            <Route path="/home" element={<Home />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -62,7 +64,7 @@ export default function App() {
           </Route>
 
           {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn />} />
+          <Route index path="/" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
 
           {/* Fallback Route */}
