@@ -17,14 +17,13 @@ import { useState } from "react";
 import ViewOrderModal  from "../common/ViewOrderModel";
 
 
-
 // Define the TypeScript interface for the table rows
 interface Request {
   id: number; // Unique identifier for each product
   requestID: string;
   productName: string; // Product name
   // image: string; // URL or path to the product image
-  status: "Delivered" | "Pending" | "Canceled"; // Status of the Request
+  status: "Pending" | "Rejected"| "Fulfilled"; // Status of the Request
     remarks: string; // Reason for rejection
 }
 
@@ -34,7 +33,7 @@ const tableData: Request[] = [
     id: 1,
     requestID: "REQ1",
     productName: "Laptop",
-    status: "Delivered",
+    status: "Pending",
     remarks: "Approved"
 
   },
@@ -42,7 +41,7 @@ const tableData: Request[] = [
     id: 2,
     requestID: "REQ1",
     productName: "Laptop",
-    status: "Delivered",
+    status: "Fulfilled",
     remarks: "Approved"
 
   },
@@ -50,22 +49,22 @@ const tableData: Request[] = [
     id: 3,
     requestID: "REQ1",
     productName: "Laptop",
-    status: "Delivered",
-    remarks: "Approved"
+    status: "Rejected",
+    remarks: "No supplies. Please try again tomorrow"
 
   },
   {
     id: 4,
     requestID: "REQ1",
     productName: "Laptop",
-    status: "Delivered",
+    status: "Fulfilled",
     remarks: "Approved"
   },
   {
     id: 5,
     requestID: "REQ1",
     productName: "Laptop",
-    status: "Delivered",
+    status: "Fulfilled",
     remarks: "Approved"
 
   },
@@ -131,6 +130,7 @@ export default function RecentRequests() {
         <Table>
           {/* Table Header */}
           <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
+            
             <TableRow>
               <TableCell
                 isHeader
@@ -175,7 +175,7 @@ export default function RecentRequests() {
                   <Badge 
                     size="sm"
                     color={
-                      request.status === "Delivered"
+                      request.status === "Fulfilled"
                         ? "success"
                         : request.status === "Pending"
                         ? "warning"
@@ -186,31 +186,42 @@ export default function RecentRequests() {
                   </Badge>
                 </TableCell>
                 <TableCell className="py-2 text-center text-gray-500 text-theme-sm dark:text-gray-400">
-                  <button  onClick={() => setSelectedItem(request)}
-                  className="inline-flex items-center justify-center
-                        w-8 h-8
-                        border border-gray-300
+                    <button
+                      onClick={() => setSelectedItem(request)}
+                      className="
+                        inline-flex items-center justify-center
+                        w-9 h-9
+                        rounded-lg
+                        border border-gray-200
                         text-blue-600
-                        hover:text-white
-                        hover:bg-blue-600
-                        rounded-md
-                        transition"
-                      title="View"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                </button>
+                        hover:bg-blue-600 hover:text-white
+                        dark:border-gray-700
+                        transition
+                      "
+                      title="View details"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    </button>
                 </TableCell>
               </TableRow>
-            ))}
+
+              
+            ))
+            
+            
+            }
+
+            {tableData.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} className="py-8 text-center text-gray-500">
+                  No orders found.
+                </TableCell>
+              </TableRow>
+            )}
+
           </TableBody>
         </Table>
       </div>

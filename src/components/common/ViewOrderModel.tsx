@@ -57,111 +57,146 @@ export default function ViewRequestModal({
         dark:bg-gray-900 lg:p-11
       "
     >
-      {/* NORMAL VIEW */}
-      {!confirmAction && (
-        <>
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white/90">
-            Order Details
-          </h2>
+    
+    {/* NORMAL VIEW */}
+    {!confirmAction && (
+    <>
+        <h2 className="text-xl font-semibold mb-5 text-gray-900 dark:text-white">
+        Order Details
+        </h2>
 
-          <div className="space-y-2 text-sm text-gray-800">
-            <p> <strong>Request ID: </strong> {item.requestID}</p>
-            <p> <strong>Product: </strong> {item.productName}</p>
-            <p><strong>Status:</strong> {item.status}</p>
-             {/* SHOW REMARKS ONLY IF STATUS IS REJECTED */}
-            {item.status === "REJECTED" && (
-              <p>
-                <strong>Remarks:</strong> {item.remarks || "No remarks yet"}
-              </p>
-            )}
-          </div>
+        {/* DETAILS CARD */}
+        <div className="rounded-xl border border-gray-200/70 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/60">
+        <div className="grid grid-cols-2 gap-y-3 text-sm">
+            <span className="font-medium text-gray-600 dark:text-gray-300">
+            Request ID
+            </span>
+            <span className="ml-2 text-gray-900 dark:text-white">
+            {item.requestID}
+            </span>
 
-          <div className="mt-6 flex justify-end gap-2">
-            <Button
-            size="sm" variant="outline"
-              onClick={onClose}
+            <span className="font-medium text-gray-600 dark:text-gray-300">
+            Product
+            </span>
+            <span className="ml-2 text-gray-900 dark:text-white">
+            {item.productName}
+            </span>
+
+            <span className="font-medium text-gray-600 dark:text-gray-300">
+            Status
+            </span>
+            <span
+            className={`ml-2 inline-flex w-fit px-2 py-0.5 rounded-full text-xs font-medium
+                ${
+                item.status === "Approved"
+                    ? "bg-green-100 text-green-700"
+                    : item.status === "Rejected"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-yellow-100 text-yellow-700"
+                }
+            `}
             >
-              Close
-            </Button>
+            {item.status}
+            </span>
 
-         {!isOperations && (
+            {item.status === "Rejected" && (
             <>
+                <span className="font-medium text-gray-600 dark:text-gray-300">
+                Remarks
+                </span>
+                <span className="ml-2 text-gray-900 dark:text-white">
+                {item.remarks || "No remarks provided"}
+                </span>
+            </>
+            )}
+        </div>
+        </div>
+
+        {/* ACTIONS */}
+        <div className="mt-6 flex justify-between items-center">
+        <Button size="sm" variant="outline" onClick={onClose}>
+            Close
+        </Button>
+
+        {!isOperations && (
+            <div className="flex gap-2">
             <Button
-              onClick={() => setConfirmAction("reject")}
-              className="px-4 py-2 text-sm
-                         bg-red-500/80 text-white
-                         hover:bg-red-600 transition"
+                size="sm"
+                onClick={() => setConfirmAction("reject")}
+                className="bg-red-500 text-white hover:bg-red-600"
             >
-              Reject
+                Reject
             </Button>
 
             <Button
-              onClick={() => setConfirmAction("approve")}
-              className="px-4 py-2 text-sm
-                         bg-green-500/80 text-white
-                         hover:bg-green-600 transition"
+                size="sm"
+                onClick={() => setConfirmAction("approve")}
+                className="bg-green-500 text-white hover:bg-green-600"
             >
-              Approve
+                Approve
             </Button>
-              </>
-             )}
-          </div>
+            </div>
+        )}
+        </div>
+    </>
+    )}
 
-        </>
-      )}
 
-      {/* CONFIRMATION VIEW */}
-      {confirmAction && (
-        <>
-          <h2 className="text-lg font-semibold mb-4 text-gray-900">
-            Confirm Action
-          </h2>
+    {/* CONFIRMATION VIEW */}
+    {confirmAction && (
+    <>
+        <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
+        Confirm {confirmAction === "approve" ? "Approval" : "Rejection"}
+        </h2>
 
-          <p className="text-sm text-gray-800 mb-3">
-            Are you sure you want to{" "}
-            <span className="font-semibold capitalize">
-              {confirmAction}
-            </span>{" "}
-            this request?
-          </p>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+        This action cannot be undone. Are you sure you want to proceed?
+        </p>
 
-          {/* Reject reason input */}
-          {confirmAction === "reject" && (
+        {confirmAction === "reject" && (
+        <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Reason for rejection <span className="text-red-500">*</span>
+            </label>
             <TextArea
-              value={rejectReason}
-              onChange={(value: string) => setRejectReason(value)}
-              placeholder="Type your reason for rejection..."
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-400"
+            value={rejectReason}
+            onChange={(value: string) => setRejectReason(value)}
+            placeholder="Provide a clear reason..."
+            className="w-full"
             />
-          )}
+        </div>
+        )}
 
-          <div className="mt-4 flex justify-end gap-2">
-            <Button
-            size="sm" variant="outline"
-              onClick={() => {
-                setConfirmAction(null);
-                setRejectReason("");
-              }}
-              className="px-4 py-2 text-sm
-                         bg-white/70 border border-gray-300
-                         hover:bg-white transition"
-            >
-              No
-            </Button>
+        <div className="mt-6 flex justify-end gap-2">
+        <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+            setConfirmAction(null);
+            setRejectReason("");
+            }}
+        >
+            Cancel
+        </Button>
 
-            <Button
-              onClick={handleConfirm}
-              className={`px-4 py-2 text-sm text-white transition
-                ${confirmAction === "approve"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-red-600 hover:bg-red-700"}
-              `}
-            >
-              Yes
-            </Button>
-          </div>
-        </>
-      )}
+        <Button
+            size="sm"
+            onClick={handleConfirm}
+            disabled={confirmAction === "reject" && !rejectReason.trim()}
+            className={`text-white
+            ${
+                confirmAction === "approve"
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-red-600 hover:bg-red-700"
+            }
+            `}
+        >
+            Yes, {confirmAction}
+        </Button>
+        </div>
+    </>
+    )}
+
     </Modal>
   );
 }

@@ -6,8 +6,8 @@ export default function SignIn() {
   return (
     <>
       <PageMeta
-        title="Submission and Approval System"
-        description="This is the signin page"
+        title="SAVI System"
+        description="SAVI Submission and Approval system"
       />
       <AuthLayout>
         <SignInForm />
