@@ -2,28 +2,38 @@ import Button from "../ui/button/Button";
 import { Modal } from "../ui/modal";
 
 import { useState } from "react";
-import Label from "../form/Label";
 import TextArea from "../form/input/TextArea";
+
+import { Request } from "../../types/request";
+
+import Badge from "../ui/badge/Badge";
+import {
+  getStatusBadgeColor,
+  formatStatusLabel,
+} from "./../utils/statusHelper";
+
 type ActionType = "approve" | "reject" | null;
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  item: any;
-  onApprove: (item: any) => void;
-  onReject: (item: any, reason: string) => void;
+  request: Request | null;
+  onApprove: (request: any) => void;
+  onReject: (request: any, reason: string) => void;
 };
 
 export default function ViewRequestModal({
   isOpen,
   onClose,
-  item,
+  request,
   onApprove,
   onReject,
 }: Props)
 {
   const [confirmAction, setConfirmAction] = useState<ActionType>(null);
   const [rejectReason, setRejectReason] = useState("");
+
+  if (!request) return null;
 
   // Get role from localStorage
   const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
@@ -32,13 +42,13 @@ export default function ViewRequestModal({
 
   const handleConfirm = () => {
     if (confirmAction === "approve") {
-      onApprove(item);
+      onApprove(request);
       onClose();
     }
 
     if (confirmAction === "reject") {
       if (!rejectReason.trim()) return; // prevent empty reason
-      onReject(item, rejectReason);
+      onReject(request, rejectReason);
       onClose();
     }
 
@@ -51,13 +61,13 @@ export default function ViewRequestModal({
       isOpen={isOpen}
       onClose={onClose}
       className="
-        max-w-md p-6
+        max-w-xl p-6
         bg-white backdrop-blur-xl
         border border-white/30 shadow-xl
         dark:bg-gray-900 lg:p-11
       "
     >
-    
+
     {/* NORMAL VIEW */}
     {!confirmAction && (
     <>
@@ -66,46 +76,86 @@ export default function ViewRequestModal({
         </h2>
 
         {/* DETAILS CARD */}
-        <div className="rounded-xl border border-gray-200/70 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/60">
-        <div className="grid grid-cols-2 gap-y-3 text-sm">
+        <div className="rounded-2xl border border-gray-200/70 bg-gray-50 p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800/60">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
+
+            {/* Request ID */}
             <span className="font-medium text-gray-600 dark:text-gray-300">
             Request ID
             </span>
-            <span className="ml-2 text-gray-900 dark:text-white">
-            {item.requestID}
+            <span className="ml-2 font-semibold text-gray-900 dark:text-white">
+            {request.id}
             </span>
 
-            <span className="font-medium text-gray-600 dark:text-gray-300">
-            Product
-            </span>
-            <span className="ml-2 text-gray-900 dark:text-white">
-            {item.productName}
-            </span>
-
+            {/* Status */}
             <span className="font-medium text-gray-600 dark:text-gray-300">
             Status
             </span>
-            <span
-            className={`ml-2 inline-flex w-fit px-2 py-0.5 rounded-full text-xs font-medium
-                ${
-                item.status === "Approved"
-                    ? "bg-green-100 text-green-700"
-                    : item.status === "Rejected"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }
-            `}
-            >
-            {item.status}
+            <span className="ml-2">
+                    <Badge
+                    size="sm"
+                    color={getStatusBadgeColor(request.status)}
+                    >
+                    {formatStatusLabel(request.status)}
+                    </Badge>
             </span>
 
-            {item.status === "Rejected" && (
+            {/* PRODUCTS — FULL WIDTH */}
+            <div className="col-span-2 pt-2">
+            <h3 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                Products
+            </h3>
+
+            {/* Scroll Container */}
+            <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1
+                            scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
+                            dark:scrollbar-thumb-gray-600">
+
+                {request.request_items.length > 0 ? (
+                request.request_items.map((p) => (
+                    <div
+                    key={p.id}
+                    className="
+                        flex items-center justify-between
+                        rounded-xl border border-gray-200
+                        bg-white px-4 py-2 text-sm shadow-sm
+                        transition-all duration-200 ease-in-out
+                        hover:bg-blue-50 hover:border-blue-200 hover:shadow-md
+                        dark:border-gray-700 dark:bg-gray-900
+                        dark:hover:bg-gray-800 dark:hover:border-blue-600/50
+                    "
+                    >
+                    <div>
+                        <p className="font-medium text-gray-900 dark:text-white">
+                        {p.product.product_name}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Unit: {p.product.unit_of_measure}
+                        </p>
+                    </div>
+
+                    <span className="text-base font-semibold text-gray-800 dark:text-gray-200">
+                        × {p.product.quantity}
+                    </span>
+                    </div>
+                ))
+                ) : (
+                <div className="rounded-lg border border-dashed border-gray-300 p-4 text-center text-xs text-gray-500 dark:border-gray-600">
+                    No products added to this request
+                </div>
+                )}
+            </div>
+            </div>
+
+
+            {/* Remarks (Rejected only) */}
+            {request.status === "REJECTED" && (
             <>
                 <span className="font-medium text-gray-600 dark:text-gray-300">
                 Remarks
                 </span>
                 <span className="ml-2 text-gray-900 dark:text-white">
-                {item.remarks || "No remarks provided"}
+                {request.approvals.remarks || "No remarks provided"}
                 </span>
             </>
             )}

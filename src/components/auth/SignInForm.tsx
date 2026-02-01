@@ -45,8 +45,11 @@ export default function SignInForm() {
 
         const { token, user } = res.data;
 
+        console.log("TOKEN SAVED:", token); // 👈 MUST NOT be undefined
+
         // store auth data
         localStorage.setItem("role", user.role);
+        localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
 
         // redirect by role
