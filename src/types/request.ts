@@ -38,11 +38,12 @@ export interface Request {
   updated_at: string;
   requestor: Requestor;
   items: RequestItem[];
-  approvals: Approval;
+  approvals: Approval[];
 }
 
 // User who created the request
 export interface Approval {
   id: number;
+  request_id: number;
   remarks: string;
 }

@@ -11,6 +11,13 @@ type CreateOrderPayload = {
   items: CreateOrderItem[];
 };
 
+export type RequestAction = "APPROVED" | "REJECTED";
+export interface ConfirmRequestPayload {
+  requestId: number;
+  action: RequestAction;
+  remarks?: string;
+};
+
 export const getPendingRequests = async () => {
    const response = await URL_API.get("/request/pending");
 
@@ -21,3 +28,14 @@ export async function createOrder(payload: CreateOrderPayload) {
   const res = await URL_API.post("/request", payload);
   return res.data;
 }
+
+export const confirmRequest = async ({
+  requestId,
+  action,
+  remarks,
+}: ConfirmRequestPayload): Promise<void> => {
+  await URL_API.post(`/request/${requestId}/approve`, {
+    action,
+    remarks,
+  });
+};

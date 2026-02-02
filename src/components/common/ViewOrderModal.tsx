@@ -12,26 +12,29 @@ import {
   formatStatusLabel,
 } from "../utils/statusHelper";
 
-type ActionType = "approve" | "reject" | null;
+type ActionType = "APPROVED" | "REJECTED" | null;
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   request: Request | null;
-  onApprove: (request: any) => void;
-  onReject: (request: any, reason: string) => void;
+  onConfirm: (payload: {
+    requestId: number;
+    action: "APPROVED" | "REJECTED";
+    remarks?: string;
+  }) => Promise<void>;
 };
 
 export default function ViewRequestModal({
   isOpen,
   onClose,
   request,
-  onApprove,
-  onReject,
+  onConfirm,
 }: Props)
 {
   const [confirmAction, setConfirmAction] = useState<ActionType>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   if (!request) return null;
 
@@ -40,21 +43,23 @@ export default function ViewRequestModal({
 
   const isOperations = role === "OPERATION" ;
 
-  const handleConfirm = () => {
-    if (confirmAction === "approve") {
-      onApprove(request);
-      onClose();
-    }
+    const handleConfirm = async () => {
+    if (!confirmAction || !request) return;
 
-    if (confirmAction === "reject") {
-      if (!rejectReason.trim()) return; // prevent empty reason
-      onReject(request, rejectReason);
-      onClose();
-    }
+    if (confirmAction === "REJECTED" && !rejectReason.trim()) return;
 
+    setSubmitting(true);
+
+    await onConfirm({
+        requestId: request.id,
+        action: confirmAction,
+        remarks: confirmAction === "REJECTED" ? rejectReason : undefined,
+    });
+    setSubmitting(false); 
     setConfirmAction(null);
     setRejectReason("");
-  };
+    onClose();
+    };
 
   return (
     <Modal
@@ -155,7 +160,7 @@ export default function ViewRequestModal({
                 Remarks
                 </span>
                 <span className="ml-2 text-gray-900 dark:text-white">
-                {request.approvals.remarks || "No remarks provided"}
+                {request.approvals?.[request.approvals.length-1]?.remarks || "No remarks provided"}
                 </span>
             </>
             )}
@@ -172,7 +177,7 @@ export default function ViewRequestModal({
             <div className="flex gap-2">
             <Button
                 size="sm"
-                onClick={() => setConfirmAction("reject")}
+                onClick={() => setConfirmAction("REJECTED")}
                 className="bg-red-500 text-white hover:bg-red-600"
             >
                 Reject
@@ -180,7 +185,7 @@ export default function ViewRequestModal({
 
             <Button
                 size="sm"
-                onClick={() => setConfirmAction("approve")}
+                onClick={() => setConfirmAction("APPROVED")}
                 className="bg-green-500 text-white hover:bg-green-600"
             >
                 Approve
@@ -196,14 +201,14 @@ export default function ViewRequestModal({
     {confirmAction && (
     <>
         <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
-        Confirm {confirmAction === "approve" ? "Approval" : "Rejection"}
+        Confirm {confirmAction === "APPROVED" ? "Approval" : "Rejection"}
         </h2>
 
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
         This action cannot be undone. Are you sure you want to proceed?
         </p>
 
-        {confirmAction === "reject" && (
+        {confirmAction === "REJECTED" && (
         <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Reason for rejection <span className="text-red-500">*</span>
@@ -232,10 +237,10 @@ export default function ViewRequestModal({
         <Button
             size="sm"
             onClick={handleConfirm}
-            disabled={confirmAction === "reject" && !rejectReason.trim()}
+            disabled={confirmAction === "REJECTED" && !rejectReason.trim()}
             className={`text-white
             ${
-                confirmAction === "approve"
+                confirmAction === "APPROVED"
                 ? "bg-green-600 hover:bg-green-700"
                 : "bg-red-600 hover:bg-red-700"
             }

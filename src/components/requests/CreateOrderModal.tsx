@@ -20,7 +20,7 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (items: OrderItem[]) => void;
-   onSuccess?: () => void; // ✅ ADD THIS
+  onSuccess?: () => void; // ✅ ADD THIS
 };
 
 const products: Product[] = [
@@ -33,7 +33,7 @@ export default function CreateOrderModal({
   isOpen,
   onClose,
   onSubmit,
-    onSuccess,
+  onSuccess,
 }: Props) {
   const [items, setItems] = useState<OrderItem[]>([
     { productId: "", quantity: 1 },
@@ -59,13 +59,11 @@ export default function CreateOrderModal({
     });
   };
 
-    const [loading, setLoading] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
-    
-
+  const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  
   const handleSubmit = async () => {
 
-    
      try {
       setLoading(true);
 
@@ -93,8 +91,6 @@ export default function CreateOrderModal({
 
   return (
 
-
-    
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[700px] m-4">
       <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
         <div className="px-2 pr-14">
@@ -103,7 +99,7 @@ export default function CreateOrderModal({
           </h4>
         </div>
 
-        <form className="flex flex-col">
+        <form className="flex flex-col" >
           <div className="mb-3 custom-scrollbar relative h-[400px] overflow-y-auto rounded-2xl bg-gray-50 px-4 py-4 pb-6 shadow-inner dark:bg-gray-800/40">
             <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90">
               Order Items
@@ -211,13 +207,6 @@ export default function CreateOrderModal({
         </form>
       </div>
     </Modal>
-
-
-
-
-
-
-
     
   );
 }

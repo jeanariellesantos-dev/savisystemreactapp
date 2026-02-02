@@ -20,57 +20,61 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import Dashboard from "./pages/Admin/Dashboard";
 import StaffDashboard from "./pages/Staff/StaffDashboard";
 import Home from "./pages/Dashboard/Home";
+import { ToastProvider } from "./context/ToastContext";
 
 export default function App() {
   return (
-    <>
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          {/* Admin Layout */}
-          <Route element={<AppLayout />}>
-            <Route path="/admin" element={<Dashboard />} />
-            <Route path="/home" element={<Home />} />
+      <ToastProvider>
+        <>
+          <Router>
+            <ScrollToTop />
+            <Routes>
+              {/* Admin Layout */}
+              <Route element={<AppLayout />}>
+                <Route path="/admin" element={<Dashboard />} />
+                <Route path="/home" element={<Home />} />
 
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+                {/* Others Page */}
+                <Route path="/profile" element={<UserProfiles />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/blank" element={<Blank />} />
 
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+                {/* Forms */}
+                <Route path="/form-elements" element={<FormElements />} />
 
-            {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+                {/* Tables */}
+                <Route path="/basic-tables" element={<BasicTables />} />
 
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
+                {/* Ui Elements */}
+                <Route path="/alerts" element={<Alerts />} />
+                <Route path="/avatars" element={<Avatars />} />
+                <Route path="/badge" element={<Badges />} />
+                <Route path="/buttons" element={<Buttons />} />
+                <Route path="/images" element={<Images />} />
+                <Route path="/videos" element={<Videos />} />
 
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
-          </Route>
+                {/* Charts */}
+                <Route path="/line-chart" element={<LineChart />} />
+                <Route path="/bar-chart" element={<BarChart />} />
+              </Route>
 
 
-           {/* Lead Man Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/staff" element={<StaffDashboard />} />
+              {/* Lead Man Layout */}
+              <Route element={<AppLayout />}>
+                <Route index path="/staff" element={<StaffDashboard />} />
 
-          </Route>
+              </Route>
 
-          {/* Auth Layout */}
-          <Route index path="/" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+              {/* Auth Layout */}
+              <Route index path="/" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </>
+              {/* Fallback Route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+        </>
+      {/* rest of your app */}
+    </ToastProvider>
   );
 }

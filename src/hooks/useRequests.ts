@@ -27,6 +27,6 @@ export function useRequests() {
     requests,
     loading,
     error,
-    refresh: fetchRequests,
+    refreshRequests: fetchRequests,
   };
 }
