@@ -33,7 +33,6 @@ export default function CreateOrderModal({
   isOpen,
   onClose,
   onSubmit,
-  onSuccess,
 }: Props) {
   const [items, setItems] = useState<OrderItem[]>([
     { productId: "", quantity: 1 },
@@ -62,32 +61,14 @@ export default function CreateOrderModal({
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   
-  const handleSubmit = async () => {
+const submitToParent = () => {
+  if (items.some(i => !i.productId || i.quantity < 1)) {
+    alert("Please complete all items");
+    return;
+  }
 
-     try {
-      setLoading(true);
-
-      // 🔥 Transform payload for backend
-        const payload = {
-        status: "PENDING_ACCOUNTING", // ✅ INCLUDED
-        items: items.map((item) => ({
-            product_id: Number(item.productId),
-            quantity: item.quantity,
-        })),
-        };
-
-      await createOrder(payload);
-
-      onSuccess?.();   // refresh list
-      onClose();       // close modal
-      setItems([{ productId: "", quantity: 1 }]); // reset form
-    } catch (err) {
-      console.error("Failed to create order", err);
-      alert("Failed to create order");
-    } finally {
-      setLoading(false);
-    }
-  };
+  onSubmit?.(items);
+};
 
   return (
 
@@ -99,7 +80,7 @@ export default function CreateOrderModal({
           </h4>
         </div>
 
-        <form className="flex flex-col" >
+        <form className="flex flex-col"  onSubmit={(e) => e.preventDefault()}>
           <div className="mb-3 custom-scrollbar relative h-[400px] overflow-y-auto rounded-2xl bg-gray-50 px-4 py-4 pb-6 shadow-inner dark:bg-gray-800/40">
             <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90">
               Order Items
@@ -206,6 +187,41 @@ export default function CreateOrderModal({
           </div>
         </form>
       </div>
+
+
+{showConfirm && (
+  <Modal isOpen onClose={() => setShowConfirm(false)} className="max-w-md">
+    <div className="p-6">
+      <h3 className="text-lg font-semibold">Confirm Submission</h3>
+      <p className="mt-2 text-sm text-gray-600">
+        Are you sure you want to submit this order?
+      </p>
+
+      <div className="mt-6 flex justify-end gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setShowConfirm(false)}
+        >
+          Cancel
+        </Button>
+
+        <Button
+          size="sm"
+          onClick={() => {
+            setShowConfirm(false);
+            submitToParent();
+          }}
+        >
+          Yes, Submit
+        </Button>
+      </div>
+    </div>
+  </Modal>
+)}
+
+
+      
     </Modal>
     
   );

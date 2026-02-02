@@ -9,13 +9,13 @@ import { useState } from "react";
 import { confirmRequest } from "../../services/orderService";
 import { isOperations } from "../../services/authService";
 import { useToast } from "../../context/ToastContext";
+import { createOrder } from "../../services/orderService";
 
 export default function RecentRequests() {
   const { requests, loading, error, refreshRequests } = useRequests();
   const { isOpen, openModal, closeModal } = useModal();
   const [selected, setSelected] = useState<Request | null>(null);
   const { showToast } = useToast();
-
 
  const handleConfirmRequest = async ({
   requestId,
@@ -43,6 +43,31 @@ export default function RecentRequests() {
     console.error(error);
   }
 };
+
+
+const handleCreateOrder = async (items: {
+    productId: string;
+    quantity: number;
+  }[]) => {
+    try {
+      const payload = {
+        status: "PENDING_ACCOUNTING",
+        items: items.map((i) => ({
+          product_id: Number(i.productId),
+          quantity: i.quantity,
+        })),
+      };
+
+      await createOrder(payload);
+
+      showToast("Order created successfully", "success");
+      closeModal();
+      refreshRequests();
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to create order", "error");
+    }
+  };
   if (loading) return <p>Loading requests...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -88,7 +113,7 @@ export default function RecentRequests() {
         onView={setSelected}
       />
 
-      <CreateOrderModal isOpen={isOpen} onClose={closeModal} onSuccess={refreshRequests} />
+      <CreateOrderModal isOpen={isOpen} onClose={closeModal}   onSubmit={handleCreateOrder} />
 
       {selected && (
         <ViewOrderModal
@@ -96,6 +121,7 @@ export default function RecentRequests() {
           request={selected}
           onClose={() => setSelected(null)}
           onConfirm={handleConfirmRequest}
+          
         />
       )}
     </div>
