@@ -10,6 +10,8 @@ import { confirmRequest } from "../../services/orderService";
 import { isOperations } from "../../services/authService";
 import { useToast } from "../../context/ToastContext";
 import { createOrder } from "../../services/orderService";
+import { markRequestAsShipped, markRequestAsReceived } from "../../services/shipmentService";
+import { ShipmentForm } from "../../types/shipment";
 
 export default function RecentRequests() {
   const { requests, loading, error, refreshRequests } = useRequests();
@@ -68,6 +70,60 @@ const handleCreateOrder = async (items: {
       showToast("Failed to create order", "error");
     }
   };
+
+  const handleShipRequest = async ({
+    requestId,
+    shipments,
+    remarks,
+      }: {
+        requestId: number;
+        shipments: ShipmentForm[];
+        remarks?: string;
+      }) => {
+        try {
+          await markRequestAsShipped(requestId, {
+            shipments: shipments.map((s) => ({
+              shipped_date: s.shipped_date,
+              tracking_link: s.tracking_link,
+            })),
+            remarks,
+          });
+
+          showToast("Request marked as shipped", "success");
+          refreshRequests();
+          setSelected(null);
+        } catch (err) {
+          console.error(err);
+          showToast("Failed to mark request as shipped", "error");
+        }
+      };
+
+    const handleReceiveRequest = async ({
+    requestId,
+    shipments,
+    remarks,
+      }: {
+        requestId: number;
+        shipments: ShipmentForm[];
+        remarks?: string;
+      }) => {
+        try {
+          await markRequestAsReceived(requestId,{
+               shipments: shipments.map((s) => ({
+              shipped_date: s.shipped_date,
+              tracking_link: s.tracking_link,
+            })),
+            remarks,
+          });
+
+          showToast("Request marked as received", "success");
+          refreshRequests();
+          setSelected(null);
+        } catch (err) {
+          console.error(err);
+          showToast("Failed to mark request as received", "error");
+        }
+      };
   if (loading) return <p>Loading requests...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -121,7 +177,9 @@ const handleCreateOrder = async (items: {
           request={selected}
           onClose={() => setSelected(null)}
           onConfirm={handleConfirmRequest}
-          
+          onShip={handleShipRequest}
+          onReceive={handleReceiveRequest}
+        
         />
       )}
     </div>
