@@ -37,7 +37,7 @@ export interface Request {
   created_at: string;
   updated_at: string;
   requestor: Requestor;
-  request_items: RequestItem[];
+  items: RequestItem[];
   approvals: Approval;
 }
 

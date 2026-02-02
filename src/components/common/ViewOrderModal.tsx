@@ -10,7 +10,7 @@ import Badge from "../ui/badge/Badge";
 import {
   getStatusBadgeColor,
   formatStatusLabel,
-} from "./../utils/statusHelper";
+} from "../utils/statusHelper";
 
 type ActionType = "approve" | "reject" | null;
 
@@ -84,7 +84,7 @@ export default function ViewRequestModal({
             Request ID
             </span>
             <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-            {request.id}
+            {request.request_id}
             </span>
 
             {/* Status */}
@@ -111,8 +111,8 @@ export default function ViewRequestModal({
                             scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
                             dark:scrollbar-thumb-gray-600">
 
-                {request.request_items.length > 0 ? (
-                request.request_items.map((p) => (
+                {request.items.length > 0 ? (
+                request.items.map((p) => (
                     <div
                     key={p.id}
                     className="

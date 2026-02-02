@@ -3,6 +3,7 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useState } from "react";
+import { createOrder } from "../../services/orderService";
 
 type Product = {
   id: number;
@@ -19,6 +20,7 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (items: OrderItem[]) => void;
+   onSuccess?: () => void; // ✅ ADD THIS
 };
 
 const products: Product[] = [
@@ -31,6 +33,7 @@ export default function CreateOrderModal({
   isOpen,
   onClose,
   onSubmit,
+    onSuccess,
 }: Props) {
   const [items, setItems] = useState<OrderItem[]>([
     { productId: "", quantity: 1 },
@@ -56,12 +59,42 @@ export default function CreateOrderModal({
     });
   };
 
-  const handleSubmit = () => {
-    onSubmit?.(items);
-    onClose();
+    const [loading, setLoading] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+    
+
+  const handleSubmit = async () => {
+
+    
+     try {
+      setLoading(true);
+
+      // 🔥 Transform payload for backend
+        const payload = {
+        status: "PENDING_ACCOUNTING", // ✅ INCLUDED
+        items: items.map((item) => ({
+            product_id: Number(item.productId),
+            quantity: item.quantity,
+        })),
+        };
+
+      await createOrder(payload);
+
+      onSuccess?.();   // refresh list
+      onClose();       // close modal
+      setItems([{ productId: "", quantity: 1 }]); // reset form
+    } catch (err) {
+      console.error("Failed to create order", err);
+      alert("Failed to create order");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
+
+
+    
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[700px] m-4">
       <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
         <div className="px-2 pr-14">
@@ -171,12 +204,20 @@ export default function CreateOrderModal({
             <Button size="sm" variant="outline" onClick={onClose}>
               Close
             </Button>
-            <Button size="sm" onClick={handleSubmit}>
-              Submit
+            <Button size="sm" onClick={() => setShowConfirm(true)}>
+            Submit
             </Button>
           </div>
         </form>
       </div>
     </Modal>
+
+
+
+
+
+
+
+    
   );
 }

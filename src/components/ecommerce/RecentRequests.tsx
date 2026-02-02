@@ -4,7 +4,7 @@ import { useModal } from "../../hooks/useModal";
 import { useRequests } from "../../hooks/useRequests";
 import RequestsTable from "../requests//RequestsTable";
 import CreateOrderModal from "../requests/CreateOrderModal";
-import ViewOrderModal from "../common/ViewOrderModel";
+import ViewOrderModal from "../common/ViewOrderModal";
 import { Request } from "../../types/request";
 import { useState } from "react";
 
