@@ -3,7 +3,6 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useState } from "react";
-import { createOrder } from "../../services/orderService";
 
 type Product = {
   id: number;

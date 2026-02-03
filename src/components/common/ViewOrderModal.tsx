@@ -4,9 +4,7 @@ import { Modal } from "../ui/modal";
 import { useState } from "react";
 import TextArea from "../form/input/TextArea";
 import { ShipmentForm } from "../../types/shipment";
-
 import { Request } from "../../types/request";
-
 import Badge from "../ui/badge/Badge";
 import {
   getStatusBadgeColor,
@@ -364,6 +362,84 @@ const removeShipment = (index: number) => {
                 )} */}
             </div>
             )}
+
+
+            {/* READ-ONLY SHIPMENT VIEW (OPERATIONS ONLY) */}
+            {canViewShipmentReadonly && (
+            <div
+                className="
+                mt-4
+                rounded-2xl
+                border border-indigo-200/50
+                bg-indigo-50/40
+                p-4
+                dark:border-indigo-600/30
+                dark:bg-indigo-900/10
+                "
+            >
+                <h3 className="mb-4 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Shipment Details
+                </h3>
+
+                <div className="space-y-3">
+                {request.shipments?.length ? (
+                    request.shipments.map((s, index) => (
+                    <div
+                        key={index}
+                        className="
+                        rounded-xl
+                        border border-gray-200/70
+                        bg-white
+                        p-4
+                        shadow-sm
+                        dark:border-gray-700
+                        dark:bg-gray-900
+                        "
+                    >
+                        <div className="grid grid-cols-3 gap-3 text-sm">
+
+                        {/* Shipped Date */}
+                        <div>
+                            <p className="text-xs text-gray-500">Shipped Date</p>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                            {s.shipped_date || "—"}
+                            </p>
+                        </div>
+
+                        {/* Tracking Link */}
+                        <div className="col-span-2">
+                            <p className="text-xs text-gray-500">Tracking Link</p>
+
+                            {s.tracking_link ? (
+                            <a
+                                href={s.tracking_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="
+                                block truncate font-medium
+                                text-indigo-600 underline
+                                hover:text-indigo-700
+                                dark:text-indigo-400
+                                "
+                            >
+                                {s.tracking_link}
+                            </a>
+                            ) : (
+                            <p className="text-gray-400">No tracking link</p>
+                            )}
+                        </div>
+                        </div>
+                    </div>
+                    ))
+                ) : (
+                    <div className="rounded-lg border border-dashed p-4 text-center text-xs text-gray-500">
+                    No shipment information available
+                    </div>
+                )}
+                </div>
+            </div>
+            )}
+
 
 
 
