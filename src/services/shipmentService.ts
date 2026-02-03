@@ -2,7 +2,7 @@ import { ShipmentForm } from "../types/shipment";
 import URL_API from "../components/api/axios";
 
 type CreateShipmentPayload = {  
-    remarks?: string;
+    remarks: string;
     shipments : ShipmentForm[];
 };
 

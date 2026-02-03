@@ -26,12 +26,12 @@ type Props = {
   onShip: (payload: {
     requestId: number;
     shipments: ShipmentForm[];
-    remarks?: string;
+    remarks?: string | null;
   }) => Promise<void>;
     onReceive: (payload: {
     requestId: number;
     shipments: ShipmentForm[];
-    remarks?: string;
+    remarks?: string | null;
   }) => Promise<void>;
 };
 
@@ -49,6 +49,8 @@ export default function ViewRequestModal({
   const [submitting, setSubmitting] = useState(false);
   const [shipRemarks, setShipRemarks] = useState("");
   const [receiveRemarks, setReceiveRemarks] = useState("");
+  const [shipmentError, setShipmentError] = useState<string | null>(null);
+
 
   const [shipments, setShipments] = useState<ShipmentForm[]>([
   { shipped_date: "", tracking_link: ""},
@@ -72,14 +74,12 @@ const updateShipment = <K extends keyof ShipmentForm>(
     copy[index] = { ...copy[index], [field]: value };
     return copy;
   });
+   setShipmentError(null);
 };
 
 const removeShipment = (index: number) => {
   setShipments((prev) => prev.filter((_, i) => i !== index));
 };
-
-
-
 
   if (!request) return null;
 
@@ -90,22 +90,51 @@ const removeShipment = (index: number) => {
 
   const isInventory = role === "INVENTORY" ;
 
-    const handleConfirm = async () => {
+  const validateShipments = () => {
+    
+  if (!shipments.length) {
+    return "At least one shipment is required.";
+  }
+
+  for (let i = 0; i < shipments.length; i++) {
+    const s = shipments[i];
+
+    if (!s.shipped_date) {
+      return `Shipment #${i + 1}: Shipped date is required.`;
+    }
+
+    if (!s.tracking_link?.trim()) {
+      return `Shipment #${i + 1}: Tracking link is required.`;
+    }
+  }
+
+  return null;
+};
+
+const handleConfirm = async () => {
     if (!confirmAction || !request) return;
 
+    
     setSubmitting(true);
 
     if (confirmAction === "SHIPPED") {
+      const error = validateShipments();
+
+      if (error) {
+        setShipmentError(error);
+        setSubmitting(false);
+        return;
+      }
      await onShip({
       requestId: request.id,
       shipments,
-      remarks: shipRemarks || undefined,
+      remarks: shipRemarks || null,
     });
     }  else if (confirmAction === "RECEIVED") {
     await onReceive({
       requestId: request.id,
       shipments,
-      remarks: receiveRemarks || undefined,
+      remarks: shipRemarks || null,
     });
   }else {
         if (confirmAction === "REJECTED" && !rejectReason.trim()) return;
@@ -117,6 +146,7 @@ const removeShipment = (index: number) => {
     }
     setSubmitting(false); 
     setConfirmAction(null);
+    setShipmentError(null);
     setRejectReason("");
     setShipRemarks("");
     setReceiveRemarks("");
@@ -124,8 +154,8 @@ const removeShipment = (index: number) => {
     onClose();
     };
 
-    const canViewShipment =
-    request.status === "PENDING_INVENTORY" &&
+  const canViewShipment =
+  request.status === "PENDING_INVENTORY"  &&
   (role === "INVENTORY" || role === "OPERATIONS");
 
   const canEditShipmentDetails = role === "INVENTORY";
@@ -137,7 +167,7 @@ const removeShipment = (index: number) => {
   request.status === "SHIPPED" && isOperations;
 
   const canViewShipmentReadonly =
-  request.status === "SHIPPED" && role === "OPERATION";
+  (request.status === "SHIPPED" ||  request.status === "RECEIVED") && role === "OPERATION";
 
   return (
     <Modal
@@ -245,17 +275,78 @@ const removeShipment = (index: number) => {
             </div>
 
 
-            {/* Remarks (Rejected only) */}
-            {request.status === "REJECTED" && (
-            <>
-                <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                Remarks
-                </span>
-                <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-                {request.approvals?.[request.approvals.length-1]?.remarks || "No remarks provided"}
-                </span>
-            </>
-            )}
+{/* Remarks (Rejected only) */}
+{/* REMARKS — FULL WIDTH */}
+{request.status !== "PENDING_ACCOUNTING" && (
+  <div
+    className="
+      col-span-2
+      mt-2
+      rounded-2xl
+      border border-gray-200/60
+      bg-gray-50/70
+      p-5
+      dark:border-gray-700
+      dark:bg-gray-800/40
+    "
+  >
+    <h4 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+      Remarks History
+    </h4>
+
+    <div
+      className="
+        max-h-[240px]
+        overflow-y-auto
+        space-y-3
+        text-sm
+        leading-relaxed
+        text-gray-800
+        dark:text-gray-200
+        scrollbar-thin
+        scrollbar-thumb-gray-300
+        dark:scrollbar-thumb-gray-600
+      "
+    >
+      {request.approvals?.length ? (
+        request.approvals.map((approval, index) => {
+          const isLatest = index === request.approvals.length - 1;
+
+          return (
+            <div
+              key={index}
+              className={`
+                relative pl-4
+                border-l-2
+                ${
+                  isLatest
+                    ? "border-blue-500 font-medium"
+                    : "border-gray-300 dark:border-gray-600"
+                }
+              `}
+            >
+              <p className="whitespace-pre-wrap">
+                {approval.remarks?.trim() || (
+                  <span className="italic text-gray-500">
+                    No remarks provided
+                  </span>
+                )}
+              </p>
+            </div>
+          );
+        })
+      ) : (
+        <p className="italic text-gray-500">
+          No remarks provided
+        </p>
+      )}
+    </div>
+  </div>
+)}
+
+
+
+
         </div>
         </div>
 
@@ -452,7 +543,7 @@ const removeShipment = (index: number) => {
         {canMarkAsShipped && (
         <Button
             size="sm"
-            onClick={() => setConfirmAction("SHIPPED")}
+            onClick={() =>  {setShipmentError(null); setConfirmAction("SHIPPED")}}
             className="
             bg-blue-600 text-white
             hover:bg-blue-700
@@ -518,7 +609,7 @@ const removeShipment = (index: number) => {
             </p>
 
 
-        {confirmAction === "SHIPPED" && (
+        {(confirmAction === "SHIPPED" || confirmAction === "RECEIVED") && (
             <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Shipment Remarks <span className="text-gray-400">(optional)</span>
@@ -547,6 +638,20 @@ const removeShipment = (index: number) => {
         </div>
         )}
 
+        {shipmentError && (
+            <div
+                className="
+                mb-4 rounded-lg border border-red-200
+                bg-red-50 px-4 py-3 text-sm
+                text-red-700 dark:border-red-600/30
+                dark:bg-red-900/20 dark:text-red-300
+                "
+            >
+                {shipmentError}
+            </div>
+            )}
+
+
         <div className="mt-6 flex justify-end gap-2">
         <Button
             size="sm"
@@ -560,26 +665,25 @@ const removeShipment = (index: number) => {
         </Button>
 
         <Button
-            size="sm"
-            onClick={handleConfirm}
-            disabled={
-                submitting ||
-                (confirmAction === "REJECTED" && !rejectReason.trim())
+        size="sm"
+        onClick={handleConfirm}
+        disabled={
+            submitting ||
+            (confirmAction === "REJECTED" && !rejectReason.trim())
+        }
+        className={`
+            text-white
+            ${
+            confirmAction === "SHIPPED"
+                ? "bg-blue-600 hover:bg-blue-700"
+                : confirmAction === "APPROVED"
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-red-600 hover:bg-red-700"
             }
-            className={`
-                text-white
-                ${
-                confirmAction === "SHIPPED"
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : confirmAction === "APPROVED"
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "bg-red-600 hover:bg-red-700"
-                }
-            `}
-            >
-            {submitting ? "Processing..." : `Yes, ${confirmAction}`}
-            </Button>
-
+        `}
+        >
+        {submitting ? "Processing..." : `Yes, ${confirmAction}`}
+        </Button>
         
         </div>
     </>

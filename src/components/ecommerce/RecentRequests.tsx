@@ -1,21 +1,16 @@
-import { useState } from "react";
 import RequestsTab from "../common/RequestsTab";
-import ViewOrderModal from "../common/ViewOrderModal";
-
 import { useModal } from "../../hooks/useModal";
 import { useRequests } from "../../hooks/useRequests";
-
-import { useToast } from "../../context/ToastContext";
-
 import RequestsTable from "../requests//RequestsTable";
 import CreateOrderModal from "../requests/CreateOrderModal";
-
+import ViewOrderModal from "../common/ViewOrderModal";
+import { Request } from "../../types/request";
+import { useState } from "react";
 import { confirmRequest } from "../../services/orderService";
 import { isOperations } from "../../services/authService";
+import { useToast } from "../../context/ToastContext";
 import { createOrder } from "../../services/orderService";
 import { markRequestAsShipped, markRequestAsReceived } from "../../services/shipmentService";
-
-import { Request } from "../../types/request";
 import { ShipmentForm } from "../../types/shipment";
 
 export default function RecentRequests() {
@@ -83,7 +78,7 @@ const handleCreateOrder = async (items: {
       }: {
         requestId: number;
         shipments: ShipmentForm[];
-        remarks?: string;
+        remarks: string;
       }) => {
         try {
           await markRequestAsShipped(requestId, {
