@@ -19,17 +19,17 @@ type Props = {
   onConfirm: (payload: {
     requestId: number;
     action: "APPROVED" | "REJECTED";
-    remarks?: string;
+    remarks?: string ;
   }) => Promise<void>;
   onShip: (payload: {
     requestId: number;
     shipments: ShipmentForm[];
-    remarks?: string | null;
+    remarks?: string | null ;
   }) => Promise<void>;
   onReceive: (payload: {
     requestId: number;
     shipments: ShipmentForm[];
-    remarks?: string | null;
+    remarks?: string | null ;
   }) => Promise<void>;
 };
 
@@ -166,8 +166,8 @@ export default function ViewRequestModal({
                     {item.product.product_name}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {item.product.quantity} ×{" "}
-                    {item.product.unit_of_measure}
+                    {item.quantity} ×{" "}
+                    {item.unit.name}
                   </p>
                 </div>
               ))}
@@ -287,9 +287,32 @@ export default function ViewRequestModal({
 
           {/* ACTIONS */}
           <div className="mt-6 flex justify-between items-center">
+          
+          
+          
             <Button size="sm" variant="outline" onClick={onClose}>
               Close
             </Button>
+
+                    {!isOperations && !isInventory && (
+            <div className="flex gap-2">
+            <Button
+                size="sm"
+                onClick={() => setConfirmAction("REJECTED")}
+                className="bg-red-500 text-white hover:bg-red-600"
+            >
+                Reject
+            </Button>
+
+            <Button
+                size="sm"
+                onClick={() => setConfirmAction("APPROVED")}
+                className="bg-green-500 text-white hover:bg-green-600"
+            >
+                Approve
+            </Button>
+            </div>
+        )}
 
             {canEditShipment && (
               <Button
@@ -315,9 +338,22 @@ export default function ViewRequestModal({
       ) : (
         <>
           {/* CONFIRMATION */}
-          <h2 className="text-lg font-semibold mb-2">
-            Confirm {confirmAction}
-          </h2>
+
+         <h2 className="text-lg font-semibold mb-2">
+            {confirmAction === "SHIPPED"
+                ? "Confirm Shipment"
+                : confirmAction === "RECEIVED"
+                ? "Confirm Receipt"
+                : `Confirm ${confirmAction}`}
+            </h2>
+
+            <p className="text-sm text-gray-600 mb-4">
+            {confirmAction === "SHIPPED"
+                ? "This will mark the request as shipped."
+                : confirmAction === "RECEIVED"
+                ? "This will confirm that the shipment has been received."
+                : "This action cannot be undone."}
+            </p>
 
           {confirmAction === "REJECTED" && (
             <TextArea
@@ -360,8 +396,14 @@ export default function ViewRequestModal({
               {submitting ? "Processing..." : "Confirm"}
             </Button>
           </div>
+       
+       
         </>
+
+        
       )}
+
+      
     </Modal>
   );
 }

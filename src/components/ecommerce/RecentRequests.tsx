@@ -12,6 +12,7 @@ import { useToast } from "../../context/ToastContext";
 import { createOrder } from "../../services/orderService";
 import { markRequestAsShipped, markRequestAsReceived } from "../../services/shipmentService";
 import { ShipmentForm } from "../../types/shipment";
+import { OrderItem } from "../../types/orderItem"
 
 export default function RecentRequests() {
   const { requests, loading, error, refreshRequests } = useRequests();
@@ -26,7 +27,7 @@ export default function RecentRequests() {
 }: {
   requestId: number;
   action: "APPROVED" | "REJECTED";
-  remarks?: string | null;
+  remarks?: string;
 }) => {
   try {
     await confirmRequest({ requestId, action, remarks });
@@ -47,15 +48,13 @@ export default function RecentRequests() {
 };
 
 
-const handleCreateOrder = async (items: {
-    productId: string;
-    quantity: number;
-  }[]) => {
+const handleCreateOrder = async (items: OrderItem[]) => {
     try {
       const payload = {
         status: "PENDING_ACCOUNTING",
         items: items.map((i) => ({
-          product_id: Number(i.productId),
+          product_id: i.productId,
+          unit_id: i.unitId,
           quantity: i.quantity,
         })),
       };
@@ -78,7 +77,7 @@ const handleCreateOrder = async (items: {
       }: {
         requestId: number;
         shipments: ShipmentForm[];
-        remarks: string;
+        remarks?: string | null;
       }) => {
         try {
           await markRequestAsShipped(requestId, {
@@ -169,7 +168,7 @@ const handleCreateOrder = async (items: {
         onView={setSelected}
       />
 
-      <CreateOrderModal isOpen={isOpen} onClose={closeModal}   onSubmit={handleCreateOrder} />
+      <CreateOrderModal isOpen={isOpen} onClose={closeModal} onSubmit={handleCreateOrder} />
 
       {selected && (
         <ViewOrderModal

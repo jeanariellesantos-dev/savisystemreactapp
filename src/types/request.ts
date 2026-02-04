@@ -4,15 +4,24 @@ export interface Requestor {
   firstname: string;
 }
 
+// Category master
+export interface Category {
+  id: number;
+  name: string;
+}
+
+// Unit master
+export interface Unit {
+  id: number;
+  name: string;
+}
+
 // Product master
 export interface Product {
   id: number;
+  category_id: number;
   product_name: string;
-  quantity: number;
-  unit_of_measure: string;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
+  category: Category;
 }
 
 // Items inside a request
@@ -20,11 +29,8 @@ export interface RequestItem {
   id: number;
   request_id: number;
   product_id: number;
+  unit: Unit;
   quantity: number;
-  starting_balance: number;
-  ending_balance: number;
-  created_at: string;
-  updated_at: string;
   product: Product;
 }
 
@@ -57,3 +63,11 @@ export interface Shipment {
   shipped_date: string;
   tracking_link: string;
 }
+
+type OrderItem = {
+  id: string;
+  categoryId: number | null;
+  productId: number | null;
+  unitId: number | null;
+  quantity: number;
+};

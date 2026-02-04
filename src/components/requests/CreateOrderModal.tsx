@@ -2,16 +2,16 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-type Product = {
-  id: number;
-  name: string;
-  unit: string;
-};
+import { Category, CategoryService } from "../../services/categoryService";
+import { Product, Unit, ProductService } from "../../services/productService";
 
 type OrderItem = {
-  productId: string;
+  id: string;
+  categoryId: number | null;
+  productId: number | null;
+  unitId: number | null;
   quantity: number;
 };
 
@@ -19,14 +19,7 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (items: OrderItem[]) => void;
-  onSuccess?: () => void; // ✅ ADD THIS
 };
-
-const products: Product[] = [
-  { id: 1, name: "Car Soap", unit: "bottle" },
-  { id: 2, name: "Engine Oil", unit: "liter" },
-  { id: 3, name: "Microfiber Cloth", unit: "piece" },
-];
 
 export default function CreateOrderModal({
   isOpen,
@@ -34,16 +27,23 @@ export default function CreateOrderModal({
   onSubmit,
 }: Props) {
   const [items, setItems] = useState<OrderItem[]>([
-    { productId: "", quantity: 1 },
+    {
+      id: crypto.randomUUID(),
+      categoryId: null,
+      productId: null,
+      unitId: null,
+      quantity: 1,
+    },
   ]);
 
-  const addItem = () => {
-    setItems([...items, { productId: "", quantity: 1 }]);
-  };
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Record<number, Product[]>>({});
+  const [units, setUnits] = useState<Record<number, Unit[]>>({});
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const removeItem = (index: number) => {
-    setItems(items.filter((_, i) => i !== index));
-  };
+  useEffect(() => {
+    CategoryService.getAll().then(setCategories);
+  }, []);
 
   const updateItem = <K extends keyof OrderItem>(
     index: number,
@@ -51,177 +51,251 @@ export default function CreateOrderModal({
     value: OrderItem[K]
   ) => {
     setItems((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [field]: value };
+      return copy;
     });
   };
 
-  const [loading, setLoading] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  
-const submitToParent = () => {
-  if (items.some(i => !i.productId || i.quantity < 1)) {
-    alert("Please complete all items");
-    return;
-  }
+  const addItem = () =>
+    setItems((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        categoryId: null,
+        productId: null,
+        unitId: null,
+        quantity: 1,
+      },
+    ]);
 
-  onSubmit?.(items);
-};
+  const removeItem = (index: number) =>
+    setItems((prev) => prev.filter((_, i) => i !== index));
+
+  const loadProducts = async (categoryId: number) => {
+    if (products[categoryId]) return;
+    const data = await ProductService.getByCategory(categoryId);
+    setProducts((prev) => ({ ...prev, [categoryId]: data }));
+  };
+
+  const loadUnits = async (productId: number) => {
+    if (units[productId]) return;
+    const data = await ProductService.getUnits(productId);
+    setUnits((prev) => ({ ...prev, [productId]: data }));
+  };
+
+  const submitToParent = () => {
+    if (
+      items.some(
+        (i) =>
+          !i.categoryId || !i.productId || !i.unitId || i.quantity < 1
+      )
+    ) {
+      alert("Please complete all items");
+      return;
+    }
+
+    onSubmit?.(items);
+    onClose();
+  };
 
   return (
-
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-[700px] m-4">
-      <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-        <div className="px-2 pr-14">
-          <h4 className="mb-5 text-2xl font-semibold text-gray-800 dark:text-white/90">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-[760px]">
+      <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
+        {/* HEADER */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             Create Order
-          </h4>
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Select category, product, unit, and quantity for each item
+          </p>
         </div>
 
-        <form className="flex flex-col"  onSubmit={(e) => e.preventDefault()}>
-          <div className="mb-3 custom-scrollbar relative h-[400px] overflow-y-auto rounded-2xl bg-gray-50 px-4 py-4 pb-6 shadow-inner dark:bg-gray-800/40">
-            <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90">
-              Order Items
-            </h5>
+        {/* ITEMS */}
+        <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1">
+          {items.map((item, index) => {
+            const productList = item.categoryId
+              ? products[item.categoryId] || []
+              : [];
 
-            <div className="space-y-4">
-              {items.map((item, index) => {
-                const selectedProduct = products.find(
-                  (p) => p.id === Number(item.productId)
-                );
+            const unitList = item.productId
+              ? units[item.productId] || []
+              : [];
 
-                return (
-                  <div
-                    key={index}
-                    className="grid grid-cols-12 gap-3 items-end border rounded-xl p-3"
-                  >
-                    {/* Product */}
-                    <div className="col-span-6">
-                      <Label>Product</Label>
-                      <select
-                        value={item.productId}
-                        onChange={(e) =>
-                          updateItem(index, "productId", e.target.value)
-                        }
-                        className="w-full rounded-md border p-2 dark:text-white"
-                      >
-                        <option value="">Select product</option>
-                        {products.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+            return (
+              <div
+                key={item.id}
+                className="rounded-2xl border bg-gray-50 p-4 shadow-sm dark:bg-gray-800"
+              >
+                <div className="mb-3 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
+                  Item {index + 1}
+                </div>
 
-                    {/* Quantity */}
-                    <div className="col-span-4">
-                      <Label>
-                        Quantity{" "}
-                        {selectedProduct && (
-                          <span className="text-xs text-gray-500">
-                            ({selectedProduct.unit})
-                          </span>
-                        )}
-                      </Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateItem(index, "quantity", Number(e.target.value))
-                        }
-                      />
-                    </div>
-
-                    {/* Remove */}
-                    <div className="col-span-2 flex justify-end">
-                      {items.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeItem(index)}
-                          className="group inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-6 0V5a1 1 0 011-1h4a1 1 0 011 1v2"
-                            />
-                          </svg>
-                          Remove
-                        </button>
-                      )}
-                    </div>
+                <div className="grid grid-cols-12 gap-3 items-end">
+                  {/* CATEGORY */}
+                  <div className="col-span-4">
+                    <Label>Category</Label>
+                    <select
+                      value={item.categoryId ?? ""}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        updateItem(index, "categoryId", value);
+                        updateItem(index, "productId", null);
+                        updateItem(index, "unitId", null);
+                        if (value) loadProducts(value);
+                      }}
+                      className="w-full rounded-md border p-2"
+                    >
+                      <option value="">Select category</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                );
-              })}
+
+                  {/* PRODUCT */}
+                  <div className="col-span-4">
+                    <Label>Product</Label>
+                    <select
+                      value={item.productId ?? ""}
+                      disabled={!item.categoryId}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        updateItem(index, "productId", value);
+                        updateItem(index, "unitId", null);
+                        if (value) loadUnits(value);
+                      }}
+                      className="w-full rounded-md border p-2 disabled:bg-gray-100 dark:disabled:bg-gray-700"
+                    >
+                      <option value="">
+                        {item.categoryId
+                          ? "Select product"
+                          : "Select category first"}
+                      </option>
+                      {productList.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.product_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* UNIT */}
+                  <div className="col-span-2">
+                    <Label>Unit</Label>
+                    <select
+                      value={item.unitId ?? ""}
+                      disabled={!item.productId}
+                      onChange={(e) =>
+                        updateItem(
+                          index,
+                          "unitId",
+                          e.target.value === ""
+                            ? null
+                            : Number(e.target.value)
+                        )
+                      }
+                      className="w-full rounded-md border p-2 disabled:bg-gray-100 dark:disabled:bg-gray-700"
+                    >
+                      <option value="">
+                        {item.productId ? "Select unit" : "Select product first"}
+                      </option>
+                      {unitList.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* QTY */}
+                  <div className="col-span-2">
+                    <Label>Qty</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={item.quantity}
+                      onChange={(e) =>
+                        updateItem(index, "quantity", Number(e.target.value))
+                      }
+                    />
+                  </div>
+
+                  {/* REMOVE */}
+                  <div className="col-span-1 flex justify-end">
+                    {items.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeItem(index)}
+                        className="text-xs font-medium text-red-600 hover:text-red-700"
+                        title="Remove item"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ADD ITEM */}
+        <button
+          type="button"
+          onClick={addItem}
+          className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+        >
+          + Add another item
+        </button>
+
+        {/* ACTIONS */}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button size="sm" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={() => setShowConfirm(true)}>
+            Submit Order
+          </Button>
+        </div>
+      </div>
+
+      {/* CONFIRM MODAL */}
+      {showConfirm && (
+        <Modal isOpen onClose={() => setShowConfirm(false)} className="max-w-md">
+          <div className="p-6">
+            <h3 className="text-lg font-semibold">Confirm Submission</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Please confirm that you want to submit this order.
+            </p>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowConfirm(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                size="sm"
+                onClick={() => {
+                  setShowConfirm(false);
+                  submitToParent();
+                }}
+              >
+                Yes, Submit
+              </Button>
             </div>
-
-            {/* Add Product */}
-            <button
-              type="button"
-              onClick={addItem}
-              className="mt-4 inline-flex items-center gap-2 rounded-lg border border-dashed border-blue-400 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/20"
-            >
-              <span className="text-lg">+</span>
-              Add another product
-            </button>
           </div>
-
-          <div className="flex items-center gap-3 px-2 mt-1 lg:justify-end">
-            <Button size="sm" variant="outline" onClick={onClose}>
-              Close
-            </Button>
-            <Button size="sm" onClick={() => setShowConfirm(true)}>
-            Submit
-            </Button>
-          </div>
-        </form>
-      </div>
-
-
-{showConfirm && (
-  <Modal isOpen onClose={() => setShowConfirm(false)} className="max-w-md">
-    <div className="p-6">
-      <h3 className="text-lg font-semibold">Confirm Submission</h3>
-      <p className="mt-2 text-sm text-gray-600">
-        Are you sure you want to submit this order?
-      </p>
-
-      <div className="mt-6 flex justify-end gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setShowConfirm(false)}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          size="sm"
-          onClick={() => {
-            setShowConfirm(false);
-            submitToParent();
-          }}
-        >
-          Yes, Submit
-        </Button>
-      </div>
-    </div>
-  </Modal>
-)}
-
-
-      
+        </Modal>
+      )}
     </Modal>
-    
   );
 }
