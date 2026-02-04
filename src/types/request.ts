@@ -47,6 +47,7 @@ export interface Approval {
   id: number;
   request_id: number;
   remarks: string;
+  created_at: string;
 }
 
 // Shipment inside the request

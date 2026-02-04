@@ -26,7 +26,7 @@ export default function RecentRequests() {
 }: {
   requestId: number;
   action: "APPROVED" | "REJECTED";
-  remarks?: string;
+  remarks?: string | null;
 }) => {
   try {
     await confirmRequest({ requestId, action, remarks });
@@ -86,7 +86,7 @@ const handleCreateOrder = async (items: {
               shipped_date: s.shipped_date,
               tracking_link: s.tracking_link,
             })),
-            remarks,
+            remarks: remarks ?? null,
           });
 
           showToast("Request marked as shipped", "success");
@@ -105,7 +105,7 @@ const handleCreateOrder = async (items: {
       }: {
         requestId: number;
         shipments: ShipmentForm[];
-        remarks?: string;
+         remarks?: string | null;
       }) => {
         try {
           await markRequestAsReceived(requestId,{
@@ -113,7 +113,7 @@ const handleCreateOrder = async (items: {
               shipped_date: s.shipped_date,
               tracking_link: s.tracking_link,
             })),
-            remarks,
+            remarks: remarks ?? null,
           });
 
           showToast("Request marked as received", "success");

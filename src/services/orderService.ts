@@ -36,6 +36,6 @@ export const confirmRequest = async ({
 }: ConfirmRequestPayload): Promise<void> => {
   await URL_API.post(`/request/${requestId}/approve`, {
     action,
-    remarks,
+    remarks: remarks ?? null,
   });
 };

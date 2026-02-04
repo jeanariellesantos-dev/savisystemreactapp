@@ -1,7 +1,6 @@
 import Button from "../ui/button/Button";
 import { Modal } from "../ui/modal";
-
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import TextArea from "../form/input/TextArea";
 import { ShipmentForm } from "../../types/shipment";
 import { Request } from "../../types/request";
@@ -11,8 +10,7 @@ import {
   formatStatusLabel,
 } from "../utils/statusHelper";
 
-
-type ActionType = "APPROVED" | "REJECTED" | "SHIPPED"| "RECEIVED"|  null;
+type ActionType = "APPROVED" | "REJECTED" | "SHIPPED" | "RECEIVED" | null;
 
 type Props = {
   isOpen: boolean;
@@ -28,7 +26,7 @@ type Props = {
     shipments: ShipmentForm[];
     remarks?: string | null;
   }) => Promise<void>;
-    onReceive: (payload: {
+  onReceive: (payload: {
     requestId: number;
     shipments: ShipmentForm[];
     remarks?: string | null;
@@ -42,652 +40,328 @@ export default function ViewRequestModal({
   onConfirm,
   onShip,
   onReceive,
-}: Props)
-{
+}: Props) {
+  if (!request) return null;
+
+  const role =
+    typeof window !== "undefined" ? localStorage.getItem("role") : null;
+
+  const isOperations = role === "OPERATION";
+  const isInventory = role === "INVENTORY";
+
+  const today = new Date().toISOString().split("T")[0];
+
   const [confirmAction, setConfirmAction] = useState<ActionType>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [shipRemarks, setShipRemarks] = useState("");
-  const [receiveRemarks, setReceiveRemarks] = useState("");
   const [shipmentError, setShipmentError] = useState<string | null>(null);
 
-
   const [shipments, setShipments] = useState<ShipmentForm[]>([
-  { shipped_date: "", tracking_link: ""},
-]);
-
-
-const addShipment = () => {
-  setShipments((prev) => [
-    ...prev,
-    { shipped_date: "", tracking_link: "" },
+    { shipped_date: today, tracking_link: "" },
   ]);
-};
 
-const updateShipment = <K extends keyof ShipmentForm>(
-  index: number,
-  field: K,
-  value: ShipmentForm[K]
-) => {
-  setShipments((prev) => {
-    const copy = [...prev];
-    copy[index] = { ...copy[index], [field]: value };
-    return copy;
-  });
-   setShipmentError(null);
-};
+  const remarksRef = useRef<HTMLDivElement>(null);
 
-const removeShipment = (index: number) => {
-  setShipments((prev) => prev.filter((_, i) => i !== index));
-};
-
-  if (!request) return null;
-
-  // Get role from localStorage
-  const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
-
-  const isOperations = role === "OPERATION" ;
-
-  const isInventory = role === "INVENTORY" ;
+  useEffect(() => {
+    remarksRef.current?.scrollTo({
+      top: remarksRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [request.approvals]);
 
   const validateShipments = () => {
-    
-  if (!shipments.length) {
-    return "At least one shipment is required.";
-  }
-
-  for (let i = 0; i < shipments.length; i++) {
-    const s = shipments[i];
-
-    if (!s.shipped_date) {
-      return `Shipment #${i + 1}: Shipped date is required.`;
+    for (let i = 0; i < shipments.length; i++) {
+      if (!shipments[i].shipped_date)
+        return `Shipment #${i + 1}: Shipped date is required.`;
+      if (!shipments[i].tracking_link.trim())
+        return `Shipment #${i + 1}: Tracking link is required.`;
     }
+    return null;
+  };
 
-    if (!s.tracking_link?.trim()) {
-      return `Shipment #${i + 1}: Tracking link is required.`;
-    }
-  }
-
-  return null;
-};
-
-const handleConfirm = async () => {
-    if (!confirmAction || !request) return;
-
-    
+  const handleConfirm = async () => {
+    if (!confirmAction) return;
     setSubmitting(true);
 
-    if (confirmAction === "SHIPPED") {
-      const error = validateShipments();
-
-      if (error) {
-        setShipmentError(error);
-        setSubmitting(false);
-        return;
-      }
-     await onShip({
-      requestId: request.id,
-      shipments,
-      remarks: shipRemarks || null,
-    });
-    }  else if (confirmAction === "RECEIVED") {
-    await onReceive({
-      requestId: request.id,
-      shipments,
-      remarks: shipRemarks || null,
-    });
-  }else {
+    try {
+      if (confirmAction === "SHIPPED") {
+        const error = validateShipments();
+        if (error) {
+          setShipmentError(error);
+          return;
+        }
+        await onShip({
+          requestId: request.id,
+          shipments,
+          remarks: shipRemarks || null,
+        });
+      } else if (confirmAction === "RECEIVED") {
+        await onReceive({
+          requestId: request.id,
+          shipments,
+          remarks: shipRemarks || null,
+        });
+      } else {
         if (confirmAction === "REJECTED" && !rejectReason.trim()) return;
         await onConfirm({
-        requestId: request.id,
-        action: confirmAction,
-        remarks: confirmAction === "REJECTED" ? rejectReason : undefined,
+          requestId: request.id,
+          action: confirmAction,
+          remarks:
+            confirmAction === "REJECTED" ? rejectReason : undefined,
         });
+      }
+      onClose();
+    } finally {
+      setSubmitting(false);
+      setConfirmAction(null);
+      setRejectReason("");
+      setShipRemarks("");
+      setShipmentError(null);
+      setShipments([{ shipped_date: today, tracking_link: "" }]);
     }
-    setSubmitting(false); 
-    setConfirmAction(null);
-    setShipmentError(null);
-    setRejectReason("");
-    setShipRemarks("");
-    setReceiveRemarks("");
-    
-    onClose();
-    };
+  };
 
-  const canViewShipment =
-  request.status === "PENDING_INVENTORY"  &&
-  (role === "INVENTORY" || role === "OPERATIONS");
-
-  const canEditShipmentDetails = role === "INVENTORY";
-
-  const canMarkAsShipped =
-  request.status === "PENDING_INVENTORY" && role === "INVENTORY";
+  const canEditShipment = request.status === "PENDING_INVENTORY" && isInventory;
+  const canViewShipmentReadonly =
+    (request.status === "SHIPPED" || request.status === "RECEIVED") &&
+    isOperations;
 
   const canMarkAsReceived =
   request.status === "SHIPPED" && isOperations;
-
-  const canViewShipmentReadonly =
-  (request.status === "SHIPPED" ||  request.status === "RECEIVED") && role === "OPERATION";
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-       className="
-    max-w-2xl
-    rounded-3xl
-    bg-white/90 backdrop-blur-xl
-    border border-gray-200/70
-    shadow-[0_20px_60px_-15px_rgba(0,0,0,0.25)]
-    dark:bg-gray-900/90
-    dark:border-gray-700
-    p-6 lg:p-8
-  "
+      className="max-w-2xl rounded-3xl bg-white/90 backdrop-blur-xl border border-gray-200/70 p-6 shadow-xl dark:bg-gray-900/90 dark:border-gray-700"
     >
+      {!confirmAction ? (
+        <>
+{/* HEADER */}
+<div className="mb-4 flex items-center gap-3">
+  <h2 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
+    Order Details
+  </h2>
 
-    {/* NORMAL VIEW */}
-    {!confirmAction && (
-    <>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">
-            Order Details
-            </h2>
+  <Badge size="sm" color={getStatusBadgeColor(request.status)}>
+    {formatStatusLabel(request.status)}
+  </Badge>
+</div>
 
-        {/* DETAILS CARD */}
-        <div className="mt-4 rounded-2xl
-                        border border-gray-200/60
-                        bg-gray-50/70
-                        p-5
-                        shadow-sm
-                        dark:border-gray-700
-                        dark:bg-gray-800/50
-                        ">
-        <div className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
+          {/* DETAILS CARD */}
+          <div className="rounded-2xl border bg-gray-50/70 p-5 dark:bg-gray-800/50 dark:border-gray-700">
+            {/* PRODUCTS */}
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Products
+            </h3>
 
-            {/* Request ID */}
-         <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            Request ID
-            </span>
-            <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-            {request.request_id}
-            </span>
-            {/* Status */}
-            <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            Status
-            </span>
-            <span className="ml-2">
-                    <Badge
-                    size="sm"
-                    color={getStatusBadgeColor(request.status)}
-                    >
-                    {formatStatusLabel(request.status)}
-                    </Badge>
-            </span>
-
-            {/* PRODUCTS — FULL WIDTH */}
-            <div className="col-span-2 pt-2">
-                <h3 className="mb-4 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                Products
-                </h3>
-
-            {/* Scroll Container */}
-            <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1
-                            scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
-                            dark:scrollbar-thumb-gray-600">
-
-                {request.items.length > 0 ? (
-                request.items.map((p) => (
-                    <div
-                    key={p.id}
-                     className="flex items-center justify-between
-                                rounded-xl
-                                border border-gray-200/60
-                                bg-white
-                                px-4 py-3
-                                text-sm
-                                shadow-sm
-                                transition-all
-                                hover:shadow-md hover:border-blue-300/60
-                                dark:border-gray-700
-                                dark:bg-gray-900
-                                dark:hover:border-blue-600/40
-                            "
-                    >
-                    <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
-                        {p.product.product_name}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Unit: {p.product.unit_of_measure}
-                        </p>
-                    </div>
-
-                   <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                        × {p.product.quantity}
-                        </span>
-                    </div>
-                ))
-                ) : (
-                <div className="rounded-lg border border-dashed border-gray-300 p-4 text-center text-xs text-gray-500 dark:border-gray-600">
-                    No products added to this request
+            <div className="max-h-[200px] space-y-2 overflow-y-auto pr-1">
+              {request.items.map((item) => (
+                <div
+                  key={item.id}
+                  className="rounded-xl border bg-white px-4 py-3 shadow-sm dark:bg-gray-900 dark:border-gray-700"
+                >
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {item.product.product_name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {item.product.quantity} ×{" "}
+                    {item.product.unit_of_measure}
+                  </p>
                 </div>
-                )}
+              ))}
             </div>
-            </div>
-
-
-{/* Remarks (Rejected only) */}
-{/* REMARKS — FULL WIDTH */}
-{request.status !== "PENDING_ACCOUNTING" && (
-  <div
-    className="
-      col-span-2
-      mt-2
-      rounded-2xl
-      border border-gray-200/60
-      bg-gray-50/70
-      p-5
-      dark:border-gray-700
-      dark:bg-gray-800/40
-    "
-  >
-    <h4 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-      Remarks History
-    </h4>
-
-    <div
-      className="
-        max-h-[240px]
-        overflow-y-auto
-        space-y-3
-        text-sm
-        leading-relaxed
-        text-gray-800
-        dark:text-gray-200
-        scrollbar-thin
-        scrollbar-thumb-gray-300
-        dark:scrollbar-thumb-gray-600
-      "
-    >
-      {request.approvals?.length ? (
-        request.approvals.map((approval, index) => {
-          const isLatest = index === request.approvals.length - 1;
-
-          return (
-            <div
-              key={index}
-              className={`
-                relative pl-4
-                border-l-2
-                ${
-                  isLatest
-                    ? "border-blue-500 font-medium"
-                    : "border-gray-300 dark:border-gray-600"
-                }
-              `}
-            >
-              <p className="whitespace-pre-wrap">
-                {approval.remarks?.trim() || (
-                  <span className="italic text-gray-500">
-                    No remarks provided
-                  </span>
-                )}
-              </p>
-            </div>
-          );
-        })
-      ) : (
-        <p className="italic text-gray-500">
-          No remarks provided
-        </p>
-      )}
-    </div>
-  </div>
-)}
-
-
-
-
-        </div>
-        </div>
 
             {/* SHIPMENT DETAILS */}
-            {canViewShipment && (
-            <div className="
-            mt-4
-            rounded-2xl
-            border border-blue-200/50
-            bg-blue-50/40
-            p-4
-            dark:border-blue-600/30
-            dark:bg-blue-900/10
-            ">
-                <h3 className="mb-4 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                Shipment Details
+            {(canEditShipment || canViewShipmentReadonly) && (
+              <div className="mt-6">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Shipment Details
                 </h3>
 
-                {/* Scroll Container */}
-            <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1
-                            scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
-                            dark:scrollbar-thumb-gray-600">
-
-                <div className="space-y-3">
-                {shipments.map((s, index) => (
+                {(canEditShipment ? shipments : request.shipments)?.map(
+                  (s, i) => (
                     <div
-                    key={index}
-                    className="rounded-xl
-                                border border-gray-200/70
-                                bg-white
-                                p-4
-                                shadow-sm
-                                dark:border-gray-700
-                                dark:bg-gray-900
-                                "
+                      key={i}
+                      className="mb-3 rounded-xl border bg-white p-4 shadow-sm dark:bg-gray-900 dark:border-gray-700"
                     >
-                    <div className="grid grid-cols-3 gap-3 text-sm">
+                      <p className="mb-2 text-xs font-medium text-gray-500">
+                        Shipment #{i + 1}
+                      </p>
 
-                        {/* Shipped Date */}
-                         <div className="col-span-1">
-                        <label className="text-xs text-gray-500">Shipped Date</label>
-                        <input
-                            type="date"
-                            value={s.shipped_date}
-                            disabled={!canEditShipmentDetails}
-                            onChange={(e) =>
-                            updateShipment(index, "shipped_date", e.target.value)
-                            }
-                            className="mt-1 w-full rounded-md border p-2 disabled:bg-gray-100 dark:disabled:bg-gray-800"
-                        />
-                        </div>
-
-                        {/* Tracking URL */}
-                         <div className="col-span-2">
-                        <label className="text-xs text-gray-500">
-                            Tracking Link
-                        </label>
-                        <input
-                            type="url"
-                            value={s.tracking_link}
-                            disabled={!canEditShipmentDetails}
-                            onChange={(e) =>
-                            updateShipment(index, "tracking_link", e.target.value)
-                            }
-                            placeholder="https://..."
-                            className="mt-1 w-full rounded-md border p-2 disabled:bg-gray-100 dark:disabled:bg-gray-800"
-                        />
-                        </div>
-                    </div>
-
-                    {/* Remove shipment
-                    {canEditShipmentDetails && shipments.length > 1 && (
-                        <div className="mt-2 flex justify-end">
-                        <button
-                            type="button"
-                            onClick={() => removeShipment(index)}
-                            className="text-xs text-red-600 hover:underline"
-                        >
-                            Remove
-                        </button>
-                        </div>
-                    )} */}
-                    </div>
-                ))}
-                </div>
-
-                </div>
-
-                {/* {canEditShipmentDetails && (
-                <button
-                    type="button"
-                    onClick={addShipment}
-                    className="
-                mt-3
-                inline-flex items-center gap-1
-                text-sm font-medium
-                text-blue-600
-                hover:text-blue-700
-                dark:text-blue-400
-            "
-                >
-                    + Add another shipment
-                </button>
-                )} */}
-            </div>
-            )}
-
-
-            {/* READ-ONLY SHIPMENT VIEW (OPERATIONS ONLY) */}
-            {canViewShipmentReadonly && (
-            <div
-                className="
-                mt-4
-                rounded-2xl
-                border border-indigo-200/50
-                bg-indigo-50/40
-                p-4
-                dark:border-indigo-600/30
-                dark:bg-indigo-900/10
-                "
-            >
-                <h3 className="mb-4 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                Shipment Details
-                </h3>
-
-                <div className="space-y-3">
-                {request.shipments?.length ? (
-                    request.shipments.map((s, index) => (
-                    <div
-                        key={index}
-                        className="
-                        rounded-xl
-                        border border-gray-200/70
-                        bg-white
-                        p-4
-                        shadow-sm
-                        dark:border-gray-700
-                        dark:bg-gray-900
-                        "
-                    >
-                        <div className="grid grid-cols-3 gap-3 text-sm">
-
-                        {/* Shipped Date */}
+                      <div className="grid grid-cols-3 gap-3 text-sm">
                         <div>
-                            <p className="text-xs text-gray-500">Shipped Date</p>
-                            <p className="font-medium text-gray-900 dark:text-white">
-                            {s.shipped_date || "—"}
+                          <label className="text-[11px] text-gray-500">
+                            Shipped Date
+                          </label>
+                          {canEditShipment ? (
+                            <input
+                              type="date"
+                              value={s.shipped_date}
+                              onChange={(e) => {
+                                const copy = [...shipments];
+                                copy[i].shipped_date = e.target.value;
+                                setShipments(copy);
+                              }}
+                              className="mt-1 w-full rounded-md border p-2"
+                            />
+                          ) : (
+                            <p className="font-medium">
+                              {s.shipped_date || "—"}
                             </p>
+                          )}
                         </div>
 
-                        {/* Tracking Link */}
                         <div className="col-span-2">
-                            <p className="text-xs text-gray-500">Tracking Link</p>
-
-                            {s.tracking_link ? (
+                          <label className="text-[11px] text-gray-500">
+                            Tracking Link
+                          </label>
+                          {canEditShipment ? (
+                            <input
+                              type="url"
+                              value={s.tracking_link}
+                              onChange={(e) => {
+                                const copy = [...shipments];
+                                copy[i].tracking_link = e.target.value;
+                                setShipments(copy);
+                              }}
+                              className="mt-1 w-full rounded-md border p-2"
+                            />
+                          ) : s.tracking_link ? (
                             <a
-                                href={s.tracking_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="
-                                block truncate font-medium
-                                text-indigo-600 underline
-                                hover:text-indigo-700
-                                dark:text-indigo-400
-                                "
+                              href={s.tracking_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block truncate text-indigo-600 underline"
                             >
-                                {s.tracking_link}
+                              {s.tracking_link}
                             </a>
-                            ) : (
-                            <p className="text-gray-400">No tracking link</p>
-                            )}
+                          ) : (
+                            <p className="text-gray-400">—</p>
+                          )}
                         </div>
-                        </div>
+                      </div>
                     </div>
-                    ))
-                ) : (
-                    <div className="rounded-lg border border-dashed p-4 text-center text-xs text-gray-500">
-                    No shipment information available
-                    </div>
+                  )
                 )}
+              </div>
+            )}
+
+            {/* REMARKS */}
+            {request.approvals?.length > 0 && (
+              <div className="mt-6">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Remarks History
+                </h3>
+
+                <div
+                  ref={remarksRef}
+                  className="max-h-[96px] overflow-y-auto space-y-4 pr-2"
+                >
+                  {request.approvals.map((a, i) => {
+                    const isLatest =
+                      i === request.approvals.length - 1;
+                    return (
+                      <div
+                        key={i}
+                        className={`pl-4 border-l-2 ${
+                          isLatest
+                            ? "border-blue-500"
+                            : "border-gray-300 dark:border-gray-600"
+                        }`}
+                      >
+                        <p className="text-sm leading-relaxed">
+                          {a.remarks || "No remarks provided"}
+                        </p>
+                        <p className="mt-1 text-[11px] tracking-wide text-gray-500">
+                          {new Date(a.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
-            </div>
+              </div>
             )}
+          </div>
 
-
-
-
-        {/* ACTIONS */}
-        <div className="mt-6 flex justify-between items-center">
-        <Button size="sm" variant="outline" onClick={onClose}>
-            Close
-        </Button>
-
-        {canMarkAsShipped && (
-        <Button
-            size="sm"
-            onClick={() =>  {setShipmentError(null); setConfirmAction("SHIPPED")}}
-            className="
-            bg-blue-600 text-white
-            hover:bg-blue-700
-            shadow-sm
-            "
-        >
-            Mark as Shipped
-        </Button>
-        )}
-
-        {canMarkAsReceived && (
-        <Button
-            size="sm"
-            onClick={() => setConfirmAction("RECEIVED")}
-            className="bg-indigo-600 text-white hover:bg-indigo-700"
-        >
-            Mark as Received
-        </Button>
-        )}
-
-
-        {!isOperations && !isInventory && (
-            <div className="flex gap-2">
-            <Button
-                size="sm"
-                onClick={() => setConfirmAction("REJECTED")}
-                className="bg-red-500 text-white hover:bg-red-600"
-            >
-                Reject
+          {/* ACTIONS */}
+          <div className="mt-6 flex justify-between items-center">
+            <Button size="sm" variant="outline" onClick={onClose}>
+              Close
             </Button>
 
-            <Button
+            {canEditShipment && (
+              <Button
                 size="sm"
-                onClick={() => setConfirmAction("APPROVED")}
-                className="bg-green-500 text-white hover:bg-green-600"
-            >
-                Approve
-            </Button>
-            </div>
-        )}
-        </div>
-    </>
-    )}
-
-
-    {/* CONFIRMATION VIEW */}
-    {confirmAction && (
-    <>
-            <h2 className="text-lg font-semibold mb-2">
-            {confirmAction === "SHIPPED"
-                ? "Confirm Shipment"
-                : confirmAction === "RECEIVED"
-                ? "Confirm Receipt"
-                : `Confirm ${confirmAction}`}
-            </h2>
-
-            <p className="text-sm text-gray-600 mb-4">
-            {confirmAction === "SHIPPED"
-                ? "This will mark the request as shipped."
-                : confirmAction === "RECEIVED"
-                ? "This will confirm that the shipment has been received."
-                : "This action cannot be undone."}
-            </p>
-
-
-        {(confirmAction === "SHIPPED" || confirmAction === "RECEIVED") && (
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Shipment Remarks <span className="text-gray-400">(optional)</span>
-                </label>
-                <TextArea
-                value={shipRemarks}
-                onChange={(value: string) => setShipRemarks(value)}
-                placeholder="Notes about this shipment (courier, delays, condition, etc.)"
-                className="w-full"
-                />
-            </div>
+                className="bg-blue-600 text-white shadow-md hover:bg-blue-700"
+                onClick={() => setConfirmAction("SHIPPED")}
+              >
+                🚚 Mark as Shipped
+              </Button>
             )}
 
+            {canMarkAsReceived && (
+              <Button
+                size="sm"
+                className="bg-indigo-600 text-white shadow-md hover:bg-indigo-700"
+                onClick={() => setConfirmAction("RECEIVED")}
+              >
+                Mark as Received
+              </Button>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* CONFIRMATION */}
+          <h2 className="text-lg font-semibold mb-2">
+            Confirm {confirmAction}
+          </h2>
 
-        {confirmAction === "REJECTED" && (
-        <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Reason for rejection <span className="text-red-500">*</span>
-            </label>
+          {confirmAction === "REJECTED" && (
             <TextArea
-            value={rejectReason}
-            onChange={(value: string) => setRejectReason(value)}
-            placeholder="Provide a clear reason..."
-            className="w-full"
+              value={rejectReason}
+              onChange={setRejectReason}
+              placeholder="Provide a clear reason..."
             />
-        </div>
-        )}
+          )}
 
-        {shipmentError && (
-            <div
-                className="
-                mb-4 rounded-lg border border-red-200
-                bg-red-50 px-4 py-3 text-sm
-                text-red-700 dark:border-red-600/30
-                dark:bg-red-900/20 dark:text-red-300
-                "
-            >
-                {shipmentError}
+          {(confirmAction === "SHIPPED" ||
+            confirmAction === "RECEIVED") && (
+            <TextArea
+              value={shipRemarks}
+              onChange={setShipRemarks}
+              placeholder="Optional shipment remarks..."
+            />
+          )}
+
+          {shipmentError && (
+            <div className="mt-3 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+              {shipmentError}
             </div>
-            )}
+          )}
 
+          <div className="mt-6 flex justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setConfirmAction(null)}
+            >
+              Cancel
+            </Button>
 
-        <div className="mt-6 flex justify-end gap-2">
-        <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-            setConfirmAction(null);
-            setRejectReason("");
-            }}
-        >
-            Cancel
-        </Button>
-
-        <Button
-        size="sm"
-        onClick={handleConfirm}
-        disabled={
-            submitting ||
-            (confirmAction === "REJECTED" && !rejectReason.trim())
-        }
-        className={`
-            text-white
-            ${
-            confirmAction === "SHIPPED"
-                ? "bg-blue-600 hover:bg-blue-700"
-                : confirmAction === "APPROVED"
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-red-600 hover:bg-red-700"
-            }
-        `}
-        >
-        {submitting ? "Processing..." : `Yes, ${confirmAction}`}
-        </Button>
-        
-        </div>
-    </>
-    )}
+            <Button
+              size="sm"
+              disabled={submitting}
+              onClick={handleConfirm}
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              {submitting ? "Processing..." : "Confirm"}
+            </Button>
+          </div>
+        </>
+      )}
     </Modal>
   );
 }
