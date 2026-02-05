@@ -99,6 +99,11 @@ export default function CreateOrderModal({
     onClose();
   };
 
+  const isFormInvalid = items.some(
+  (i) => !i.categoryId || !i.productId || !i.unitId || i.quantity < 1
+);
+
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[760px]">
       <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
@@ -134,7 +139,7 @@ export default function CreateOrderModal({
 
                 <div className="grid grid-cols-12 gap-3 items-end">
                   {/* CATEGORY */}
-                  <div className="col-span-4">
+                  <div className="col-span-3">
                     <Label>Category</Label>
                     <select
                       value={item.categoryId ?? ""}
@@ -158,7 +163,7 @@ export default function CreateOrderModal({
                   </div>
 
                   {/* PRODUCT */}
-                  <div className="col-span-4">
+                  <div className="col-span-3">
                     <Label>Product</Label>
                     <select
                       value={item.productId ?? ""}
@@ -227,7 +232,7 @@ export default function CreateOrderModal({
                   </div>
 
                   {/* REMOVE */}
-                  <div className="col-span-1 flex justify-end">
+                  <div className="col-span-2 flex justify-end">
                     {items.length > 1 && (
                       <button
                         type="button"
@@ -235,7 +240,7 @@ export default function CreateOrderModal({
                         className="text-xs font-medium text-red-600 hover:text-red-700"
                         title="Remove item"
                       >
-                        ✕
+                        ✕ Remove Item
                       </button>
                     )}
                   </div>
@@ -259,7 +264,7 @@ export default function CreateOrderModal({
           <Button size="sm" variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button size="sm" onClick={() => setShowConfirm(true)}>
+          <Button size="sm"   disabled={isFormInvalid} onClick={() => setShowConfirm(true)}>
             Submit Order
           </Button>
         </div>

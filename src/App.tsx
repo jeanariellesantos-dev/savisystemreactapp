@@ -21,6 +21,7 @@ import Dashboard from "./pages/Admin/Dashboard";
 import StaffDashboard from "./pages/Staff/StaffDashboard";
 import Home from "./pages/Dashboard/Home";
 import { ToastProvider } from "./context/ToastContext";
+import AccountSettings from "./pages/AccounSettings";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
 
                 {/* Others Page */}
                 <Route path="/profile" element={<UserProfiles />} />
+                <Route path="/account" element={<AccountSettings />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/blank" element={<Blank />} />
 

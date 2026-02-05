@@ -44,13 +44,15 @@ export default function SignInForm() {
         console.log(res.data);
 
         const { token, user } = res.data;
-
-        console.log("TOKEN SAVED:", token); // 👈 MUST NOT be undefined
-
+        
         // store auth data
         localStorage.setItem("role", user.role);
+        localStorage.setItem("email", user.email);
+        localStorage.setItem("firstname", user.firstname);
+        localStorage.setItem("lastname", user.lastname);
+        localStorage.setItem("mobile", user.mobile);
+        localStorage.setItem("role_description", user.role_description);
         localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
 
         // redirect by role
         if (user.role === "ADMINISTRATOR") {

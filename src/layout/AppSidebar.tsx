@@ -13,7 +13,9 @@ import {
   PieChartIcon,
   PlugInIcon,
   TableIcon,
+  SettingsIcon,
   UserCircleIcon,
+  FileIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -26,10 +28,15 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/admin",
+    icon: <FileIcon />,
+    name: "Requests",
+    path: "/home",
   },
+  //   {
+  //   icon: <GridIcon />,
+  //   name: "Requests",
+  //   path: "/admin",
+  // },
   // {
   //   icon: <CalenderIcon />,
   //   name: "Calendar",
@@ -39,6 +46,11 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
+  },
+    {
+    icon: <SettingsIcon />,
+    name: "Account Settings",
+    path: "/account",
   },
   // {
   //   name: "Forms",
