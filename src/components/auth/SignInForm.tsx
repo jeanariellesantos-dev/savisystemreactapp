@@ -100,11 +100,8 @@ export default function SignInForm() {
     <div>
       <div className="mb-2 sm:mb-4">
         <h1 className="mb-5 font-semibold text-gray-800 text-center text-title-sm dark:text-white/90 sm:text-title-md">
-          SAVI
+          SAVI Systems
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Enter your email and password to sign in!
-        </p>
       </div>
 
       <form onSubmit={handleSubmit}>

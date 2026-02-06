@@ -1,10 +1,11 @@
-import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
-import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
-import StatisticsChart from "../../components/ecommerce/StatisticsChart";
-import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
-import DemographicCard from "../../components/ecommerce/DemographicCard";
+import RequestStatusCards from "../../components/AdminDashboard/RequestStatusCards";
+import RequestStatusChart from "../../components/AdminDashboard/RequestStatusChart";
+import MostOrderedProductsChart from "../../components/AdminDashboard/MostOrderedProductsChart";
+import MonthlyRequestsChart from "../../components/AdminDashboard/MonthlyRequestsChart";
+import AvgApprovalTimeChart from "../../components/AdminDashboard/AvgApprovalTimeChart";
+import SupplierLeadTimeChart from "../../components/AdminDashboard/SupplierLeadTimeChart";
+
 import PageMeta from "../../components/common/PageMeta";
-import RecentRequests from "../../components/ecommerce/RecentRequests";
 
 export default function Dashboard() {
   return (
@@ -13,11 +14,22 @@ export default function Dashboard() {
         title="SAVI System"
         description="SAVI Submission and Approval system"
       />
-      <div className="grid grid-cols-12 gap-4 md:gap-6">
-        <div className="col-span-12  space-y-6 xl:col-span-12">
-          <RecentRequests />
+      <div className="space-y-6">
+        <RequestStatusCards />
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <RequestStatusChart />
+          <MostOrderedProductsChart />
+        </div>
+
+        <MonthlyRequestsChart />
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <AvgApprovalTimeChart />
+          <SupplierLeadTimeChart />
         </div>
       </div>
+      
     </>
   );
 }

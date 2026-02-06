@@ -1,8 +1,4 @@
 import { useModal } from "../../hooks/useModal";
-import { Modal } from "../ui/modal";
-import Button from "../ui/button/Button";
-import Input from "../form/input/InputField";
-import Label from "../form/Label";
 
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -11,15 +7,12 @@ export default function UserMetaCard() {
     console.log("Saving changes...");
     closeModal();
   
-
   
   };
-
 
   const firstName = localStorage.getItem("firstname");
   const lastName = localStorage.getItem("lastname");
   const role_description = localStorage.getItem("role_description");
-
 
   return (
     <>

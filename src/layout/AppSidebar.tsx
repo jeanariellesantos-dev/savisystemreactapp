@@ -19,11 +19,35 @@ import {
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
+type Role =
+  | "ADMINISTRATOR"
+  | "OPERATION"
+  | "ACCOUNTING"
+  | "SUPERVISOR"
+  | "INVENTORY";
+
+const ADMIN_ROLE: Role = "ADMINISTRATOR";
+
+const NORMAL_ROLES: Role[] = [
+  "OPERATION",
+  "ACCOUNTING",
+  "SUPERVISOR",
+  "INVENTORY",
+];
+
+
+
+const isAdmin = (role: Role | null) => role === ADMIN_ROLE;
+
+const isNormalUser = (role: Role | null) => role !== "ADMINISTRATOR";
+
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  adminOnly?: boolean;
+  normalOnly?: boolean;
+  subItems?: { name: string; path: string;adminOnly?: boolean; normalOnly?: boolean; pro?: boolean; new?: boolean }[];
 };
 
 const navItems: NavItem[] = [
@@ -31,12 +55,14 @@ const navItems: NavItem[] = [
     icon: <FileIcon />,
     name: "Requests",
     path: "/home",
+    normalOnly: true,
   },
-  //   {
-  //   icon: <GridIcon />,
-  //   name: "Requests",
-  //   path: "/admin",
-  // },
+    {
+    icon: <GridIcon />,
+    name: "Dashboard",
+    path: "/admin",
+    adminOnly: true,
+  },
   // {
   //   icon: <CalenderIcon />,
   //   name: "Calendar",
@@ -292,7 +318,27 @@ const AppSidebar: React.FC = () => {
         </li>
       ))}
     </ul>
+
+    
   );
+
+  const userRole = localStorage.getItem("role") as Role | null;
+
+const filteredNavItems = navItems
+  .filter((item) => {
+    if (item.adminOnly) return isAdmin(userRole);
+    if (item.normalOnly) return !isAdmin(userRole);
+    return true; // visible to both
+  })
+  .map((item) => ({
+    ...item,
+    subItems: item.subItems?.filter((sub) => {
+      if (sub.adminOnly) return isAdmin(userRole);
+      if (sub.normalOnly) return !isAdmin(userRole);
+      return true;
+    }),
+  }));
+
 
   return (
     <aside
@@ -359,7 +405,7 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots className="size-6" />
                 )}
               </h2> */}
-              {renderMenuItems(navItems, "main")}
+              {renderMenuItems(filteredNavItems, "main")}
             </div>
             {/* <div className="">
               <h2

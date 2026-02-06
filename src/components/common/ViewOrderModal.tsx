@@ -138,16 +138,16 @@ export default function ViewRequestModal({
     >
       {!confirmAction ? (
         <>
-{/* HEADER */}
-<div className="mb-4 flex items-center gap-3">
-  <h2 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
-    Order Details
-  </h2>
+            {/* HEADER */}
+            <div className="mb-6 flex items-center gap-3">
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
+                Order Details
+            </h2>
 
-  <Badge size="sm" color={getStatusBadgeColor(request.status)}>
-    {formatStatusLabel(request.status)}
-  </Badge>
-</div>
+            <Badge size="sm" color={getStatusBadgeColor(request.status)}>
+                {formatStatusLabel(request.status)}
+            </Badge>
+            </div>
 
           {/* DETAILS CARD */}
           <div className="rounded-2xl border bg-gray-50/70 p-5 dark:bg-gray-800/50 dark:border-gray-700">
@@ -288,13 +288,11 @@ export default function ViewRequestModal({
           {/* ACTIONS */}
           <div className="mt-6 flex justify-between items-center">
           
-          
-          
             <Button size="sm" variant="outline" onClick={onClose}>
               Close
             </Button>
 
-                    {!isOperations && !isInventory && (
+          {!isOperations && !isInventory && (
             <div className="flex gap-2">
             <Button
                 size="sm"
@@ -399,11 +397,9 @@ export default function ViewRequestModal({
        
        
         </>
-
         
       )}
 
-      
     </Modal>
   );
 }

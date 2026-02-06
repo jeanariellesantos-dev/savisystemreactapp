@@ -22,6 +22,7 @@ import StaffDashboard from "./pages/Staff/StaffDashboard";
 import Home from "./pages/Dashboard/Home";
 import { ToastProvider } from "./context/ToastContext";
 import AccountSettings from "./pages/AccounSettings";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 export default function App() {
   return (
@@ -32,20 +33,31 @@ export default function App() {
             <Routes>
               {/* Admin Layout */}
               <Route element={<AppLayout />}>
-                <Route path="/admin" element={<Dashboard />} />
-                <Route path="/home" element={<Home />} />
+                {/* ADMIN ONLY */}
+                <Route element={<ProtectedRoute adminOnly />}>
+                  <Route path="/admin" element={<Dashboard />} />
+                </Route>
+
+                {/* NORMAL USERS ONLY */}
+                <Route element={<ProtectedRoute normalOnly />}>
+                  <Route path="/home" element={<Home />} />
+                </Route>
 
                 {/* Others Page */}
-                <Route path="/profile" element={<UserProfiles />} />
-                <Route path="/account" element={<AccountSettings />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/blank" element={<Blank />} />
+                {/* BOTH */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/profile" element={<UserProfiles />} />
+                  <Route path="/account" element={<AccountSettings />} />
+                </Route>
+
+                {/* <Route path="/calendar" element={<Calendar />} />
+                <Route path="/blank" element={<Blank />} /> */}
 
                 {/* Forms */}
-                <Route path="/form-elements" element={<FormElements />} />
+                {/* <Route path="/form-elements" element={<FormElements />} /> */}
 
                 {/* Tables */}
-                <Route path="/basic-tables" element={<BasicTables />} />
+                {/* <Route path="/basic-tables" element={<BasicTables />} /> */}
 
                 {/* Ui Elements */}
                 <Route path="/alerts" element={<Alerts />} />
@@ -56,19 +68,12 @@ export default function App() {
                 <Route path="/videos" element={<Videos />} />
 
                 {/* Charts */}
-                <Route path="/line-chart" element={<LineChart />} />
-                <Route path="/bar-chart" element={<BarChart />} />
-              </Route>
-
-
-              {/* Lead Man Layout */}
-              <Route element={<AppLayout />}>
-                <Route index path="/staff" element={<StaffDashboard />} />
-
+                {/* <Route path="/line-chart" element={<LineChart />} />
+                <Route path="/bar-chart" element={<BarChart />} /> */}
               </Route>
 
               {/* Auth Layout */}
-              <Route index path="/" element={<SignIn />} />
+              <Route index path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
 
               {/* Fallback Route */}
