@@ -1,8 +1,8 @@
 import URL_API from "../components/api/axios";
 
 type CreateOrderItem = {  
-    product_id: number;
-    unit_id: number;
+    product_id: number | null;
+    unit_id: number | null;
     quantity: number;
 };
 

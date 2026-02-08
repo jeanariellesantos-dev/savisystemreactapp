@@ -18,7 +18,7 @@ type OrderItem = {
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (items: OrderItem[]) => void;
+  onSubmit?: (items: OrderItem[]) => void | Promise<void>;
 };
 
 export default function CreateOrderModal({

@@ -2,8 +2,8 @@
 
 export type OrderItem = {
   id: string;
-  categoryId: number ;
-  productId: number;
-  unitId: number;
+  categoryId: number | null;
+  productId: number | null;
+  unitId: number | null;
   quantity: number;
 };
