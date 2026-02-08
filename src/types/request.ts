@@ -64,10 +64,3 @@ export interface Shipment {
   tracking_link: string;
 }
 
-type OrderItem = {
-  id: string;
-  categoryId: number | null;
-  productId: number | null;
-  unitId: number | null;
-  quantity: number;
-};
