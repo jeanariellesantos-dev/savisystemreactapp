@@ -28,13 +28,14 @@ export default function UserDropdown() {
       
       // Optional: clear local storage / auth context
       localStorage.clear()
-      
-      navigate("/signin"); // or "/"
+
+    
     } catch (error) {
       console.error("Logout failed", error);
     } finally {
-    localStorage.clear();
-    window.location.replace("/signin");
+      localStorage.clear();
+     // window.location.replace("/signin");
+       navigate("/signin", { replace: true }); // or "/"
   }
   }
 

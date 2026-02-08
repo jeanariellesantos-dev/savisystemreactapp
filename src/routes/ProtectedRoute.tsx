@@ -14,6 +14,7 @@ export default function ProtectedRoute({
   adminOnly?: boolean;
   normalOnly?: boolean;
 }) {
+  
   const role = localStorage.getItem("role") as Role | null;
 
   if (!role) {

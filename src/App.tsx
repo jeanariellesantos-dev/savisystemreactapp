@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -18,7 +18,6 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Dashboard from "./pages/Admin/Dashboard";
-import StaffDashboard from "./pages/Staff/StaffDashboard";
 import Home from "./pages/Dashboard/Home";
 import { ToastProvider } from "./context/ToastContext";
 import AccountSettings from "./pages/AccounSettings";
@@ -72,12 +71,14 @@ export default function App() {
                 <Route path="/bar-chart" element={<BarChart />} /> */}
               </Route>
 
+              {/* Fallback Route */}
+              <Route path="*" element={<Navigate to="/signin" replace />} />
+
               {/* Auth Layout */}
               <Route index path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
 
-              {/* Fallback Route */}
-              <Route path="*" element={<NotFound />} />
+
             </Routes>
           </Router>
         </>
