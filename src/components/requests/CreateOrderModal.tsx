@@ -6,14 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Category, CategoryService } from "../../services/categoryService";
 import { Product, Unit, ProductService } from "../../services/productService";
-
-type OrderItem = {
-  id: string;
-  categoryId: number | null;
-  productId: number | null;
-  unitId: number | null;
-  quantity: number;
-};
+import { OrderItem } from "../../types/orderItem";
 
 type Props = {
   isOpen: boolean;
@@ -223,7 +216,7 @@ export default function CreateOrderModal({
                     <Label>Qty</Label>
                     <Input
                       type="number"
-                      min={1}
+                      min={"1"}
                       value={item.quantity}
                       onChange={(e) =>
                         updateItem(index, "quantity", Number(e.target.value))
