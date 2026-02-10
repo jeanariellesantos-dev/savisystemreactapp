@@ -5,7 +5,7 @@ import RequestsTable from "../requests//RequestsTable";
 import CreateOrderModal from "../requests/CreateOrderModal";
 import ViewOrderModal from "../common/ViewOrderModal";
 import { Request } from "../../types/request";
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { confirmRequest } from "../../services/orderService";
 import { isOperations } from "../../services/authService";
 import { useToast } from "../../context/ToastContext";
@@ -15,10 +15,21 @@ import { ShipmentForm } from "../../types/shipment";
 import { OrderItem } from "../../types/orderItem"
 
 export default function RecentRequests() {
-  const { requests, loading, error, refreshRequests } = useRequests();
   const { isOpen, openModal, closeModal } = useModal();
   const [selected, setSelected] = useState<Request | null>(null);
   const { showToast } = useToast();
+
+  const [page, setPage] = useState(1);
+
+  const [filter, setFilter] = useState<"ACTIVE" | "ALL">("ACTIVE");
+  const [search, setSearch] = useState("");    
+
+  const { requests, meta, loading, error, refreshRequests } = useRequests(filter, page);
+
+    // ADD THIS HERE
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
 
  const handleConfirmRequest = async ({
   requestId,
@@ -123,7 +134,21 @@ const handleCreateOrder = async (items: OrderItem[]) => {
           showToast("Failed to mark request as received", "error");
         }
       };
-  if (loading) return <p>Loading requests...</p>;
+
+    const filteredRequests = requests.filter((r) => {
+        if (search) {
+          const text =
+            `${r.request_id} ${r.status} ${r.requestor?.firstname ?? ""}`.toLowerCase();
+          if (!text.includes(search.toLowerCase())) return false;
+        }
+        return true;
+      });
+
+console.log("meta page:", meta?.current_page);
+console.log("requests length:", requests.length);
+console.log("requests ids:", requests.map(r => r.id));
+
+      if (loading) return <p>Loading requests...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
@@ -136,7 +161,22 @@ const handleCreateOrder = async (items: OrderItem[]) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <RequestsTab />
+
+     <RequestsTab
+        value={filter}
+        onChange={(val) => {
+          setFilter(val);
+        }}
+      />
+
+         <input
+          type="text"
+          placeholder="Search requests..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700"
+        />
+
           {isOperations() && (
             <button
               onClick={openModal}
@@ -163,10 +203,32 @@ const handleCreateOrder = async (items: OrderItem[]) => {
         </div>
       </div>
 
-      <RequestsTable
-        requests={requests}
-        onView={setSelected}
-      />
+    <RequestsTable requests={filteredRequests} onView={setSelected} />
+          {meta && meta.last_page > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <button
+            disabled={meta.current_page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
+          >
+            Previous
+          </button>
+
+          <div className="text-sm text-gray-600 dark:text-gray-300">
+            Page <span className="font-semibold">{meta.current_page}</span> of{" "}
+            <span className="font-semibold">{meta.last_page}</span>
+          </div>
+
+          <button
+            disabled={meta.current_page === meta.last_page}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
+          >
+            Next
+          </button>
+          
+        </div>
+      )}
 
       <CreateOrderModal isOpen={isOpen} onClose={closeModal} onSubmit={handleCreateOrder} />
 

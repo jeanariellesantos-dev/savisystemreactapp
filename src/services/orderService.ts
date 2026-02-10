@@ -24,6 +24,16 @@ export const getPendingRequests = async () => {
   return response.data;
 };
 
+export const getRequests = (filter: string, page = 1) => {
+  const url =
+    filter === "ACTIVE"
+      ? "/request/pending"
+      : "/request/history";
+
+  return URL_API.get(`${url}?page=${page}`);
+};
+
+
 export async function createOrder(payload: CreateOrderPayload) {
   const res = await URL_API.post("/request", payload);
   return res.data;

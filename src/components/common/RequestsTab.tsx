@@ -1,11 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const RequestsTab: React.FC = () => {
-  const [selected, setSelected] = useState<
-    "optionOne" | "optionTwo"
-  >("optionOne");
+type Filter = "ACTIVE" | "ALL";
 
-  const getButtonClass = (option: "optionOne" | "optionTwo") =>
+const RequestsTab: React.FC<{
+  onChange?: (filter: Filter) => void;
+}> = ({ onChange }) => {
+  const [selected, setSelected] = useState<Filter>("ACTIVE");
+
+  useEffect(() => {
+    onChange?.(selected);
+  }, [selected]);
+
+  const getButtonClass = (option: Filter) =>
     selected === option
       ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
       : "text-gray-500 dark:text-gray-400";
@@ -13,22 +19,23 @@ const RequestsTab: React.FC = () => {
   return (
     <div className="flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900">
       <button
-        onClick={() => setSelected("optionOne")}
-        className={`px-3 py-2 font-medium w-full rounded-md text-theme-sm hover:text-gray-900   dark:hover:text-white ${getButtonClass(
-          "optionOne"
+        onClick={() => setSelected("ACTIVE")}
+        className={`px-3 py-2 font-medium w-full rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white ${getButtonClass(
+          "ACTIVE"
         )}`}
       >
-        Recent
+        Active
       </button>
 
-      <button
-        onClick={() => setSelected("optionTwo")}
-        className={`px-3 py-2 font-medium w-full rounded-md text-theme-sm hover:text-gray-900   dark:hover:text-white ${getButtonClass(
-          "optionTwo"
+       <button
+        onClick={() => setSelected("ALL")}
+        className={`px-3 py-2 font-medium w-full rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white ${getButtonClass(
+          "ALL"
         )}`}
       >
-        Past
+        All
       </button>
+
     </div>
   );
 };
