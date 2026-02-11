@@ -54,10 +54,12 @@ export default function ViewRequestModal({
   const today = new Date().toISOString().split("T")[0];
 
   const [confirmAction, setConfirmAction] = useState<ActionType>(null);
-  const [rejectReason, setRejectReason] = useState("");
+
+  const [actionRemarks, setActionRemarks] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
-  const [shipRemarks, setShipRemarks] = useState("");
   const [shipmentError, setShipmentError] = useState<string | null>(null);
+  
 
   const [shipments, setShipments] = useState<ShipmentForm[]>([
     { shipped_date: today, tracking_link: "" },
@@ -75,50 +77,56 @@ export default function ViewRequestModal({
   const validateShipments = () => {
     for (let i = 0; i < shipments.length; i++) {
       if (!shipments[i].shipped_date)
-        return `Shipment #${i + 1}: Shipped date is required.`;
+        // return `Shipment #${i + 1}: Shipped date is required.`;
+       return `Shipment: Shipped date is required.`;
       if (!shipments[i].tracking_link.trim())
-        return `Shipment #${i + 1}: Tracking link is required.`;
+        // return `Shipment #${i + 1}: Tracking link is required.`;
+       return `Shipment: Tracking link is required.`;
     }
     return null;
   };
 
   const handleConfirm = async () => {
     if (!confirmAction) return;
-    setSubmitting(true);
 
-    try {
+          // 🔴 Validate shipment BEFORE submitting
       if (confirmAction === "SHIPPED") {
         const error = validateShipments();
         if (error) {
           setShipmentError(error);
           return;
         }
+      }
+
+      setSubmitting(true);
+      setShipmentError(null);
+
+    try {
+      if (confirmAction === "SHIPPED") {
         await onShip({
           requestId: request.id,
           shipments,
-          remarks: shipRemarks || null,
+          remarks: actionRemarks || undefined,
         });
       } else if (confirmAction === "RECEIVED") {
         await onReceive({
           requestId: request.id,
           shipments,
-          remarks: shipRemarks || null,
+          remarks: actionRemarks || undefined,
         });
       } else {
-        if (confirmAction === "REJECTED" && !rejectReason.trim()) return;
-        await onConfirm({
-          requestId: request.id,
-          action: confirmAction,
-          remarks:
-            confirmAction === "REJECTED" ? rejectReason : undefined,
-        });
+        if (confirmAction === "REJECTED" && !actionRemarks.trim()) return;
+          await onConfirm({
+            requestId: request.id,
+            action: confirmAction,
+            remarks: actionRemarks || undefined,
+          });
       }
       onClose();
     } finally {
       setSubmitting(false);
       setConfirmAction(null);
-      setRejectReason("");
-      setShipRemarks("");
+      setActionRemarks("");
       setShipmentError(null);
       setShipments([{ shipped_date: today, tracking_link: "" }]);
     }
@@ -209,6 +217,7 @@ export default function ViewRequestModal({
                                 const copy = [...shipments];
                                 copy[i].shipped_date = e.target.value;
                                 setShipments(copy);
+                                
                               }}
                               className="mt-1 w-full rounded-md border p-2"
                             />
@@ -231,6 +240,7 @@ export default function ViewRequestModal({
                                 const copy = [...shipments];
                                 copy[i].tracking_link = e.target.value;
                                 setShipments(copy);
+                                setShipmentError(null); // clear error on edit
                               }}
                               className="mt-1 w-full rounded-md border p-2"
                             />
@@ -303,7 +313,11 @@ export default function ViewRequestModal({
             <Button
                 size="sm"
                 onClick={() => setConfirmAction("REJECTED")}
-                className="bg-red-500 text-white hover:bg-red-600"
+                className="
+                  flex items-center gap-2
+                  bg-red-500 text-white hover:bg-red-600
+                  dark:bg-red-600 dark:hover:bg-red-500
+                "
             >
                 Reject
             </Button>
@@ -311,7 +325,11 @@ export default function ViewRequestModal({
             <Button
                 size="sm"
                 onClick={() => setConfirmAction("APPROVED")}
-                className="bg-green-500 text-white hover:bg-green-600"
+                className="
+                  flex items-center gap-2
+                  bg-green-500 text-white hover:bg-green-600
+                  dark:bg-green-600 dark:hover:bg-green-500
+                "
             >
                 Approve
             </Button>
@@ -321,7 +339,11 @@ export default function ViewRequestModal({
             {canEditShipment && (
               <Button
                 size="sm"
-                className="bg-blue-600 text-white shadow-md hover:bg-blue-700"
+                className="
+                  flex items-center gap-2
+                  bg-blue-600 text-white shadow-md hover:bg-blue-700
+                  dark:bg-blue-700 dark:hover:bg-blue-600
+                "
                 onClick={() => setConfirmAction("SHIPPED")}
               >
                 🚚 Mark as Shipped
@@ -331,10 +353,14 @@ export default function ViewRequestModal({
             {canMarkAsReceived && (
               <Button
                 size="sm"
-                className="bg-indigo-600 text-white shadow-md hover:bg-indigo-700"
+                className="
+                  flex items-center gap-2
+                  bg-indigo-600 text-white shadow-md hover:bg-indigo-700
+                  dark:bg-indigo-700 dark:hover:bg-indigo-600
+                "
                 onClick={() => setConfirmAction("RECEIVED")}
               >
-                Mark as Received
+                📦 Mark as Received
               </Button>
             )}
           </div>
@@ -348,7 +374,11 @@ export default function ViewRequestModal({
                 ? "Confirm Shipment"
                 : confirmAction === "RECEIVED"
                 ? "Confirm Receipt"
-                : `Confirm ${confirmAction}`}
+                : confirmAction === "APPROVED"
+                ? "Confirm Approval"
+                : confirmAction === "REJECTED"
+                ? "Confirm Rejection"
+                : ""}
             </h2>
 
             <p className="text-sm text-gray-600 mb-4">
@@ -359,22 +389,23 @@ export default function ViewRequestModal({
                 : "This action cannot be undone."}
             </p>
 
-          {confirmAction === "REJECTED" && (
-            <TextArea
-              value={rejectReason}
-              onChange={setRejectReason}
-              placeholder="Provide a clear reason..."
-            />
-          )}
-
-          {(confirmAction === "SHIPPED" ||
-            confirmAction === "RECEIVED") && (
-            <TextArea
-              value={shipRemarks}
-              onChange={setShipRemarks}
-              placeholder="Optional shipment remarks..."
-            />
-          )}
+            {confirmAction && (
+              <TextArea
+                value={actionRemarks}
+                onChange={setActionRemarks}
+                placeholder={
+                  confirmAction === "REJECTED"
+                    ? "Provide a clear rejection reason..."
+                    : confirmAction === "APPROVED"
+                    ? "Optional approval remarks..."
+                    : confirmAction === "SHIPPED"
+                    ? "Optional shipment remarks..."
+                    : confirmAction === "RECEIVED"
+                    ? "Optional receipt remarks..."
+                    : ""
+                }
+              />
+            )}
 
           {shipmentError && (
             <div className="mt-3 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
