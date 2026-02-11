@@ -53,7 +53,7 @@ export default function RecentRequests() {
     setSelected(null);
     refreshRequests();  // refresh list
   } catch (error) {
-       showToast("Failed to process request", "error");
+    showToast("Failed to process request", "error");
     console.error(error);
   }
 };
@@ -144,11 +144,7 @@ const handleCreateOrder = async (items: OrderItem[]) => {
         return true;
       });
 
-console.log("meta page:", meta?.current_page);
-console.log("requests length:", requests.length);
-console.log("requests ids:", requests.map(r => r.id));
-
-      if (loading) return <p>Loading requests...</p>;
+  if (loading) return <p>Loading requests...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
@@ -156,7 +152,7 @@ console.log("requests ids:", requests.map(r => r.id));
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Active Orders
+            Requests
           </h3>
         </div>
 

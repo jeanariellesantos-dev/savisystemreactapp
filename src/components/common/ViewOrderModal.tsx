@@ -48,6 +48,8 @@ export default function ViewRequestModal({
 
   const isOperations = role === "OPERATION";
   const isInventory = role === "INVENTORY";
+  const isAccounting = role === "ACCOUNTING";
+  const isSupervisor = role === "SUPERVISOR";
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -129,6 +131,10 @@ export default function ViewRequestModal({
 
   const canMarkAsReceived =
   request.status === "SHIPPED" && isOperations;
+
+  const canApproveReject =
+  (isAccounting && request.status === "PENDING_ACCOUNTING") ||
+  (isSupervisor && request.status === "PENDING_SUPERVISOR");
 
   return (
     <Modal
@@ -292,7 +298,7 @@ export default function ViewRequestModal({
               Close
             </Button>
 
-          {!isOperations && !isInventory && (
+          {canApproveReject && (
             <div className="flex gap-2">
             <Button
                 size="sm"

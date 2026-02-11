@@ -15,6 +15,25 @@ type Props = {
   onView: (request: Request) => void;
 };
 
+function formatDateTime(dateString: string) {
+  const date = new Date(dateString);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12; // convert 0 -> 12
+
+  const formattedHours = String(hours).padStart(2, "0");
+
+  return `${year}-${month}-${day} ${formattedHours}:${minutes} ${ampm}`;
+}
+
+
 export default function RequestsTable({ requests, onView }: Props) {
   return (
     <div className="max-w-full overflow-x-auto">
@@ -35,6 +54,14 @@ export default function RequestsTable({ requests, onView }: Props) {
             >
               Requested By
             </TableCell>
+
+            <TableCell
+              isHeader
+              className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
+            >
+              Date Requested
+            </TableCell>
+
 
             <TableCell
               isHeader
@@ -64,6 +91,11 @@ export default function RequestsTable({ requests, onView }: Props) {
               {/* Requestor */}
               <TableCell className="py-2 text-center text-gray-500 text-theme-sm dark:text-gray-400">
                 {req.requestor?.firstname ?? "—"}
+              </TableCell>
+
+               {/* Date Requested */}
+              <TableCell className="py-2 text-center text-gray-500 text-theme-sm dark:text-gray-400">
+                {formatDateTime(req.created_at)}
               </TableCell>
 
               {/* Status */}

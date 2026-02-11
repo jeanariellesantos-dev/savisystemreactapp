@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 type ToastType = "success" | "error" | "info";
 
@@ -31,25 +32,27 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
 
-      {/* TOAST CONTAINER */}
-      <div className="fixed top-5 right-5 z-50 space-y-2">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`px-4 py-3 rounded-lg shadow-lg text-white text-sm
-              ${
-                toast.type === "success"
-                  ? "bg-green-600"
-                  : toast.type === "error"
-                  ? "bg-red-600"
-                  : "bg-gray-800"
-              }
-            `}
-          >
-            {toast.message}
-          </div>
-        ))}
-      </div>
+      {createPortal(
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[99999] space-y-2 pointer-events-none">
+          {toasts.map((toast) => (
+            <div
+              key={toast.id}
+              className={`px-4 py-3 rounded-lg shadow-xl text-white text-sm pointer-events-auto
+                ${
+                  toast.type === "success"
+                    ? "bg-green-600"
+                    : toast.type === "error"
+                    ? "bg-red-600"
+                    : "bg-gray-800"
+                }
+              `}
+            >
+              {toast.message}
+            </div>
+          ))}
+        </div>,
+        document.body
+      )}
     </ToastContext.Provider>
   );
 }
