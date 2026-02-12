@@ -27,6 +27,7 @@
   import ManageProducts from "./pages/Admin/ManageProducts";
   import ManageUnits from "./pages/Admin/ManageUnits";
 import ManageDealerships from "./pages/Admin/ManageDealerships";
+import ManageRoles from "./pages/Admin/ManageRoles";
 
 
   export default function App() {
@@ -46,6 +47,7 @@ import ManageDealerships from "./pages/Admin/ManageDealerships";
                     <Route path="/admin/products" element={<ManageProducts />} />
                     <Route path="/admin/units" element={<ManageUnits />} />
                     <Route path="/admin/dealerships" element={<ManageDealerships />} />
+                    <Route path="/admin/roles" element={<ManageRoles />} />
                   </Route>
 
                   {/* NORMAL USERS ONLY */}
