@@ -76,11 +76,11 @@ export default function CategoryModal({
         readOnly
         onChange={(e) => setSlug(generateSlug(e.target.value))}
         placeholder="Slug"
-          className="
-    w-full rounded-lg border px-3 py-2 mb-3
-    bg-gray-100 text-gray-500 cursor-not-allowed
-    dark:bg-gray-800 dark:text-gray-400
-  "
+        className="
+                w-full rounded-lg border px-3 py-2 mb-3
+                bg-gray-100 text-gray-500 cursor-not-allowed
+                dark:bg-gray-800 dark:text-gray-400
+            "
       />
 
       {/* ACTIVE TOGGLE */}
