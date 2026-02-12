@@ -26,6 +26,7 @@
   import ManageCategories from "./pages/Admin/ManageCategories";
   import ManageProducts from "./pages/Admin/ManageProducts";
   import ManageUnits from "./pages/Admin/ManageUnits";
+import ManageDealerships from "./pages/Admin/ManageDealerships";
 
 
   export default function App() {
@@ -44,7 +45,7 @@
                     <Route path="/admin/categories" element={<ManageCategories />} />
                     <Route path="/admin/products" element={<ManageProducts />} />
                     <Route path="/admin/units" element={<ManageUnits />} />
-
+                    <Route path="/admin/dealerships" element={<ManageDealerships />} />
                   </Route>
 
                   {/* NORMAL USERS ONLY */}

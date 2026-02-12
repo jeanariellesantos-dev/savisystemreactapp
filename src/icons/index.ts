@@ -56,6 +56,7 @@ import { ReactComponent as AlertHexaIcon } from "./alert-hexa.svg?react";
 import { ReactComponent as ErrorHexaIcon } from "./info-hexa.svg?react";
 import { ReactComponent as SettingsIcon } from "./settings.svg?react";
 import { ReactComponent as RulerIcon } from "./ruler.svg?react";
+import { ReactComponent as DealershipIcon } from "./dealership.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -116,4 +117,5 @@ export {
   AngleRightIcon,
   SettingsIcon,
   RulerIcon,
+  DealershipIcon,
 };

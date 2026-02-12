@@ -17,6 +17,7 @@ import {
   UserCircleIcon,
   FileIcon,
   RulerIcon,
+  DealershipIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -86,9 +87,13 @@ const navItems: NavItem[] = [
     name: "Units",
     path: "/admin/units",
     adminOnly: true,
+  },
+  {
+    icon: <DealershipIcon />,
+    name: "Dealerships",
+    path: "/admin/dealerships",
+    adminOnly: true,
   }
-  
-
   // {
   //   name: "Forms",
   //   icon: <ListIcon />,
