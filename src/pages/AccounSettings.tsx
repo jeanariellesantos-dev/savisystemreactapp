@@ -1,7 +1,7 @@
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import PageMeta from "../components/common/PageMeta";
 
-import AccountSecurityCard from "./../components/AccountSettings/AccountSecurityCard";
+import AccountSecurityCard from "../components/accountsettings/AccountSecurityCard";
 
 export default function AccountSettings() {
   return (

@@ -83,7 +83,7 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link to="/" className="lg:hidden">
+          <Link to="#" className="lg:hidden">
             <img
               className="dark:hidden"
               src={`${import.meta.env.BASE_URL}images/logo/logo.svg`}

@@ -35,8 +35,6 @@ const NORMAL_ROLES: Role[] = [
   "INVENTORY",
 ];
 
-
-
 const isAdmin = (role: Role | null) => role === ADMIN_ROLE;
 
 const isNormalUser = (role: Role | null) => role !== "ADMINISTRATOR";
@@ -63,21 +61,19 @@ const navItems: NavItem[] = [
     path: "/admin",
     adminOnly: true,
   },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
   {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
+    icon: <GridIcon />,
+    name: "Manage Requests",
+    path: "/admin/requests",
+    adminOnly: true,
   },
-    {
-    icon: <SettingsIcon />,
-    name: "Account Settings",
-    path: "/account",
-  },
+  {
+    icon: <ListIcon />,
+    name: "Manage Categories",
+    path: "/admin/categories",
+    adminOnly: true,
+  }
+
   // {
   //   name: "Forms",
   //   icon: <ListIcon />,
@@ -99,6 +95,16 @@ const navItems: NavItem[] = [
 ];
 
 const othersItems: NavItem[] = [
+    {
+    icon: <UserCircleIcon />,
+    name: "User Profile",
+    path: "/profile",
+  },
+    {
+    icon: <SettingsIcon />,
+    name: "Account Settings",
+    path: "/account",
+  },
   // {
   //   icon: <PieChartIcon />,
   //   name: "Charts",
@@ -360,7 +366,7 @@ const filteredNavItems = navItems
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link to="/">
+        <Link to="#">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img
@@ -380,7 +386,7 @@ const filteredNavItems = navItems
             </>
           ) : (
             <img
-              src="/images/logo/logo-icon.svg"
+              src={`${import.meta.env.BASE_URL}images/logo/logo-icon.svg`}
               alt="Logo"
               width={32}
               height={32}
@@ -392,7 +398,7 @@ const filteredNavItems = navItems
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
-              {/* <h2
+              <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
@@ -404,10 +410,10 @@ const filteredNavItems = navItems
                 ) : (
                   <HorizontaLDots className="size-6" />
                 )}
-              </h2> */}
+              </h2>
               {renderMenuItems(filteredNavItems, "main")}
             </div>
-            {/* <div className="">
+            <div className="">
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
@@ -422,7 +428,7 @@ const filteredNavItems = navItems
                 )}
               </h2>
               {renderMenuItems(othersItems, "others")}
-            </div> */}
+            </div>
           </div>
         </nav>
       </div>

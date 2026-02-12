@@ -22,6 +22,9 @@
   import { ToastProvider } from "./context/ToastContext";
   import AccountSettings from "./pages/AccounSettings";
   import ProtectedRoute from "./routes/ProtectedRoute";
+  import ManageRequests from "./pages/Admin/ManageRequests";
+  import ManageCategories from "./pages/Admin/ManageCategories";
+
 
   export default function App() {
     return (
@@ -35,6 +38,9 @@
                   {/* ADMIN ONLY */}
                   <Route element={<ProtectedRoute adminOnly />}>
                     <Route path="/admin" element={<Dashboard />} />
+                    <Route path="/admin/requests" element={<ManageRequests />} />
+                    <Route path="/admin/categories" element={<ManageCategories />} />
+
                   </Route>
 
                   {/* NORMAL USERS ONLY */}

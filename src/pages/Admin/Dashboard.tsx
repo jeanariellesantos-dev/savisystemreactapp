@@ -1,9 +1,9 @@
-import RequestStatusCards from "../../components/AdminDashboard/RequestStatusCards";
-import RequestStatusChart from "../../components/AdminDashboard/RequestStatusChart";
-import MostOrderedProductsChart from "../../components/AdminDashboard/MostOrderedProductsChart";
-import MonthlyRequestsChart from "../../components/AdminDashboard/MonthlyRequestsChart";
-import AvgApprovalTimeChart from "../../components/AdminDashboard/AvgApprovalTimeChart";
-import SupplierLeadTimeChart from "../../components/AdminDashboard/SupplierLeadTimeChart";
+import RequestStatusCards from "../../components/admindashboard/RequestStatusCards";
+import RequestStatusChart from "../../components/admindashboard/RequestStatusChart";
+import MostOrderedProductsChart from "../../components/admindashboard/MostOrderedProductsChart";
+import MonthlyRequestsChart from "../../components/admindashboard/MonthlyRequestsChart";
+import AvgApprovalTimeChart from "../../components/admindashboard/AvgApprovalTimeChart";
+import SupplierLeadTimeChart from "../../components/admindashboard/SupplierLeadTimeChart";
 
 import PageMeta from "../../components/common/PageMeta";
 
