@@ -24,6 +24,8 @@
   import ProtectedRoute from "./routes/ProtectedRoute";
   import ManageRequests from "./pages/Admin/ManageRequests";
   import ManageCategories from "./pages/Admin/ManageCategories";
+  import ManageProducts from "./pages/Admin/ManageProducts";
+  import ManageUnits from "./pages/Admin/ManageUnits";
 
 
   export default function App() {
@@ -40,6 +42,8 @@
                     <Route path="/admin" element={<Dashboard />} />
                     <Route path="/admin/requests" element={<ManageRequests />} />
                     <Route path="/admin/categories" element={<ManageCategories />} />
+                    <Route path="/admin/products" element={<ManageProducts />} />
+                    <Route path="/admin/units" element={<ManageUnits />} />
 
                   </Route>
 

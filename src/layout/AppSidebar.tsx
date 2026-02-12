@@ -16,6 +16,7 @@ import {
   SettingsIcon,
   UserCircleIcon,
   FileIcon,
+  RulerIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -63,16 +64,30 @@ const navItems: NavItem[] = [
   },
   {
     icon: <GridIcon />,
-    name: "Manage Requests",
+    name: "Requests",
     path: "/admin/requests",
     adminOnly: true,
   },
   {
     icon: <ListIcon />,
-    name: "Manage Categories",
+    name: "Categories",
     path: "/admin/categories",
     adminOnly: true,
   }
+  ,
+  {
+    icon: <BoxCubeIcon />,
+    name: "Products",
+    path: "/admin/products",
+    adminOnly: true,
+  },
+  {
+    icon: <RulerIcon />,
+    name: "Units",
+    path: "/admin/units",
+    adminOnly: true,
+  }
+  
 
   // {
   //   name: "Forms",
