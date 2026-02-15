@@ -19,6 +19,7 @@ import {
   RulerIcon,
   DealershipIcon,
   RoleIcon,
+  AccountsIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -99,6 +100,12 @@ const navItems: NavItem[] = [
     icon: <RoleIcon />,
     name: "Roles",
     path: "/admin/roles",
+    adminOnly: true,
+  },
+  {
+    icon: <AccountsIcon />,
+    name: "Accounts",
+    path: "/admin/accounts",
     adminOnly: true,
   }
   // {

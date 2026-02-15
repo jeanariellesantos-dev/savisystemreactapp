@@ -26,3 +26,15 @@ export const UserService = {
   }
   
 };
+//ADMIN
+export const getUsers = () => {
+  return URL_API.get("/user");
+};
+
+export const toggleUserStatus = (id: number) => {
+  return URL_API.patch(`/user/${id}/toggle-status`);
+};
+
+export const updateUser = (id: number, data: any) => {
+  return URL_API.put("/user/${id}", data);
+};

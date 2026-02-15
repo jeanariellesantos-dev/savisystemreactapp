@@ -1,7 +1,6 @@
   import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
   import SignIn from "./pages/AuthPages/SignIn";
   import SignUp from "./pages/AuthPages/SignUp";
-  // import NotFound from "./pages/OtherPage/NotFound";
   import UserProfiles from "./pages/UserProfiles";
   import Videos from "./pages/UiElements/Videos";
   import Images from "./pages/UiElements/Images";
@@ -9,12 +8,6 @@
   import Badges from "./pages/UiElements/Badges";
   import Avatars from "./pages/UiElements/Avatars";
   import Buttons from "./pages/UiElements/Buttons";
-  // import LineChart from "./pages/Charts/LineChart";
-  // import BarChart from "./pages/Charts/BarChart";
-  // import Calendar from "./pages/Calendar";
-  // import BasicTables from "./pages/Tables/BasicTables";
-  // import FormElements from "./pages/Forms/FormElements";
-  // import Blank from "./pages/Blank";
   import AppLayout from "./layout/AppLayout";
   import { ScrollToTop } from "./components/common/ScrollToTop";
   import Dashboard from "./pages/Admin/Dashboard";
@@ -26,9 +19,9 @@
   import ManageCategories from "./pages/Admin/ManageCategories";
   import ManageProducts from "./pages/Admin/ManageProducts";
   import ManageUnits from "./pages/Admin/ManageUnits";
-import ManageDealerships from "./pages/Admin/ManageDealerships";
-import ManageRoles from "./pages/Admin/ManageRoles";
-
+  import ManageDealerships from "./pages/Admin/ManageDealerships";
+  import ManageRoles from "./pages/Admin/ManageRoles";
+  import ManageAccounts from "./pages/Admin/ManageAccounts";
 
   export default function App() {
     return (
@@ -48,6 +41,7 @@ import ManageRoles from "./pages/Admin/ManageRoles";
                     <Route path="/admin/units" element={<ManageUnits />} />
                     <Route path="/admin/dealerships" element={<ManageDealerships />} />
                     <Route path="/admin/roles" element={<ManageRoles />} />
+                    <Route path="/admin/accounts" element={<ManageAccounts />} />
                   </Route>
 
                   {/* NORMAL USERS ONLY */}
