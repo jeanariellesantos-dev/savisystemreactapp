@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { useToast } from "../../context/ToastContext";
 import CategoryTable from "../../components/categories/CategoryTable";
 import CategoryModal from "../../components/categories/CategoryModal";
+import PageMeta from "../../components/common/PageMeta";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { CategoryService } from "../../services/adminService";
 import { Category } from "../../types/category";
+import Button from "../../components/ui/button/Button";
 
 export default function ManageCategories() {
   const { showToast } = useToast();
@@ -81,6 +84,9 @@ export default function ManageCategories() {
     return <p className="p-6 text-gray-500 dark:text-gray-400">Loading categories...</p>;
 
   return (
+    <>
+          <PageMeta title="Manage Categories" description="Admin category management" />
+      <PageBreadcrumb pageTitle="Manage Categories" />
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
       {/* HEADER */}
@@ -98,15 +104,15 @@ export default function ManageCategories() {
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700"
           />
 
-          <button
-            onClick={() => {
-              setSelected(null);
-              setModalOpen(true);
-            }}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
-          >
-            + Add Category
-          </button>
+          <Button size="sm" variant="primary"
+                      className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
+          onClick={() => {
+            setSelected(null);
+            setModalOpen(true);
+            
+          }}>
+            + Add Categories
+          </Button>
         </div>
       </div>
 
@@ -133,5 +139,6 @@ export default function ManageCategories() {
         />
       )}
     </div>
+    </>
   );
 }

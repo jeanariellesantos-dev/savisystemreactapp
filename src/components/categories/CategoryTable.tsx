@@ -84,7 +84,7 @@ export default function CategoryTable({
               {/* OPERATION */}
               <TableCell className="py-2 text-center">
                 <div className="flex justify-center items-center gap-2">
-
+                  
                   {/* EDIT BUTTON */}
                   <button
                     onClick={() => onEdit(c)}

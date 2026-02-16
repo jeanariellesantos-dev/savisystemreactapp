@@ -11,13 +11,13 @@ import { Product } from "../../types/product";
 type Props = {
   products: Product[];
   onEdit: (product: Product) => void;
-  onDelete: (product: Product) => void;
+  onToggle: (product: Product) => void;
 };
 
 export default function ProductTable({
   products,
   onEdit,
-  onDelete,
+  onToggle,
 }: Props) {
   return (
     <div className="max-w-full overflow-x-auto">
@@ -44,6 +44,13 @@ export default function ProductTable({
               className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
             >
               Units
+            </TableCell>
+
+            <TableCell
+              isHeader
+              className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
+            >
+              Status
             </TableCell>
 
             <TableCell
@@ -88,6 +95,16 @@ export default function ProductTable({
                 </div>
               </TableCell>
 
+              {/* STATUS */}
+              <TableCell className="py-2 text-center">
+                <Badge
+                  size="sm"
+                  color={product.is_active ? "success" : "error"}
+                >
+                  {product.is_active ? "Active" : "Inactive"}
+                </Badge>
+              </TableCell>
+
               {/* ACTIONS */}
               <TableCell className="py-3 text-center">
                 <div className="flex justify-center gap-3">
@@ -122,9 +139,9 @@ export default function ProductTable({
                     </svg>
                   </button>
 
-                  {/* DELETE */}
+                  {/* TOGGLE */}
                   <button
-                    onClick={() => onDelete(product)}
+                    onClick={() => onToggle(product)}
                     className="
                       inline-flex items-center justify-center
                       w-9 h-9
@@ -135,7 +152,7 @@ export default function ProductTable({
                       dark:border-gray-700
                       transition
                     "
-                    title="Delete product"
+                    title="Deactivate product"
                   >
                     <svg
                       className="w-4 h-4"

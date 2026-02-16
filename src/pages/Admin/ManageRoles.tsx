@@ -3,7 +3,8 @@ import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/button/Button";
 import RoleTable from "../../components/roles/RoleTable";
 import RoleModal from "../../components/roles/RoleModal";
-
+import PageMeta from "../../components/common/PageMeta";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { RoleService } from "../../services/roleService";
 import { Role } from "../../types/role";
 
@@ -66,6 +67,10 @@ export default function ManageRoles() {
     return <div className="p-6 text-gray-500">Loading roles...</div>;
 
   return (
+    <>
+      <PageMeta title="Manage Role" description="Admin role management" />
+      <PageBreadcrumb pageTitle="Manage Roles" />
+
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
       <div className="flex items-center justify-between mb-4">
@@ -81,11 +86,14 @@ export default function ManageRoles() {
             className="rounded-lg border px-3 py-2 text-sm dark:bg-gray-800"
           />
 
-          <Button size="sm" variant="primary" onClick={() => {
+          <Button size="sm" variant="primary"
+                      className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
+          onClick={() => {
             setSelected(null);
             setModalOpen(true);
+            
           }}>
-            Add Role
+            + Add Role
           </Button>
         </div>
       </div>
@@ -111,5 +119,6 @@ export default function ManageRoles() {
         />
       )}
     </div>
+        </>
   );
 }

@@ -3,7 +3,8 @@ import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/button/Button";
 import UnitTable from "../../components/units/UnitTable";
 import UnitModal from "../../components/units/UnitModal";
-
+import PageMeta from "../../components/common/PageMeta";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { UnitService } from "../../services/unitService";
 import { Unit } from "../../types/unit";
 
@@ -55,17 +56,15 @@ export default function ManageUnits() {
     }
   };
 
-  /* ================= DELETE ================= */
+  /* ================= TOGGLE ================= */
 
-  const handleDelete = async (unit: Unit) => {
-    if (!confirm(`Delete unit "${unit.name}"?`)) return;
-
+  const handleToggle = async (unit: Unit) => {
     try {
-      await UnitService.delete(unit.id);
-      showToast("Unit deleted", "success");
+      await UnitService.toggleStatus(unit.id);
+      showToast("Unit status updated", "success");
       loadUnits();
     } catch {
-      showToast("Delete failed", "error");
+      showToast("Failed to update status", "error");
     }
   };
 
@@ -87,6 +86,9 @@ export default function ManageUnits() {
   /* ================= UI ================= */
 
   return (
+    <>
+    <PageMeta title="Manage Unit" description="Admin unit management" />
+    <PageBreadcrumb pageTitle="Manage Units" />
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       
       <div className="flex items-center justify-between mb-4">
@@ -102,11 +104,13 @@ export default function ManageUnits() {
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700"
           />
 
-          <Button size="sm" variant="primary" onClick={() => {
+          <Button size="sm" variant="primary" 
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
+            onClick={() => {
             setSelected(null);
             setModalOpen(true);
           }}>
-            Add Unit
+            + Add Unit
           </Button>
         </div>
       </div>
@@ -117,7 +121,7 @@ export default function ManageUnits() {
           setSelected(u);
           setModalOpen(true);
         }}
-        onDelete={handleDelete}
+        onToggle={handleToggle}
       />
 
       {modalOpen && (
@@ -132,5 +136,6 @@ export default function ManageUnits() {
         />
       )}
     </div>
+    </>
   );
 }

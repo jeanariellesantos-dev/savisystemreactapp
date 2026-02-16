@@ -10,6 +10,7 @@ export type Product = {
   product_name: string;
   description?: string;
   category_id: number;
+  is_active: boolean;
   category?: { id: number; name: string };
   units?: Unit[];
 };

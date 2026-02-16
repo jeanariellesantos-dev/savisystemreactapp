@@ -1,6 +1,7 @@
 import URL_API from "../components/api/axios";
 import { Product, ProductPayload } from "../types/product";
 import { Category, CategoryPayload } from "../types/category";
+import { Dealership, DealershipPayload } from "../types/dealership";
 
 //User
 export const getUsers = () => {
@@ -76,6 +77,33 @@ export const CategoryService = {
   /* ===== TOGGLE ACTIVE ===== */
   async toggleStatus(id: number): Promise<Category> {
     const { data } = await URL_API.patch(`admin/categories/${id}/toggle`);
+    return data;
+  },
+};
+
+export const DealershipService = {
+  async getAll(): Promise<Dealership[]> {
+    const { data } = await URL_API.get("admin/dealerships");
+    return data;
+  },
+
+  async create(payload: DealershipPayload): Promise<Dealership> {
+    const { data } = await URL_API.post("admin/dealerships", payload);
+    return data;
+  },
+
+  async update(id: number, payload: DealershipPayload): Promise<Dealership> {
+    const { data } = await URL_API.put(`admin/dealerships/${id}`, payload);
+    return data;
+  },
+
+  async delete(id: number): Promise<void> {
+    await URL_API.delete(`admin/dealerships/${id}`);
+  },
+
+    /* ===== TOGGLE ACTIVE ===== */
+  async toggleStatus(id: number): Promise<Dealership> {
+    const { data } = await URL_API.patch(`admin/dealerships/${id}/toggle`);
     return data;
   },
 };

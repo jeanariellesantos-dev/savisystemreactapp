@@ -3,8 +3,9 @@ import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/button/Button";
 import DealershipTable from "../../components/dealerships/DealershipTable";
 import DealershipModal from "../../components/dealerships/DealershipModal";
-
-import { DealershipService } from "../../services/dealershipService";
+import PageMeta from "../../components/common/PageMeta";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import { DealershipService } from "../../services/adminService";
 import { Dealership } from "../../types/dealership";
 
 export default function ManageDealerships() {
@@ -48,12 +49,14 @@ export default function ManageDealerships() {
     }
   };
 
-  const handleDelete = async (d: Dealership) => {
-    if (!confirm(`Delete "${d.dealership_name}"?`)) return;
-
-    await DealershipService.delete(d.id);
-    showToast("Deleted", "success");
-    load();
+  const handleToggle = async (d: Dealership) => {
+    try {
+      await DealershipService.toggleStatus(d.id);
+      showToast("Dealership status updated", "success");
+      load();
+    } catch {
+      showToast("Failed to update status", "error");
+    }
   };
 
   const filtered = dealerships.filter((d) =>
@@ -66,6 +69,9 @@ export default function ManageDealerships() {
     return <div className="p-6 text-gray-500">Loading dealerships...</div>;
 
   return (
+    <>
+          <PageMeta title="Manage Dealership" description="Admin dealership management" />
+      <PageBreadcrumb pageTitle="Manage Dealerships" />
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
       <div className="flex items-center justify-between mb-4">
@@ -81,11 +87,13 @@ export default function ManageDealerships() {
             className="rounded-lg border px-3 py-2 text-sm dark:bg-gray-800"
           />
 
-          <Button size="sm" variant="primary" onClick={() => {
+          <Button size="sm" variant="primary" 
+          className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
+          onClick={() => {
             setSelected(null);
             setModalOpen(true);
           }}>
-            Add Dealership
+            + Add Dealership
           </Button>
         </div>
       </div>
@@ -96,7 +104,7 @@ export default function ManageDealerships() {
           setSelected(d);
           setModalOpen(true);
         }}
-        onDelete={handleDelete}
+        onToggle={handleToggle}
       />
 
       {modalOpen && (
@@ -111,5 +119,6 @@ export default function ManageDealerships() {
         />
       )}
     </div>
+    </>
   );
 }

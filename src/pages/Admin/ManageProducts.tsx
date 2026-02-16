@@ -3,7 +3,8 @@ import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/button/Button";
 import ProductTable from "../../components/products/ProductTable";
 import ProductModal from "../../components/products/ProductModal";
-
+import PageMeta from "../../components/common/PageMeta";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { adminProductService } from "../../services/adminService";
 import { CategoryService } from "../../services/categoryService";
 import { UnitService } from "../../services/unitService";
@@ -70,17 +71,15 @@ export default function ManageProducts() {
     }
   };
 
-  /* ================= DELETE ================= */
+  /* ================= TOGGLE ================= */
 
-  const handleDelete = async (product: Product) => {
-    if (!confirm(`Delete product "${product.product_name}"?`)) return;
-
+  const handleToggle = async (product: Product) => {
     try {
-      await adminProductService.delete(product.id);
-      showToast("Product deleted", "success");
+      await adminProductService.toggleStatus(product.id);
+      showToast("Product status updated", "success");
       loadData();
     } catch {
-      showToast("Delete failed", "error");
+      showToast("Failed to update status", "error");
     }
   };
 
@@ -103,6 +102,9 @@ export default function ManageProducts() {
   /* ================= UI ================= */
 
   return (
+    <>
+    <PageMeta title="Manage Product" description="Admin product management" />
+    <PageBreadcrumb pageTitle="Manage Products" />
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
       {/* ================= HEADER ================= */}
@@ -123,12 +125,13 @@ export default function ManageProducts() {
           <Button
             size="sm"
             variant="primary"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
             onClick={() => {
               setSelected(null);
               setModalOpen(true);
             }}
           >
-            Add Product
+            + Add Product
           </Button>
         </div>
       </div>
@@ -140,7 +143,7 @@ export default function ManageProducts() {
           setSelected(product);
           setModalOpen(true);
         }}
-        onDelete={handleDelete}
+        onToggle={handleToggle}
       />
 
       {/* ================= MODAL ================= */}
@@ -158,5 +161,6 @@ export default function ManageProducts() {
         />
       )}
     </div>
+    </>
   );
 }
