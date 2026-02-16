@@ -6,88 +6,82 @@ import {
   TableRow,
 } from "../ui/table";
 import Badge from "../ui/badge/Badge";
-import { Category } from "../../types/category";
 
-type Props = {
-  categories: Category[];
-  onEdit: (cat: Category) => void;
-  onToggle: (cat: Category) => void;
+type User = {
+  id: number;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: string;
+  is_active: boolean;
 };
 
-export default function CategoryTable({
-  categories,
-  onEdit,
-  onToggle,
-}: Props) {
+type Props = {
+  users: User[];
+  onEdit: (user: User) => void;
+  onToggle: (user: User) => void;
+};
+
+export default function AccountsTable({ users, onEdit, onToggle }: Props) {
   return (
     <div className="max-w-full overflow-x-auto">
       <Table>
-        {/* ================= HEADER ================= */}
+        {/* HEADER */}
         <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
           <TableRow>
-            <TableCell
-              isHeader
-              className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-            >
-              Category
+            <TableCell isHeader className="py-3 text-start text-theme-xs text-gray-500 dark:text-gray-400">
+              Name
             </TableCell>
 
-            <TableCell
-              isHeader
-              className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
-            >
-              Slug
+            <TableCell isHeader className="py-3 text-center text-theme-xs text-gray-500 dark:text-gray-400">
+              Email
             </TableCell>
 
-            <TableCell
-              isHeader
-              className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
-            >
+            <TableCell isHeader className="py-3 text-center text-theme-xs text-gray-500 dark:text-gray-400">
+              Role
+            </TableCell>
+
+            <TableCell isHeader className="py-3 text-center text-theme-xs text-gray-500 dark:text-gray-400">
               Status
             </TableCell>
 
-            <TableCell
-              isHeader
-              className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
-            >
+            <TableCell isHeader className="py-3 text-center text-theme-xs text-gray-500 dark:text-gray-400">
               Operation
             </TableCell>
           </TableRow>
         </TableHeader>
 
-        {/* ================= BODY ================= */}
+        {/* BODY */}
         <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-          {categories.map((c) => (
-            <TableRow key={c.id}>
-              {/* CATEGORY NAME */}
-              <TableCell className="py-2 text-gray-500 text-theme-sm dark:text-gray-400">
-                <span className="font-medium text-gray-800 dark:text-white/90">
-                  {c.name}
-                </span>
+          {users.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell className="py-2 text-theme-sm">
+                {user.firstname} {user.lastname}
               </TableCell>
 
-              {/* SLUG */}
-              <TableCell className="py-2 text-center text-gray-500 text-theme-sm dark:text-gray-400">
-                {c.slug ?? "—"}
+              <TableCell className="py-2 text-center text-theme-sm">
+                {user.email}
               </TableCell>
 
-              {/* STATUS */}
+              <TableCell className="py-2 text-center text-theme-sm">
+                {user.role}
+              </TableCell>
+
               <TableCell className="py-2 text-center">
                 <Badge
                   size="sm"
-                  color={c.is_active ? "success" : "error"}
+                  color={user.is_active ? "success" : "error"}
                 >
-                  {c.is_active ? "Active" : "Inactive"}
+                  {user.is_active ? "Active" : "Inactive"}
                 </Badge>
               </TableCell>
 
-              {/* OPERATION */}
               <TableCell className="py-2 text-center">
-                <div className="flex justify-center items-center gap-2">
+                <div className="flex justify-center gap-2">
 
-                  {/* EDIT BUTTON */}
+             {/* EDIT BUTTON */}
                   <button
-                    onClick={() => onEdit(c)}
+                    onClick={() => onEdit(user)}
                     className="
                       inline-flex items-center justify-center
                       w-9 h-9
@@ -117,7 +111,7 @@ export default function CategoryTable({
 
                   {/* TOGGLE STATUS BUTTON */}
                   <button
-                    onClick={() => onToggle(c)}
+                    onClick={() => onToggle(user)}
                     className="
                       inline-flex items-center justify-center
                       w-9 h-9
@@ -128,9 +122,9 @@ export default function CategoryTable({
                       dark:border-gray-700
                       transition
                     "
-                    title={c.is_active ? "Deactivate" : "Activate"}
+                    title={user.is_active ? "Deactivate" : "Activate"}
                   >
-                    {c.is_active ? (
+                    {user.is_active ? (
                       <svg
                         className="w-4 h-4"
                         fill="none"
@@ -166,14 +160,10 @@ export default function CategoryTable({
             </TableRow>
           ))}
 
-          {/* EMPTY STATE */}
-          {categories.length === 0 && (
+          {users.length === 0 && (
             <TableRow>
-              <TableCell
-                colSpan={4}
-                className="py-8 text-center text-gray-500"
-              >
-                No categories found.
+              <TableCell colSpan={5} className="py-8 text-center text-gray-500">
+                No accounts found.
               </TableCell>
             </TableRow>
           )}

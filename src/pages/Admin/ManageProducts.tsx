@@ -4,7 +4,7 @@ import Button from "../../components/ui/button/Button";
 import ProductTable from "../../components/products/ProductTable";
 import ProductModal from "../../components/products/ProductModal";
 
-import { adminProductService } from "../../services/adminProductService";
+import { adminProductService } from "../../services/adminService";
 import { CategoryService } from "../../services/categoryService";
 import { UnitService } from "../../services/unitService";
 
@@ -29,6 +29,7 @@ export default function ManageProducts() {
   const loadData = async () => {
     try {
       setLoading(true);
+
       const [p, c, u] = await Promise.all([
         adminProductService.getAll(),
         CategoryService.getAll(),
@@ -71,11 +72,11 @@ export default function ManageProducts() {
 
   /* ================= DELETE ================= */
 
-  const handleDelete = async (p: Product) => {
-    if (!confirm(`Delete product "${p.product_name}"?`)) return;
+  const handleDelete = async (product: Product) => {
+    if (!confirm(`Delete product "${product.product_name}"?`)) return;
 
     try {
-      await adminProductService.delete(p.id);
+      await adminProductService.delete(product.id);
       showToast("Product deleted", "success");
       loadData();
     } catch {
@@ -91,18 +92,20 @@ export default function ManageProducts() {
       .includes(search.toLowerCase())
   );
 
-  if (loading)
+  if (loading) {
     return (
       <div className="p-6 text-gray-500 dark:text-gray-400">
         Loading products...
       </div>
     );
+  }
 
   /* ================= UI ================= */
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
+      {/* ================= HEADER ================= */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
           Manage Products
@@ -113,27 +116,34 @@ export default function ManageProducts() {
             placeholder="Search product..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700"
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm 
+                       dark:bg-gray-800 dark:border-gray-700"
           />
 
-          <Button size="sm" variant="primary" onClick={() => {
-            setSelected(null);
-            setModalOpen(true);
-          }}>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={() => {
+              setSelected(null);
+              setModalOpen(true);
+            }}
+          >
             Add Product
           </Button>
         </div>
       </div>
 
+      {/* ================= TABLE ================= */}
       <ProductTable
         products={filtered}
-        onEdit={(p) => {
-          setSelected(p);
+        onEdit={(product) => {
+          setSelected(product);
           setModalOpen(true);
         }}
         onDelete={handleDelete}
       />
 
+      {/* ================= MODAL ================= */}
       {modalOpen && (
         <ProductModal
           isOpen={modalOpen}

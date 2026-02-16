@@ -1,98 +1,152 @@
-import { useEffect, useState } from "react";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
+import { Product } from "../../types/product";
+import { Category } from "../../types/category";
+import { Unit } from "../../types/unit";
+import { useState, useEffect } from "react";
+
+type Props = {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: any) => void;
+  product: Product | null;
+  categories: Category[];
+  units: Unit[];
+};
 
 export default function ProductModal({
   isOpen,
   onClose,
+  onSubmit,
   product,
   categories,
   units,
-  onSubmit,
-}: any) {
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState(0);
-  const [selectedUnits, setSelectedUnits] = useState<number[]>([]);
+}: Props) {
+  const [form, setForm] = useState({
+    product_name: "",
+    category_id: "",
+    unit_ids: [] as number[],
+  });
 
   useEffect(() => {
     if (product) {
-      setName(product.product_name);
-      setCategory(product.category_id);
-      setSelectedUnits(product.units?.map((u:any)=>u.id) || []);
+      setForm({
+        product_name: product.product_name,
+        category_id: String(product.category?.id ?? ""),
+        unit_ids: product.units?.map((u) => u.id) ?? [],
+      });
     } else {
-      setName("");
-      setCategory(categories[0]?.id || 0);
-      setSelectedUnits([]);
+      setForm({
+        product_name: "",
+        category_id: "",
+        unit_ids: [],
+      });
     }
   }, [product]);
 
-  const toggleUnit = (id:number)=>{
-    setSelectedUnits(prev =>
-      prev.includes(id)
-        ? prev.filter(u=>u!==id)
-        : [...prev,id]
-    );
-  };
-
-  const submit = () => {
-    onSubmit({
-      product_name: name,
-      category_id: category,
-      units: selectedUnits.map(id=>({
-        unit_id:id,
-        is_default:false
-      }))
-    });
+  const toggleUnit = (id: number) => {
+    setForm((prev) => ({
+      ...prev,
+      unit_ids: prev.unit_ids.includes(id)
+        ? prev.unit_ids.filter((u) => u !== id)
+        : [...prev.unit_ids, id],
+    }));
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-lg mb-4">
-        {product ? "Edit Product" : "Create Product"}
-      </h2>
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-[600px]">
+      <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
 
-      <input
-        value={name}
-        onChange={e=>setName(e.target.value)}
-        className="input mb-3"
-        placeholder="Product name"
-      />
+        <h3 className="text-xl font-semibold mb-6">
+          {product ? "Edit Product" : "Add Product"}
+        </h3>
 
-      <select
-        value={category}
-        onChange={e=>setCategory(Number(e.target.value))}
-        className="input mb-3"
-      >
-        {categories.map((c:any)=>(
-          <option key={c.id} value={c.id}>{c.name}</option>
-        ))}
-      </select>
+        <div className="space-y-5">
 
-      {/* Units */}
-      <div className="mb-4">
-        <p className="text-sm mb-2">Units</p>
-        <div className="grid grid-cols-2 gap-2">
-          {units.map((u:any)=>(
-            <label key={u.id} className="flex gap-2">
-              <input
-                type="checkbox"
-                checked={selectedUnits.includes(u.id)}
-                onChange={()=>toggleUnit(u.id)}
-              />
-              {u.name}
+          {/* PRODUCT NAME */}
+          <div>
+            <label className="text-sm font-medium block mb-2">
+              Product Name
             </label>
-          ))}
+            <input
+              value={form.product_name}
+              onChange={(e) =>
+                setForm({ ...form, product_name: e.target.value })
+              }
+              className="w-full rounded-lg border px-3 py-2 dark:bg-gray-800"
+              placeholder="Enter product name"
+            />
+          </div>
+
+          {/* CATEGORY */}
+          <div>
+            <label className="text-sm font-medium block mb-2">
+              Category
+            </label>
+            <select
+              value={form.category_id}
+              onChange={(e) =>
+                setForm({ ...form, category_id: e.target.value })
+              }
+              className="w-full rounded-lg border px-3 py-2 dark:bg-gray-800"
+            >
+              <option value="">Select category</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* UNITS (Checkbox grid) */}
+          <div>
+            <label className="text-sm font-medium block mb-3">
+              Units
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              {units.map((u) => (
+                <label
+                  key={u.id}
+                  className="
+                    flex items-center gap-2
+                    rounded-lg border px-3 py-2
+                    hover:bg-gray-50 dark:hover:bg-gray-800
+                    cursor-pointer
+                  "
+                >
+                  <input
+                    type="checkbox"
+                    checked={form.unit_ids.includes(u.id)}
+                    onChange={() => toggleUnit(u.id)}
+                  />
+                  <span className="text-sm">{u.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" size="sm" onClick={onClose}>
-          Cancel
-        </Button>
+        {/* ACTIONS */}
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
 
-        <Button size="sm" onClick={submit}>
-          Save
-        </Button>
+          <Button
+            size="sm"
+            onClick={() =>
+              onSubmit({
+                product_name: form.product_name,
+                category_id: Number(form.category_id),
+                unit_ids: form.unit_ids,
+              })
+            }
+          >
+            {product ? "Update Product" : "Create Product"}
+          </Button>
+        </div>
       </div>
     </Modal>
   );
