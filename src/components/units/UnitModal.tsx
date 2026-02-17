@@ -7,7 +7,10 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   unit: Unit | null;
-  onSubmit: (data: Omit<Unit, "id">) => void;
+  onSubmit: (data: {
+    name: string;
+    abbreviation: string;
+  }) => void;
 };
 
 export default function UnitModal({
@@ -18,7 +21,8 @@ export default function UnitModal({
 }: Props) {
   const [name, setName] = useState("");
   const [abbr, setAbbr] = useState("");
-
+  const [error, setError] = useState<string | null>(null);
+  
   useEffect(() => {
     if (unit) {
       setName(unit.name);
@@ -30,7 +34,10 @@ export default function UnitModal({
   }, [unit]);
 
   const handleSubmit = () => {
-    if (!name.trim() || !abbr.trim()) return;
+    if (!name.trim() || !abbr.trim())  {
+      setError("Unit name & bbreviation is required");
+       return;
+    }
 
     onSubmit({
       name,

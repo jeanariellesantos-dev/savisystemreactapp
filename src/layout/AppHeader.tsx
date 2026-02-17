@@ -86,13 +86,17 @@ const AppHeader: React.FC = () => {
           <Link to="#" className="lg:hidden">
             <img
               className="dark:hidden"
-              src={`${import.meta.env.BASE_URL}images/logo/logo.svg`}
+              src={`${import.meta.env.BASE_URL}images/logo/savi-logo.svg`}
               alt="Logo"
+              width={200}
+              height={100}
             />
             <img
               className="hidden dark:block"
-              src={`${import.meta.env.BASE_URL}images/logo/logo-dark.svg`}
+              src={`${import.meta.env.BASE_URL}images/logo/savi-logo.svg`}
               alt="Logo"
+              width={200}
+              height={100}
             />
           </Link>
 

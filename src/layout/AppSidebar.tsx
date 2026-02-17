@@ -405,14 +405,14 @@ const filteredNavItems = navItems
             <>
               <img
                 className="dark:hidden"
-                 src={`${import.meta.env.BASE_URL}images/logo/logo.svg`}
+                 src={`${import.meta.env.BASE_URL}images/logo/savi-logo.svg`}
                 alt="Logo"
-                width={150}
-                height={40}
+                width={250}
+                height={10}
               />
               <img
                 className="hidden dark:block"
-                 src={`${import.meta.env.BASE_URL}images/logo/logo-dark.svg`}
+                 src={`${import.meta.env.BASE_URL}images/logo/savi-logo.svg`}
                 alt="Logo"
                 width={150}
                 height={40}
@@ -420,7 +420,7 @@ const filteredNavItems = navItems
             </>
           ) : (
             <img
-              src={`${import.meta.env.BASE_URL}images/logo/logo-icon.svg`}
+              src={`${import.meta.env.BASE_URL}images/logo/savi-icon.svg`}
               alt="Logo"
               width={32}
               height={32}

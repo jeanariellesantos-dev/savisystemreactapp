@@ -23,6 +23,7 @@ export default function DealershipModal({
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   // const [active, setActive] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (dealership) {
@@ -34,11 +35,17 @@ export default function DealershipModal({
       setLocation("");
       // setActive(true);
     }
+        setError(null);
   }, [dealership]);
 
-  const submit = () => {
-    if (!name.trim() || !location.trim()) return;
 
+  const submit = () => {
+    if (!name.trim() || !location.trim()) {
+       setError("Dealership name & location is required");
+       return;
+    }
+
+   setError(null);
     onSubmit({
       dealership_name: name,
       location,
@@ -51,7 +58,6 @@ export default function DealershipModal({
       <h2 className="text-lg font-semibold mb-4">
         {dealership ? "Edit Dealership" : "Create Dealership"}
       </h2>
-
 
       <div>
         <label className="text-sm font-medium block mb-2">
@@ -76,6 +82,13 @@ export default function DealershipModal({
           className="w-full border rounded-lg px-3 py-2 mb-3 dark:bg-gray-800"
         />
       </div>
+
+                {/* ERROR MESSAGE */}
+          {error && (
+            <div className="text-sm text-red-500">
+              {error}
+            </div>
+          )}
 
       {/* <label className="flex items-center gap-2 mb-4 text-sm">
         <input

@@ -1,4 +1,5 @@
 import { Modal } from "../ui/modal";
+import { useEffect, useState } from "react";
 
 type Props = {
   isOpen: boolean;

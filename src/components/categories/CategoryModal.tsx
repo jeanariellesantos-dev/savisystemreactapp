@@ -24,6 +24,7 @@ export default function CategoryModal({
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   // const [isActive, setIsActive] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (category) {
@@ -35,6 +36,7 @@ export default function CategoryModal({
       setSlug("");
       // setIsActive(true);
     }
+        setError(null);
   }, [category]);
 
   /* ===== HANDLERS ===== */
@@ -45,7 +47,10 @@ export default function CategoryModal({
   };
 
   const handleSubmit = () => {
-    if (!name.trim()) return;
+    if (!name.trim())  {
+      setError("Category name is required");
+       return;
+    }
 
     onSubmit({
       name,
@@ -95,6 +100,13 @@ export default function CategoryModal({
       />
 
           </div>
+
+                    {/* ERROR MESSAGE */}
+          {error && (
+            <div className="text-sm text-red-500">
+              {error}
+            </div>
+          )}
 
       {/* ACTIVE TOGGLE
       <label className="flex items-center gap-2 mb-4 text-sm">
