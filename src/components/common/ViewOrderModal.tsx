@@ -9,6 +9,7 @@ import {
   getStatusBadgeColor,
   formatStatusLabel,
 } from "../utils/statusHelper";
+import DatePicker from "../form/date-picker";
 
 type ActionType = "APPROVED" | "REJECTED" | "SHIPPED" | "RECEIVED" | null;
 
@@ -205,58 +206,97 @@ export default function ViewRequestModal({
                       </p>
 
                       <div className="grid grid-cols-3 gap-3 text-sm">
-                        <div>
-                          <label className="text-[11px] text-gray-500">
-                            Shipped Date
-                          </label>
-                          {canEditShipment ? (
-                            <input
-                              type="date"
-                              value={s.shipped_date}
-                              onChange={(e) => {
-                                const copy = [...shipments];
-                                copy[i].shipped_date = e.target.value;
-                                setShipments(copy);
-                                
-                              }}
-                              className="mt-1 w-full rounded-md border p-2"
-                            />
-                          ) : (
-                            <p className="font-medium">
-                              {s.shipped_date || "—"}
-                            </p>
-                          )}
-                        </div>
+                      <div>
+                        <label className="text-[11px] text-gray-500">
+                          Shipped Date
+                        </label>
 
-                        <div className="col-span-2">
-                          <label className="text-[11px] text-gray-500">
-                            Tracking Link
-                          </label>
-                          {canEditShipment ? (
-                            <input
-                              type="url"
-                              value={s.tracking_link}
-                              onChange={(e) => {
+                        {canEditShipment ? (
+                          <div className="mt-1">
+                            <DatePicker
+                              id={`shipped_date_${i}`}
+                              defaultDate={s.shipped_date || undefined}
+                              placeholder="Select shipped date"
+                              onChange={(selectedDates) => {
                                 const copy = [...shipments];
-                                copy[i].tracking_link = e.target.value;
+
+                                copy[i].shipped_date =
+                                  selectedDates && selectedDates.length > 0
+                                    ? selectedDates[0].toISOString().split("T")[0]
+                                    : "";
+
                                 setShipments(copy);
-                                setShipmentError(null); // clear error on edit
                               }}
-                              className="mt-1 w-full rounded-md border p-2"
                             />
-                          ) : s.tracking_link ? (
-                            <a
-                              href={s.tracking_link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block truncate text-indigo-600 underline"
-                            >
-                              {s.tracking_link}
-                            </a>
-                          ) : (
-                            <p className="text-gray-400">—</p>
-                          )}
-                        </div>
+                          </div>
+                        ) : (
+                          <p className="font-medium">
+                            {s.shipped_date || "—"}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="col-span-2">
+                        <label className="text-[11px] text-gray-500">
+                          Tracking Link
+                        </label>
+
+                        {canEditShipment ? (
+                          <input
+                            type="url"
+                            value={s.tracking_link || ""}
+                            onChange={(e) => {
+                              const copy = [...shipments];
+                              copy[i].tracking_link = e.target.value;
+                              setShipments(copy);
+                              setShipmentError(null);
+                            }}
+                            placeholder="https://tracking-link.com"
+                            className="
+                              mt-1
+                              h-11 w-full
+                              rounded-lg
+                              border
+                              px-4 py-2.5
+                              text-sm
+                              shadow-theme-xs
+                              placeholder:text-gray-400
+                              focus:outline-none
+                              focus:ring-3
+                              bg-transparent
+                              text-gray-800
+                              border-gray-300
+                              focus:border-brand-300
+                              focus:ring-brand-500/20
+                              dark:bg-gray-900
+                              dark:text-white/90
+                              dark:placeholder:text-white/30
+                              dark:border-gray-700
+                              dark:focus:border-brand-800
+                            "
+                          />
+                        ) : s.tracking_link ? (
+                          <a
+                            href={s.tracking_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="
+                              mt-2 block
+                              truncate
+                              text-sm
+                              font-medium
+                              text-brand-600
+                              hover:underline
+                              dark:text-brand-400
+                            "
+                          >
+                            {s.tracking_link}
+                          </a>
+                        ) : (
+                          <p className="mt-2 text-sm text-gray-400">—</p>
+                        )}
+                      </div>
+
                       </div>
                     </div>
                   )
