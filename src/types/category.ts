@@ -14,11 +14,9 @@ export type Category = {
 export type CategoryPayload = {
   name: string;
   slug: string;
-  is_active: boolean;
 };
 
 export type CategoryForm = {
   name: string;
   slug: string;
-  is_active: boolean;
 };

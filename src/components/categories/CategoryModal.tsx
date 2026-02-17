@@ -11,7 +11,7 @@ type Props = {
   onSubmit: (data: {
     name: string;
     slug: string;
-    is_active: boolean;
+    // is_active: boolean;
   }) => void;
 };
 
@@ -23,17 +23,17 @@ export default function CategoryModal({
 }: Props) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [isActive, setIsActive] = useState(true);
+  // const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     if (category) {
       setName(category.name);
       setSlug(category.slug);
-      setIsActive(category.is_active);
+      // setIsActive(category.is_active);
     } else {
       setName("");
       setSlug("");
-      setIsActive(true);
+      // setIsActive(true);
     }
   }, [category]);
 
@@ -50,7 +50,7 @@ export default function CategoryModal({
     onSubmit({
       name,
       slug,
-      is_active: isActive,
+      // is_active: isActive,
     });
   };
 
@@ -63,14 +63,25 @@ export default function CategoryModal({
       </h2>
 
       {/* NAME */}
-      <input
-        value={name}
-        onChange={(e) => handleNameChange(e.target.value)}
-        placeholder="Category name"
-        className="w-full rounded-lg border px-3 py-2 mb-3 dark:bg-gray-800"
-      />
+      <div>
+        <label className="text-sm font-medium block mb-2">
+          Category Name
+        </label>
+
+          <input
+            value={name}
+            onChange={(e) => handleNameChange(e.target.value)}
+            placeholder="Enter category name"
+            className="w-full rounded-lg border px-3 py-2 mb-3 dark:bg-gray-800"
+          />
+      </div>
+
 
       {/* SLUG */}
+       <div>
+        <label className="text-sm font-medium block mb-2">
+          Slug
+        </label>
       <input
         value={slug}
         readOnly
@@ -83,7 +94,9 @@ export default function CategoryModal({
             "
       />
 
-      {/* ACTIVE TOGGLE */}
+          </div>
+
+      {/* ACTIVE TOGGLE
       <label className="flex items-center gap-2 mb-4 text-sm">
         <input
           type="checkbox"
@@ -91,7 +104,7 @@ export default function CategoryModal({
           onChange={(e) => setIsActive(e.target.checked)}
         />
         Active
-      </label>
+      </label> */}
 
       {/* ACTIONS */}
       <div className="flex justify-end gap-2">

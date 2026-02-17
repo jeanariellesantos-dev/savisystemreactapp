@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
-import PageMeta from "../../components/common/PageMeta";
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import AccountsTable from "../../components/accounts/AccountsTable";
-import AccountModal from "../../components/accounts/AccountsModal";
-import ConfirmPasswordModal from "../../components/accounts/ConfirmPasswordModal";
+import UsersTable from "../../components/users/UsersTable";
+import UsersModal from "../../components/users/UsersModal";
+import ConfirmPasswordModal from "../../components/users/ConfirmPasswordModal";
 import { UserService } from "../../services/adminService";
 import { RoleService } from "../../services/adminService";
 import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/button/Button";
 
-export default function ManageAccounts() {
+export default function ManageUsers() {
   const { showToast } = useToast();
 
   const [users, setUsers] = useState<any[]>([]);
@@ -25,6 +23,7 @@ export default function ManageAccounts() {
     lastname: "",
     email: "",
     role_id: "",
+    mobile: "",
     password: "",
     confirmPassword: "",
   });
@@ -37,7 +36,7 @@ export default function ManageAccounts() {
       const data = await UserService.getAll();
       setUsers(data);
     } catch {
-      showToast("Failed to load accounts", "error");
+      showToast("Failed to load users", "error");
     } finally {
       setLoading(false);
     }
@@ -66,6 +65,7 @@ export default function ManageAccounts() {
       firstname: "",
       lastname: "",
       email: "",
+      mobile: "",
       role_id: "",
       password: "",
       confirmPassword: "",
@@ -81,6 +81,7 @@ export default function ManageAccounts() {
       firstname: user.firstname,
       lastname: user.lastname,
       email: user.email,
+      mobile: user.mobile,
       role_id: user.role_id ?? "",
       password: "",
       confirmPassword: "",
@@ -130,7 +131,7 @@ export default function ManageAccounts() {
       closeModal();
       loadUsers();
     } catch {
-      showToast("Failed to create account", "error");
+      showToast("Failed to create user", "error");
     }
   };
 
@@ -140,12 +141,14 @@ export default function ManageAccounts() {
     if (!editingUser) return;
 
     try {
-      const payload: any = {
-        firstname: form.firstname,
-        lastname: form.lastname,
-        email: form.email,
-        role_id: form.role_id,
-      };
+        const payload: any = {
+          firstname: form.firstname,
+          lastname: form.lastname,
+          email: form.email,
+          role_id: form.role_id,
+          mobile: form.mobile,
+        };
+
 
       if (withPassword) {
         payload.password = form.password;
@@ -169,14 +172,14 @@ const handleToggle = async (user: any) => {
 
     showToast(
       user.is_active
-        ? "Account deactivated successfully"
-        : "Account activated successfully",
+        ? "User deactivated successfully"
+        : "User activated successfully",
       "success"
     );
 
     loadUsers();
   } catch {
-    showToast("Failed to update account status", "error");
+    showToast("Failed to update user status", "error");
   }
 };
 
@@ -202,7 +205,7 @@ const handleToggle = async (user: any) => {
   if (loading) {
     return (
       <div className="p-6 text-gray-500 dark:text-gray-400">
-        Loading accounts...
+        Loading users...
       </div>
     );
   }
@@ -211,33 +214,48 @@ const handleToggle = async (user: any) => {
 
   return (
     <>
-      <PageMeta title="Manage Accounts" description="Admin user management" />
-      <PageBreadcrumb pageTitle="Manage Accounts" />
-
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
         {/* HEADER */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Manage Accounts
+            Manage Users
           </h3>
 
           <div className="flex items-center gap-3">
             <input
-              placeholder="Search accounts..."
+              placeholder="Search user..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700"
             />
 
-            <Button size="sm" variant="primary" onClick={openCreate}>
-              + Create Account
+            <Button 
+              size="sm" 
+              variant="primary" 
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
+              onClick={openCreate}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Create User
             </Button>
           </div>
         </div>
 
         {/* TABLE */}
-        <AccountsTable
+        <UsersTable
           users={filteredUsers}
           onEdit={openEdit}
           onToggle={handleToggle}
@@ -245,7 +263,7 @@ const handleToggle = async (user: any) => {
 
         {/* ACCOUNT MODAL */}
         {editingUser && (
-          <AccountModal
+          <UsersModal
             isOpen={true}
             mode={isCreateMode ? "create" : "edit"}
             onClose={closeModal}

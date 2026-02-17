@@ -22,7 +22,7 @@ type Props = {
   onToggle: (user: User) => void;
 };
 
-export default function AccountsTable({ users, onEdit, onToggle }: Props) {
+export default function UsersTable({ users, onEdit, onToggle }: Props) {
   return (
     <div className="max-w-full overflow-x-auto">
       <Table>
@@ -170,7 +170,7 @@ export default function AccountsTable({ users, onEdit, onToggle }: Props) {
           {users.length === 0 && (
             <TableRow>
               <TableCell colSpan={5} className="py-10 text-center text-gray-500">
-                No accounts found
+                No users found
               </TableCell>
             </TableRow>
           )}

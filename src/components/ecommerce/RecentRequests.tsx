@@ -13,6 +13,7 @@ import { createOrder } from "../../services/orderService";
 import { markRequestAsShipped, markRequestAsReceived } from "../../services/shipmentService";
 import { ShipmentForm } from "../../types/shipment";
 import { OrderItem } from "../../types/orderItem"
+import Button from "../../components/ui/button/Button";
 
 export default function RecentRequests() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -174,14 +175,15 @@ const handleCreateOrder = async (items: OrderItem[]) => {
         />
 
           {isOperations() && (
-            <button
-              onClick={openModal}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-brand-500 px-4 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-            >
+            <Button 
+              size="sm" 
+              variant="primary" 
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
+              onClick={openModal}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -192,8 +194,8 @@ const handleCreateOrder = async (items: OrderItem[]) => {
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              Create Order
-            </button>
+              Create Request
+            </Button>
           )}
 
         </div>

@@ -66,7 +66,7 @@ const navItems: NavItem[] = [
     adminOnly: true,
   },
   {
-    icon: <GridIcon />,
+    icon: <FileIcon />,
     name: "Requests",
     path: "/admin/requests",
     adminOnly: true,
@@ -104,8 +104,8 @@ const navItems: NavItem[] = [
   },
   {
     icon: <AccountsIcon />,
-    name: "Accounts",
-    path: "/admin/accounts",
+    name: "Users",
+    path: "/admin/users",
     adminOnly: true,
   }
   // {

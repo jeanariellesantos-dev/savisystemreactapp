@@ -10,7 +10,7 @@ type Props = {
   onSubmit: (data: {
     dealership_name: string;
     location: string;
-    is_active: boolean;
+    // is_active: boolean;
   }) => void;
 };
 
@@ -22,17 +22,17 @@ export default function DealershipModal({
 }: Props) {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
-  const [active, setActive] = useState(true);
+  // const [active, setActive] = useState(true);
 
   useEffect(() => {
     if (dealership) {
       setName(dealership.dealership_name);
       setLocation(dealership.location);
-      setActive(dealership.is_active);
+      // setActive(dealership.is_active);
     } else {
       setName("");
       setLocation("");
-      setActive(true);
+      // setActive(true);
     }
   }, [dealership]);
 
@@ -42,7 +42,7 @@ export default function DealershipModal({
     onSubmit({
       dealership_name: name,
       location,
-      is_active: active,
+      // is_active: active,
     });
   };
 
@@ -52,28 +52,39 @@ export default function DealershipModal({
         {dealership ? "Edit Dealership" : "Create Dealership"}
       </h2>
 
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Dealership name"
-        className="w-full border rounded-lg px-3 py-2 mb-3 dark:bg-gray-800"
-      />
 
-      <input
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-        placeholder="Location"
-        className="w-full border rounded-lg px-3 py-2 mb-3 dark:bg-gray-800"
-      />
+      <div>
+        <label className="text-sm font-medium block mb-2">
+          Dealership Name
+        </label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter dealership name"
+          className="w-full border rounded-lg px-3 py-2 mb-3 dark:bg-gray-800"
+        />
+      </div>
 
-      <label className="flex items-center gap-2 mb-4 text-sm">
+      <div>
+        <label className="text-sm font-medium block mb-2">
+          Location
+        </label>
+        <input
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Enter location"
+          className="w-full border rounded-lg px-3 py-2 mb-3 dark:bg-gray-800"
+        />
+      </div>
+
+      {/* <label className="flex items-center gap-2 mb-4 text-sm">
         <input
           type="checkbox"
           checked={active}
           onChange={(e) => setActive(e.target.checked)}
         />
         Active
-      </label>
+      </label> */}
 
       <div className="flex justify-end gap-2">
         <Button variant="outline" size="sm" onClick={onClose}>

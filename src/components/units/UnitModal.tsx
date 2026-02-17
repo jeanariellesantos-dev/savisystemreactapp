@@ -45,20 +45,31 @@ export default function UnitModal({
       </h2>
 
       {/* NAME */}
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Unit name (e.g. Gallon)"
-        className="w-full rounded-lg border px-3 py-2 mb-3 dark:bg-gray-800"
-      />
+
+      <div>
+        <label className="text-sm font-medium block mb-2">
+          Unit Name
+        </label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter unit name (e.g. Gallon)"
+            className="w-full rounded-lg border px-3 py-2 mb-3 dark:bg-gray-800"
+          />
+      </div>
 
       {/* ABBR */}
-      <input
-        value={abbr}
-        onChange={(e) => setAbbr(e.target.value)}
-        placeholder="Abbreviation (e.g. GAL)"
-        className="w-full rounded-lg border px-3 py-2 mb-4 dark:bg-gray-800"
-      />
+      <div>
+        <label className="text-sm font-medium block mb-2">
+          Unit Abbreviation
+        </label>
+        <input
+          value={abbr}
+          onChange={(e) => setAbbr(e.target.value)}
+          placeholder="Enter abbreviation (e.g. GAL)"
+          className="w-full rounded-lg border px-3 py-2 mb-4 dark:bg-gray-800"
+        />
+      </div>
 
       {/* ACTIONS */}
       <div className="flex justify-end gap-2">

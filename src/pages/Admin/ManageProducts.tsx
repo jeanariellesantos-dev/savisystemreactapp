@@ -103,8 +103,6 @@ export default function ManageProducts() {
 
   return (
     <>
-    <PageMeta title="Manage Product" description="Admin product management" />
-    <PageBreadcrumb pageTitle="Manage Products" />
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
       {/* ================= HEADER ================= */}
@@ -131,7 +129,21 @@ export default function ManageProducts() {
               setModalOpen(true);
             }}
           >
-            + Add Product
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Create Product
           </Button>
         </div>
       </div>
