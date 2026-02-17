@@ -118,16 +118,19 @@ export default function CategoryTable({
                   {/* TOGGLE STATUS BUTTON */}
                   <button
                     onClick={() => onToggle(c)}
-                    className="
+                    className={`
                       inline-flex items-center justify-center
                       w-9 h-9
                       rounded-lg
                       border border-gray-200
-                      text-red-600
-                      hover:bg-red-600 hover:text-white
                       dark:border-gray-700
                       transition
-                    "
+                      ${
+                        c.is_active
+                          ? "text-red-600 hover:bg-red-600 hover:text-white"
+                          : "text-green-600 hover:bg-green-600 hover:text-white"
+                      }
+                    `}
                     title={c.is_active ? "Deactivate" : "Activate"}
                   >
                     {c.is_active ? (

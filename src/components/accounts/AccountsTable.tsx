@@ -26,48 +26,51 @@ export default function AccountsTable({ users, onEdit, onToggle }: Props) {
   return (
     <div className="max-w-full overflow-x-auto">
       <Table>
-        {/* HEADER */}
+        {/* ================= HEADER ================= */}
         <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
           <TableRow>
-            <TableCell isHeader className="py-3 text-start text-theme-xs text-gray-500 dark:text-gray-400">
+            <TableCell isHeader className="py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">
               Name
             </TableCell>
 
-            <TableCell isHeader className="py-3 text-center text-theme-xs text-gray-500 dark:text-gray-400">
+            <TableCell isHeader className="py-3 text-center text-theme-xs font-medium text-gray-500 dark:text-gray-400">
               Email
             </TableCell>
 
-            <TableCell isHeader className="py-3 text-center text-theme-xs text-gray-500 dark:text-gray-400">
+            <TableCell isHeader className="py-3 text-center text-theme-xs font-medium text-gray-500 dark:text-gray-400">
               Role
             </TableCell>
 
-            <TableCell isHeader className="py-3 text-center text-theme-xs text-gray-500 dark:text-gray-400">
+            <TableCell isHeader className="py-3 text-center text-theme-xs font-medium text-gray-500 dark:text-gray-400">
               Status
             </TableCell>
 
-            <TableCell isHeader className="py-3 text-center text-theme-xs text-gray-500 dark:text-gray-400">
+            <TableCell isHeader className="py-3 text-center text-theme-xs font-medium text-gray-500 dark:text-gray-400">
               Operation
             </TableCell>
           </TableRow>
         </TableHeader>
 
-        {/* BODY */}
+        {/* ================= BODY ================= */}
         <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
           {users.map((user) => (
             <TableRow key={user.id}>
-              <TableCell className="py-2 text-theme-sm">
-                {user.firstname} {user.lastname}
+              
+              <TableCell className="py-3 text-theme-sm">
+                <span className="font-medium text-gray-800 dark:text-white/90">
+                  {user.firstname} {user.lastname}
+                </span>
               </TableCell>
 
-              <TableCell className="py-2 text-center text-theme-sm">
+              <TableCell className="py-3 text-center text-theme-sm text-gray-500 dark:text-gray-400">
                 {user.email}
               </TableCell>
 
-              <TableCell className="py-2 text-center text-theme-sm">
+              <TableCell className="py-3 text-center text-theme-sm text-gray-500 dark:text-gray-400">
                 {user.role}
               </TableCell>
 
-              <TableCell className="py-2 text-center">
+              <TableCell className="py-3 text-center">
                 <Badge
                   size="sm"
                   color={user.is_active ? "success" : "error"}
@@ -76,10 +79,10 @@ export default function AccountsTable({ users, onEdit, onToggle }: Props) {
                 </Badge>
               </TableCell>
 
-              <TableCell className="py-2 text-center">
-                <div className="flex justify-center gap-2">
+              <TableCell className="py-3 text-center">
+                <div className="flex justify-center items-center gap-2">
 
-             {/* EDIT BUTTON */}
+                  {/* EDIT */}
                   <button
                     onClick={() => onEdit(user)}
                     className="
@@ -112,16 +115,19 @@ export default function AccountsTable({ users, onEdit, onToggle }: Props) {
                   {/* TOGGLE STATUS BUTTON */}
                   <button
                     onClick={() => onToggle(user)}
-                    className="
+                    className={`
                       inline-flex items-center justify-center
                       w-9 h-9
                       rounded-lg
                       border border-gray-200
-                      text-red-600
-                      hover:bg-red-600 hover:text-white
                       dark:border-gray-700
                       transition
-                    "
+                      ${
+                        user.is_active
+                          ? "text-red-600 hover:bg-red-600 hover:text-white"
+                          : "text-green-600 hover:bg-green-600 hover:text-white"
+                      }
+                    `}
                     title={user.is_active ? "Deactivate" : "Activate"}
                   >
                     {user.is_active ? (
@@ -160,10 +166,11 @@ export default function AccountsTable({ users, onEdit, onToggle }: Props) {
             </TableRow>
           ))}
 
+          {/* EMPTY STATE */}
           {users.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="py-8 text-center text-gray-500">
-                No accounts found.
+              <TableCell colSpan={5} className="py-10 text-center text-gray-500">
+                No accounts found
               </TableCell>
             </TableRow>
           )}

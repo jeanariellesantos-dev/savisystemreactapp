@@ -2,33 +2,51 @@ import URL_API from "../components/api/axios";
 import { Product, ProductPayload } from "../types/product";
 import { Category, CategoryPayload } from "../types/category";
 import { Dealership, DealershipPayload } from "../types/dealership";
+import { Role, RolePayload } from "../types/role";
 
-//User
-export const getUsers = () => {
-  return URL_API.get("/admin/users");
+/* =========================================================
+   USERS
+========================================================= */
+
+export const UserService = {
+  async getAll(): Promise<any[]> {
+    const { data } = await URL_API.get("/admin/users");
+    return data;
+  },
+
+  async create(payload: any): Promise<any> {
+    const { data } = await URL_API.post("/admin/users", payload);
+    return data;
+  },
+
+  async update(id: number, payload: any): Promise<any> {
+    const { data } = await URL_API.put(`/admin/users/${id}`, payload);
+    return data;
+  },
+
+  async toggleStatus(id: number) {
+    const { data } = await URL_API.patch(`/admin/users/${id}/toggle`);
+    return data;
+  },
 };
 
-export const toggleUserStatus = (id: number) => {
-  return URL_API.patch(`/admin/users/${id}/toggle`);
-};
 
-export const updateUser = (id: number, data: any) => {
-  return URL_API.put("/admin/users/${id}", data);
-};
+/* =========================================================
+   PRODUCTS
+========================================================= */
 
-//Product 
-export const adminProductService = {
+export const ProductService = {
   async getAll(): Promise<Product[]> {
     const { data } = await URL_API.get("/admin/products");
     return data;
   },
 
-  async create(payload: any): Promise<Product> {
+  async create(payload: ProductPayload): Promise<Product> {
     const { data } = await URL_API.post("/admin/products", payload);
     return data;
   },
 
-  async update(id: number, payload: any): Promise<Product> {
+  async update(id: number, payload: ProductPayload): Promise<Product> {
     const { data } = await URL_API.put(`/admin/products/${id}`, payload);
     return data;
   },
@@ -43,67 +61,96 @@ export const adminProductService = {
 };
 
 
-//Categories
+/* =========================================================
+   CATEGORIES
+========================================================= */
+
 export const CategoryService = {
-  /* ===== GET ALL ===== */
   async getAll(): Promise<Category[]> {
-    const { data } = await URL_API.get("admin/categories");
+    const { data } = await URL_API.get("/admin/categories");
     return data;
   },
 
-  /* ===== GET ONE ===== */
   async getById(id: number): Promise<Category> {
-    const { data } = await URL_API.get(`admin/categories/${id}`);
+    const { data } = await URL_API.get(`/admin/categories/${id}`);
     return data;
   },
 
-  /* ===== CREATE ===== */
   async create(payload: CategoryPayload): Promise<Category> {
-    const { data } = await URL_API.post("admin/categories", payload);
+    const { data } = await URL_API.post("/admin/categories", payload);
     return data;
   },
 
-  /* ===== UPDATE ===== */
   async update(id: number, payload: CategoryPayload): Promise<Category> {
-    const { data } = await URL_API.put(`admin/categories/${id}`, payload);
+    const { data } = await URL_API.put(`/admin/categories/${id}`, payload);
     return data;
   },
 
-  /* ===== DELETE ===== */
   async delete(id: number): Promise<void> {
-    await URL_API.delete(`admin/categories/${id}`);
+    await URL_API.delete(`/admin/categories/${id}`);
   },
 
-  /* ===== TOGGLE ACTIVE ===== */
-  async toggleStatus(id: number): Promise<Category> {
-    const { data } = await URL_API.patch(`admin/categories/${id}/toggle`);
-    return data;
+  async toggleStatus(id: number): Promise<void> {
+    await URL_API.patch(`/admin/categories/${id}/toggle`);
   },
 };
 
+
+/* =========================================================
+   DEALERSHIPS
+========================================================= */
+
 export const DealershipService = {
   async getAll(): Promise<Dealership[]> {
-    const { data } = await URL_API.get("admin/dealerships");
+    const { data } = await URL_API.get("/admin/dealerships");
     return data;
   },
 
   async create(payload: DealershipPayload): Promise<Dealership> {
-    const { data } = await URL_API.post("admin/dealerships", payload);
+    const { data } = await URL_API.post("/admin/dealerships", payload);
     return data;
   },
 
   async update(id: number, payload: DealershipPayload): Promise<Dealership> {
-    const { data } = await URL_API.put(`admin/dealerships/${id}`, payload);
+    const { data } = await URL_API.put(`/admin/dealerships/${id}`, payload);
     return data;
   },
 
   async delete(id: number): Promise<void> {
-    await URL_API.delete(`admin/dealerships/${id}`);
+    await URL_API.delete(`/admin/dealerships/${id}`);
   },
 
-    /* ===== TOGGLE ACTIVE ===== */
-  async toggleStatus(id: number): Promise<Dealership> {
-    const { data } = await URL_API.patch(`admin/dealerships/${id}/toggle`);
+  async toggleStatus(id: number): Promise<void> {
+    await URL_API.patch(`/admin/dealerships/${id}/toggle`);
+  },
+};
+
+
+/* =========================================================
+   ROLES
+========================================================= */
+
+export const RoleService = {
+  async getAll(): Promise<Role[]> {
+    const { data } = await URL_API.get("/admin/roles");
     return data;
+  },
+
+  async create(payload: RolePayload): Promise<Role> {
+    const { data } = await URL_API.post("/admin/roles", payload);
+    return data;
+  },
+
+  async update(id: number, payload: RolePayload): Promise<Role> {
+    const { data } = await URL_API.put(`/admin/roles/${id}`, payload);
+    return data;
+  },
+
+  async delete(id: number): Promise<void> {
+    await URL_API.delete(`/admin/roles/${id}`);
+  },
+
+  async toggleStatus(id: number): Promise<void> {
+    await URL_API.patch(`/admin/roles/${id}/toggle`);
   },
 };

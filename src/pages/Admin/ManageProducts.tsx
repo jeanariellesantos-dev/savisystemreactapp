@@ -5,7 +5,7 @@ import ProductTable from "../../components/products/ProductTable";
 import ProductModal from "../../components/products/ProductModal";
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import { adminProductService } from "../../services/adminService";
+import { ProductService } from "../../services/adminService";
 import { CategoryService } from "../../services/categoryService";
 import { UnitService } from "../../services/unitService";
 
@@ -32,7 +32,7 @@ export default function ManageProducts() {
       setLoading(true);
 
       const [p, c, u] = await Promise.all([
-        adminProductService.getAll(),
+        ProductService.getAll(),
         CategoryService.getAll(),
         UnitService.getAll(),
       ]);
@@ -56,10 +56,10 @@ export default function ManageProducts() {
   const handleSave = async (data: any) => {
     try {
       if (selected) {
-        await adminProductService.update(selected.id, data);
+        await ProductService.update(selected.id, data);
         showToast("Product updated", "success");
       } else {
-        await adminProductService.create(data);
+        await ProductService.create(data);
         showToast("Product created", "success");
       }
 
@@ -75,7 +75,7 @@ export default function ManageProducts() {
 
   const handleToggle = async (product: Product) => {
     try {
-      await adminProductService.toggleStatus(product.id);
+      await ProductService.toggleStatus(product.id);
       showToast("Product status updated", "success");
       loadData();
     } catch {

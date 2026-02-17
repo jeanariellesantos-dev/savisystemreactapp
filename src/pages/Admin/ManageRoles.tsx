@@ -5,7 +5,7 @@ import RoleTable from "../../components/roles/RoleTable";
 import RoleModal from "../../components/roles/RoleModal";
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import { RoleService } from "../../services/roleService";
+import { RoleService } from "../../services/adminService";
 import { Role } from "../../types/role";
 
 export default function ManageRoles() {
@@ -49,12 +49,14 @@ export default function ManageRoles() {
     }
   };
 
-  const handleDelete = async (r: Role) => {
-    if (!confirm(`Delete role "${r.role_name}"?`)) return;
-
-    await RoleService.delete(r.id);
-    showToast("Deleted", "success");
-    load();
+  const handleToggle = async (r: Role) => {
+    try {
+      await RoleService.toggleStatus(r.id);
+      showToast("Product status updated", "success");
+      load();
+    } catch {
+      showToast("Failed to update status", "error");
+    }
   };
 
   const filtered = roles.filter((r) =>
@@ -104,7 +106,7 @@ export default function ManageRoles() {
           setSelected(r);
           setModalOpen(true);
         }}
-        onDelete={handleDelete}
+        onToggle={handleToggle}
       />
 
       {modalOpen && (
