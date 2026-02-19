@@ -63,13 +63,13 @@ export default function CategoryModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md p-6">
-      <h2 className="text-lg font-semibold mb-4">
+      <h2 className="text-lg font-semibold mb-4 dark:text-white/90">
         {category ? "Edit Category" : "Create Category"}
       </h2>
 
       {/* NAME */}
       <div>
-        <label className="text-sm font-medium block mb-2">
+        <label className="text-sm font-medium block mb-2 dark:text-gray-400">
           Category Name
         </label>
 
@@ -77,14 +77,14 @@ export default function CategoryModal({
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Enter category name"
-            className="w-full rounded-lg border px-3 py-2 mb-3 dark:bg-gray-800"
+            className="w-full rounded-lg border px-3 py-2 mb-3 dark:bg-gray-800 dark:text-gray-400"
           />
       </div>
 
 
       {/* SLUG */}
        <div>
-        <label className="text-sm font-medium block mb-2">
+        <label className="text-sm font-medium block mb-2 dark:text-gray-400">
           Slug
         </label>
       <input

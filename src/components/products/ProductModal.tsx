@@ -57,7 +57,7 @@ export default function ProductModal({
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[600px]">
       <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
 
-        <h3 className="text-xl font-semibold mb-6">
+        <h3 className="text-xl font-semibold mb-6 dark:text-white/90">
           {product ? "Edit Product" : "Add Product"}
         </h3>
 
@@ -65,7 +65,7 @@ export default function ProductModal({
 
           {/* PRODUCT NAME */}
           <div>
-            <label className="text-sm font-medium block mb-2">
+            <label className="text-sm font-medium block mb-2 dark:text-gray-400">
               Product Name
             </label>
             <input
@@ -73,14 +73,14 @@ export default function ProductModal({
               onChange={(e) =>
                 setForm({ ...form, product_name: e.target.value })
               }
-              className="w-full rounded-lg border px-3 py-2 dark:bg-gray-800"
+              className="w-full rounded-lg border px-3 py-2 dark:bg-gray-800 dark:text-gray-400"
               placeholder="Enter product name"
             />
           </div>
 
           {/* CATEGORY */}
           <div>
-            <label className="text-sm font-medium block mb-2">
+            <label className="text-sm font-medium block mb-2 dark:text-gray-400">
               Category
             </label>
             <select
@@ -88,7 +88,7 @@ export default function ProductModal({
               onChange={(e) =>
                 setForm({ ...form, category_id: e.target.value })
               }
-              className="w-full rounded-lg border px-3 py-2 dark:bg-gray-800"
+              className="w-full rounded-lg border px-3 py-2 dark:bg-gray-800 dark:text-gray-400"
             >
               <option value="">Select category</option>
               {categories.map((c) => (
@@ -101,7 +101,7 @@ export default function ProductModal({
 
           {/* UNITS (Checkbox grid) */}
           <div>
-            <label className="text-sm font-medium block mb-3">
+            <label className="text-sm font-medium block mb-3 dark:text-gray-400">
               Units
             </label>
 
@@ -112,7 +112,7 @@ export default function ProductModal({
                   className="
                     flex items-center gap-2
                     rounded-lg border px-3 py-2
-                    hover:bg-gray-50 dark:hover:bg-gray-800
+                    hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-400
                     cursor-pointer
                   "
                 >

@@ -105,12 +105,6 @@ export default function ManageProducts() {
 
   return (
     <>
-      <PageMeta
-        title="Manage Products"
-        description="Admin product management"
-      />
-      <PageBreadcrumb pageTitle="Manage Products" />
-
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
         {/* HEADER */}
@@ -125,7 +119,7 @@ export default function ManageProducts() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm 
-                         dark:bg-gray-800 dark:border-gray-700"
+                         dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400" 
             />
 
             <Button

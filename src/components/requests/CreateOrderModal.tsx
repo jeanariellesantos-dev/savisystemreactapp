@@ -4,7 +4,9 @@ import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useEffect, useState } from "react";
 
-import { Category, CategoryService } from "../../services/categoryService";
+import { Category } from "../../types/category";
+import { CategoryService } from "../../services/categoryService";
+import Select from "../form/Select";
 import { Product, Unit, ProductService } from "../../services/productService";
 import { OrderItem } from "../../types/orderItem";
 
@@ -132,83 +134,79 @@ export default function CreateOrderModal({
 
                 <div className="grid grid-cols-12 gap-3 items-end">
                   {/* CATEGORY */}
-                  <div className="col-span-3">
+                  <div className="col-span-4">
                     <Label>Category</Label>
-                    <select
-                      value={item.categoryId ?? ""}
-                      onChange={(e) => {
-                        const value =
-                          e.target.value === "" ? null : Number(e.target.value);
-                        updateItem(index, "categoryId", value);
+                    <Select
+                      value={item.categoryId ? String(item.categoryId) : ""}
+                      placeholder="Select category"
+                      options={categories.map((c) => ({
+                        value: String(c.id),
+                        label: c.name,
+                      }))}
+                      onChange={(value) => {
+                        const numericValue = value ? Number(value) : null;
+
+                        updateItem(index, "categoryId", numericValue);
                         updateItem(index, "productId", null);
                         updateItem(index, "unitId", null);
-                        if (value) loadProducts(value);
+
+                        if (numericValue) loadProducts(numericValue);
                       }}
-                      className="w-full rounded-md border p-2"
-                    >
-                      <option value="">Select category</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
+
                   </div>
 
                   {/* PRODUCT */}
-                  <div className="col-span-3">
+                  <div className="col-span-4">
                     <Label>Product</Label>
-                    <select
-                      value={item.productId ?? ""}
-                      disabled={!item.categoryId}
-                      onChange={(e) => {
-                        const value =
-                          e.target.value === "" ? null : Number(e.target.value);
-                        updateItem(index, "productId", value);
-                        updateItem(index, "unitId", null);
-                        if (value) loadUnits(value);
-                      }}
-                      className="w-full rounded-md border p-2 disabled:bg-gray-100 dark:disabled:bg-gray-700"
-                    >
-                      <option value="">
-                        {item.categoryId
-                          ? "Select product"
-                          : "Select category first"}
-                      </option>
-                      {productList.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.product_name}
-                        </option>
-                      ))}
-                    </select>
+                  <Select
+                    value={item.productId ? String(item.productId) : ""}
+                    disabled={!item.categoryId}
+                    placeholder={
+                      item.categoryId
+                        ? "Select product"
+                        : "Select category first"
+                    }
+                    options={productList.map((p) => ({
+                      value: String(p.id),
+                      label: p.product_name,
+                    }))}
+                    onChange={(value) => {
+                      const numericValue = value ? Number(value) : null;
+
+                      updateItem(index, "productId", numericValue);
+                      updateItem(index, "unitId", null);
+
+                      if (numericValue) loadUnits(numericValue);
+                    }}
+                  />
+
                   </div>
 
                   {/* UNIT */}
                   <div className="col-span-2">
                     <Label>Unit</Label>
-                    <select
-                      value={item.unitId ?? ""}
+                    <Select
+                      value={item.unitId ? String(item.unitId) : ""}
                       disabled={!item.productId}
-                      onChange={(e) =>
+                      placeholder={
+                        item.productId
+                          ? "Select unit"
+                          : "Select product first"
+                      }
+                      options={unitList.map((u) => ({
+                        value: String(u.id),
+                        label: u.name,
+                      }))}
+                      onChange={(value) =>
                         updateItem(
                           index,
                           "unitId",
-                          e.target.value === ""
-                            ? null
-                            : Number(e.target.value)
+                          value ? Number(value) : null
                         )
                       }
-                      className="w-full rounded-md border p-2 disabled:bg-gray-100 dark:disabled:bg-gray-700"
-                    >
-                      <option value="">
-                        {item.productId ? "Select unit" : "Select product first"}
-                      </option>
-                      {unitList.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
+
                   </div>
 
                   {/* QTY */}

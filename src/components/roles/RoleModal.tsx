@@ -67,7 +67,7 @@ export default function RoleModal({
       <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
 
         {/* HEADER */}
-        <h3 className="text-xl font-semibold mb-6">
+        <h3 className="text-xl font-semibold mb-6 dark:text-white/90">
           {isEdit ? "Edit Role" : "Create Role"}
         </h3>
 
@@ -75,7 +75,7 @@ export default function RoleModal({
 
           {/* ROLE NAME */}
           <div>
-            <label className="text-sm font-medium block mb-2">
+            <label className="text-sm font-medium block mb-2 dark:text-gray-400">
               Role Name
             </label>
             <input
@@ -84,14 +84,14 @@ export default function RoleModal({
               placeholder="Enter role name"
               className="
                 w-full rounded-lg border px-3 py-2
-                dark:bg-gray-800 dark:border-gray-700
+                dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400
               "
             />
           </div>
 
           {/* DESCRIPTION */}
           <div>
-            <label className="text-sm font-medium block mb-2">
+            <label className="text-sm font-medium block mb-2 dark:text-gray-400">
               Role Description
             </label>
             <textarea
@@ -101,7 +101,7 @@ export default function RoleModal({
               rows={3}
               className="
                 w-full rounded-lg border px-3 py-2
-                dark:bg-gray-800 dark:border-gray-700
+                dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400
               "
             />
           </div>

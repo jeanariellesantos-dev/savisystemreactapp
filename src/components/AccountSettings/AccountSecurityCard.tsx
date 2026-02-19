@@ -111,11 +111,9 @@ function ChangePasswordModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md m-4">
       <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
-        <h4 className="text-xl font-semibold mb-4">
+        <h4 className="text-xl font-semibold mb-4 dark:text-white/90">
           Change Password
         </h4>
-
-        {error && <p className="mb-3 text-sm text-red-500">{error}</p>}
 
         <div className="space-y-4">
           <div>
@@ -145,6 +143,8 @@ function ChangePasswordModal({
             />
           </div>
         </div>
+
+        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
 
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="outline" onClick={onClose}>
@@ -190,7 +190,7 @@ function UpdateEmailModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md m-4">
       <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
-        <h4 className="text-xl font-semibold mb-4">
+        <h4 className="text-xl font-semibold mb-4 dark:text-white/90">
           Update Email
         </h4>
 

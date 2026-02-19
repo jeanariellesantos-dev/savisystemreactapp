@@ -1,5 +1,6 @@
 import { Modal } from "../ui/modal";
 import { useEffect, useState } from "react";
+import Button from "../ui/button/Button";
 
 type Props = {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export default function UsersModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[600px]">
       <div className="p-6 dark:bg-gray-900 rounded-3xl">
-        <h3 className="text-lg font-semibold mb-6">
+        <h3 className="text-lg font-semibold mb-6 dark:text-white/90">
           {isCreate ? "Create User" : "Edit User"}
         </h3>
 
@@ -39,7 +40,7 @@ export default function UsersModal({
               onChange={(e) =>
                 setForm({ ...form, firstname: e.target.value })
               }
-              className="border rounded-lg px-3 py-2 dark:bg-gray-800"
+              className="border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-gray-400"
               placeholder="First Name"
             />
 
@@ -48,7 +49,7 @@ export default function UsersModal({
               onChange={(e) =>
                 setForm({ ...form, lastname: e.target.value })
               }
-              className="border rounded-lg px-3 py-2 dark:bg-gray-800"
+              className="border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-gray-400"
               placeholder="Last Name"
             />
           </div>
@@ -59,7 +60,7 @@ export default function UsersModal({
             onChange={(e) =>
               setForm({ ...form, email: e.target.value })
             }
-            className="border rounded-lg px-3 py-2 dark:bg-gray-800"
+            className="border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-gray-400"
             placeholder="Email"
           />
 
@@ -69,7 +70,7 @@ export default function UsersModal({
             onChange={(e) =>
               setForm({ ...form, mobile: e.target.value })
             }
-            className="border rounded-lg px-3 py-2 dark:bg-gray-800"
+            className="border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-gray-400"
             placeholder="Mobile Number (e.g. 09XXXXXXXXX)"
           />
 
@@ -79,7 +80,7 @@ export default function UsersModal({
             onChange={(e) =>
               setForm({ ...form, role_id: e.target.value })
             }
-            className="border rounded-lg px-3 py-2 dark:bg-gray-800"
+            className="border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-gray-400"
           >
             <option value="">Select Role</option>
 
@@ -92,7 +93,7 @@ export default function UsersModal({
 
           {/* ===== PASSWORD SECTION ===== */}
           <div className="border-t pt-4 mt-2">
-            <p className="text-sm font-medium mb-2">
+            <p className="text-sm font-medium mb-2 dark:text-gray-400">
               {isCreate
                 ? "Set Password"
                 : "Change Password (Optional)"}
@@ -105,7 +106,7 @@ export default function UsersModal({
               onChange={(e) =>
                 setForm({ ...form, password: e.target.value })
               }
-              className="border rounded-lg px-3 py-2 w-full dark:bg-gray-800"
+              className="border rounded-lg px-3 py-2 w-full dark:bg-gray-800 dark:text-gray-400"
             />
 
             <input
@@ -115,26 +116,22 @@ export default function UsersModal({
               onChange={(e) =>
                 setForm({ ...form, confirmPassword: e.target.value })
               }
-              className="border rounded-lg px-3 py-2 w-full mt-3 dark:bg-gray-800"
+              className="border rounded-lg px-3 py-2 w-full mt-3 dark:bg-gray-800 dark:text-gray-400"
             />
           </div>
         </div>
 
         {/* ===== ACTION BUTTONS ===== */}
         <div className="mt-6 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-          >
-            Cancel
-          </button>
 
-          <button
-            onClick={onSave}
-            className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:opacity-90 transition"
-          >
-            {isCreate ? "Create User" : "Save Changes"}
-          </button>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+
+          <Button size="sm" onClick={onSave}>
+            {isCreate ? "Create User" : "Update User"}
+          </Button>
+
         </div>
       </div>
     </Modal>

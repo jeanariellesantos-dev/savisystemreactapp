@@ -14,7 +14,7 @@ export default function ConfirmPasswordModal({
   return (
     <Modal isOpen={isOpen} onClose={onCancel} className="max-w-md">
       <div className="p-6 dark:bg-gray-900 rounded-3xl">
-        <h3 className="text-lg font-semibold mb-4">
+        <h3 className="text-lg font-semibold mb-4 dark:text-white/90">
           Confirm Password Change
         </h3>
 

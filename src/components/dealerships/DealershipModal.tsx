@@ -55,31 +55,31 @@ export default function DealershipModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md p-6">
-      <h2 className="text-lg font-semibold mb-4">
+      <h2 className="text-lg font-semibold mb-4 dark:text-white/90">
         {dealership ? "Edit Dealership" : "Create Dealership"}
       </h2>
 
       <div>
-        <label className="text-sm font-medium block mb-2">
+        <label className="text-sm font-medium block mb-2 dark:text-gray-400">
           Dealership Name
         </label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter dealership name"
-          className="w-full border rounded-lg px-3 py-2 mb-3 dark:bg-gray-800"
+          className="w-full border rounded-lg px-3 py-2 mb-3 dark:bg-gray-800 dark:text-gray-400"
         />
       </div>
 
       <div>
-        <label className="text-sm font-medium block mb-2">
+        <label className="text-sm font-medium block mb-2 dark:text-gray-400">
           Location
         </label>
         <input
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           placeholder="Enter location"
-          className="w-full border rounded-lg px-3 py-2 mb-3 dark:bg-gray-800"
+          className="w-full border rounded-lg px-3 py-2 mb-3 dark:bg-gray-800 dark:text-gray-400"
         />
       </div>
 

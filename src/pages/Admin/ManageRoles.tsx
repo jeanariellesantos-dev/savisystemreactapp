@@ -83,7 +83,7 @@ export default function ManageRoles() {
             placeholder="Search role..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="rounded-lg border px-3 py-2 text-sm dark:bg-gray-800"
+            className="rounded-lg border px-3 py-2 text-sm dark:bg-gray-800 dark:text-gray-400"
           />
 
           <Button size="sm" variant="primary"

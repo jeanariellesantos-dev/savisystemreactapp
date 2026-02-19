@@ -98,11 +98,18 @@ export default function SignInForm() {
   {/* Box Container */}
   <div className="border rounded-2xl shadow-sm bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 p-6">
     <div>
-      <div className="mb-2 sm:mb-4">
-        <h1 className="mb-5 font-semibold text-gray-800 text-center text-title-sm dark:text-white/90 sm:text-title-md">
-          SAVI Systems
-        </h1>
-      </div>
+        <div className="flex flex-col items-center">
+
+          {/* Logo Container */}
+          <div className="flex items-center justify-center w-100 h-20 mb-3">
+            <img
+              src={`${import.meta.env.BASE_URL}images/logo/savi-logo-modern.png`}
+              alt="SAVI System Logo"
+              className="object-contain w-full h-full"
+            />
+          </div>
+        </div>
+
 
       <form onSubmit={handleSubmit}>
         <div className="space-y-6 mb-5">
@@ -139,7 +146,7 @@ export default function SignInForm() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Checkbox checked={isChecked} onChange={setIsChecked} />
               <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
@@ -152,7 +159,7 @@ export default function SignInForm() {
             >
               Forgot password?
             </Link>
-          </div>
+          </div> */}
 
           <div>
             <Button className="w-full" size="sm">
