@@ -17,6 +17,8 @@ export default function ManageUsers() {
   const [confirmPasswordModal, setConfirmPasswordModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [originalForm, setOriginalForm] = useState<any>(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
   const [form, setForm] = useState({
     firstname: "",
@@ -71,24 +73,59 @@ export default function ManageUsers() {
       confirmPassword: "",
     });
     setIsCreateMode(true);
-    setEditingUser({}); // trigger modal
+   setEditingUser(null);
+  setIsUserModalOpen(true);
+
   };
 
   /* ================= OPEN EDIT ================= */
 
-  const openEdit = (user: any) => {
-    setForm({
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email,
-      mobile: user.mobile,
-      role_id: user.role_id ?? "",
-      password: "",
-      confirmPassword: "",
-    });
-    setIsCreateMode(false);
-    setEditingUser(user);
-  };
+    const openEdit = (user: any) => {
+
+      const data = {
+        firstname: user.firstname ?? "",
+        lastname: user.lastname ?? "",
+        email: user.email ?? "",
+        mobile: user.mobile ?? "",
+        role_id: user.role_id ?? "",
+      };
+
+      setForm({
+        ...data,
+        password: "",
+        confirmPassword: "",
+      });
+
+      setOriginalForm(data);
+      setIsCreateMode(false);
+      setEditingUser(user);
+      setIsUserModalOpen(true); 
+    };
+
+
+      /* ================= OPEN CHANGES ================= */
+    const hasUserInfoChanged = () => {
+
+      if (!originalForm) return false;
+
+      const infoChanged =
+        form.firstname !== originalForm.firstname ||
+        form.lastname !== originalForm.lastname ||
+        form.email !== originalForm.email ||
+        form.mobile !== originalForm.mobile ||
+        String(form.role_id) !== String(originalForm.role_id);
+
+      const passwordFilled =
+        form.password.trim() !== "" ||
+        form.confirmPassword.trim() !== "";
+
+      return infoChanged || passwordFilled;
+    };
+
+
+    const hasChanges = isCreateMode ? true : hasUserInfoChanged();
+
+
 
   /* ================= SAVE LOGIC ================= */
 
@@ -112,7 +149,7 @@ export default function ManageUsers() {
       return;
     }
 
-    submitUpdate(false);
+    submitUpdate();
   };
 
   /* ================= CREATE ================= */
@@ -137,32 +174,52 @@ export default function ManageUsers() {
 
   /* ================= UPDATE ================= */
 
-  const submitUpdate = async (withPassword: boolean) => {
-    if (!editingUser) return;
+  const submitUpdate = async () => {
 
-    try {
-        const payload: any = {
-          firstname: form.firstname,
-          lastname: form.lastname,
-          email: form.email,
-          role_id: form.role_id,
-          mobile: form.mobile,
-        };
+  if (!editingUser) return;
 
+      const infoChanged =
+        form.firstname !== originalForm.firstname ||
+        form.lastname !== originalForm.lastname ||
+        form.email !== originalForm.email ||
+        form.mobile !== originalForm.mobile ||
+        String(form.role_id) !== String(originalForm.role_id);
 
-      if (withPassword) {
-        payload.password = form.password;
+      const passwordFilled =
+        form.password.trim() !== "";
+
+      if (!infoChanged && !passwordFilled) {
+        showToast("No changes detected", "error");
+        return;
       }
 
-      await UserService.update(editingUser.id, payload);
+    try {
 
-      showToast("User updated successfully", "success");
+      await UserService.update(editingUser.id, {
+        firstname: form.firstname,
+        lastname: form.lastname,
+        email: form.email,
+        role_id: form.role_id,
+        mobile: form.mobile,
+      });
+
+      showToast("User info updated successfully", "success");
+
       closeModal();
       loadUsers();
-    } catch {
-      showToast("Failed to update user", "error");
+
+    } catch (err: any) {
+
+      // BACKEND VALIDATION ERROR
+      if (err.response?.data?.message) {
+        showToast(err.response.data.message, "error");
+      } else {
+        showToast("Update failed", "error");
+      }
+
     }
   };
+
 
   /* ================= TOGGLE STATUS ================= */
 
@@ -186,11 +243,13 @@ const handleToggle = async (user: any) => {
 
   /* ================= CLOSE MODAL ================= */
 
-  const closeModal = () => {
-    setEditingUser(null);
-    setIsCreateMode(false);
-    setConfirmPasswordModal(false);
-  };
+    const closeModal = () => {
+      setEditingUser(null);
+      setIsCreateMode(false);
+      setConfirmPasswordModal(false);
+      setIsUserModalOpen(false);  
+    };
+
 
   /* ================= SEARCH ================= */
 
@@ -262,7 +321,7 @@ const handleToggle = async (user: any) => {
         />
 
         {/* ACCOUNT MODAL */}
-        {editingUser && (
+        {isUserModalOpen && (
           <UsersModal
             isOpen={true}
             mode={isCreateMode ? "create" : "edit"}
@@ -271,6 +330,7 @@ const handleToggle = async (user: any) => {
             setForm={setForm}
             onSave={handleSave}
             roles={roles}
+            hasChanges={hasChanges}
           />
         )}
 
@@ -279,7 +339,7 @@ const handleToggle = async (user: any) => {
           <ConfirmPasswordModal
             isOpen={true}
             onCancel={() => setConfirmPasswordModal(false)}
-            onConfirm={() => submitUpdate(true)}
+            onConfirm={() => submitUpdate()}
           />
         )}
       </div>

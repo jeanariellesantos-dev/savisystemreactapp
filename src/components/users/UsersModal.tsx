@@ -10,6 +10,7 @@ type Props = {
   setForm: any;
   onSave: () => void;
   roles: any[];
+  hasChanges: boolean; 
 };
 
 export default function UsersModal({
@@ -20,6 +21,7 @@ export default function UsersModal({
   setForm,
   onSave,
   roles,
+  hasChanges,   
 }: Props) {
   const isCreate = mode === "create";
 
@@ -128,7 +130,11 @@ export default function UsersModal({
             Cancel
           </Button>
 
-          <Button size="sm" onClick={onSave}>
+         <Button
+            size="sm"
+            disabled={!isCreate && !hasChanges}
+            onClick={onSave}
+          >
             {isCreate ? "Create User" : "Update User"}
           </Button>
 
