@@ -207,7 +207,7 @@ const handleCreateOrder = async (items: OrderItem[]) => {
           <button
             disabled={meta.current_page === 1}
             onClick={() => setPage((p) => p - 1)}
-            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 dark:text-gray-300"
           >
             Previous
           </button>
@@ -220,7 +220,7 @@ const handleCreateOrder = async (items: OrderItem[]) => {
           <button
             disabled={meta.current_page === meta.last_page}
             onClick={() => setPage((p) => p + 1)}
-            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 dark:text-gray-300"
           >
             Next
           </button>

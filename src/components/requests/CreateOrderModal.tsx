@@ -98,6 +98,28 @@ export default function CreateOrderModal({
   (i) => !i.categoryId || !i.productId || !i.unitId || i.quantity < 1
 );
 
+const orderSummary = items.map((item) => {
+  const category = categories.find((c) => c.id === item.categoryId);
+
+  const product =
+    item.categoryId && products[item.categoryId]
+      ? products[item.categoryId].find((p) => p.id === item.productId)
+      : null;
+
+  const unit =
+    item.productId && units[item.productId]
+      ? units[item.productId].find((u) => u.id === item.unitId)
+      : null;
+
+  return {
+    category: category?.name ?? "-",
+    product: product?.product_name ?? "-",
+    unit: unit?.name ?? "-",
+    quantity: item.quantity,
+  };
+});
+
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[760px]">
@@ -261,37 +283,78 @@ export default function CreateOrderModal({
         </div>
       </div>
 
-      {/* CONFIRM MODAL */}
-      {showConfirm && (
-        <Modal isOpen onClose={() => setShowConfirm(false)} className="max-w-md">
-          <div className="p-6">
-            <h3 className="text-lg font-semibold">Confirm Submission</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Please confirm that you want to submit this order.
-            </p>
+{/* CONFIRM MODAL */}
+{showConfirm && (
+  <Modal isOpen onClose={() => setShowConfirm(false)} className="max-w-2xl w-full max-h-[100vh]">
+    <div className="p-6 flex flex-col h-full max-h-[100vh]">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        Confirm Order Submission
+      </h3>
 
-            <div className="mt-6 flex justify-end gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowConfirm(false)}
-              >
-                Cancel
-              </Button>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Please review the order summary before submitting.
+      </p>
 
-              <Button
-                size="sm"
-                onClick={() => {
-                  setShowConfirm(false);
-                  submitToParent();
-                }}
+      {/* SUMMARY */}
+      <div className="mt-4 max-h-[400px] overflow-y-auto rounded-xl border bg-gray-50 dark:bg-gray-800">
+        <table className="w-full text-sm">
+          <thead className="border-b bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+            <tr>
+              <th className="p-2 text-left">Category</th>
+              <th className="p-2 text-left">Product</th>
+              <th className="p-2 text-left">Unit</th>
+              <th className="p-2 text-right">Qty</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {orderSummary.map((item, i) => (
+              <tr
+                key={i}
+                className="border-b last:border-0 text-gray-700 dark:text-gray-200"
               >
-                Yes, Submit
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+                <td className="p-2">{item.category}</td>
+                <td className="p-2">{item.product}</td>
+                <td className="p-2">{item.unit}</td>
+                <td className="p-2 text-right font-medium">
+                  {item.quantity}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* TOTAL */}
+      <div className="mt-3 flex justify-between text-sm text-gray-600 dark:text-gray-300">
+        <span>Total Line Items:</span>
+        <span className="font-semibold">{items.length}</span>
+      </div>
+
+      {/* ACTIONS */}
+      <div className="mt-6 flex justify-end gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setShowConfirm(false)}
+        >
+          Back
+        </Button>
+
+        <Button
+          size="sm"
+          onClick={() => {
+            setShowConfirm(false);
+            submitToParent();
+          }}
+        >
+          Confirm & Submit
+        </Button>
+      </div>
+    </div>
+  </Modal>
+)}
+
     </Modal>
   );
 }

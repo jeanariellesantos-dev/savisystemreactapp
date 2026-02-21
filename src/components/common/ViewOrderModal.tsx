@@ -212,7 +212,7 @@ export default function ViewRequestModal({
                         </label>
 
                         {canEditShipment ? (
-                          <div className="mt-1">
+                          <div className="mt-1 ">
                             <DatePicker
                               id={`shipped_date_${i}`}
                               defaultDate={s.shipped_date || undefined}
@@ -230,7 +230,7 @@ export default function ViewRequestModal({
                             />
                           </div>
                         ) : (
-                          <p className="font-medium">
+                          <p className="font-medium dark:text-white">
                             {s.shipped_date || "—"}
                           </p>
                         )}
@@ -327,7 +327,7 @@ export default function ViewRequestModal({
                             : "border-gray-300 dark:border-gray-600"
                         }`}
                       >
-                        <p className="text-sm leading-relaxed">
+                        <p className="text-sm leading-relaxed dark:text-white">
                           {a.remarks || "No remarks provided"}
                         </p>
                         <p className="mt-1 text-[11px] tracking-wide text-gray-500">
