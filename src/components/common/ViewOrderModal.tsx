@@ -51,6 +51,7 @@ export default function ViewRequestModal({
   const isInventory = role === "INVENTORY";
   const isAccounting = role === "ACCOUNTING";
   const isSupervisor = role === "SUPERVISOR";
+  const isClusterHead = role === "CLUSTER_HEAD";
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -60,7 +61,9 @@ export default function ViewRequestModal({
 
   const [submitting, setSubmitting] = useState(false);
   const [shipmentError, setShipmentError] = useState<string | null>(null);
-  
+
+  const [rejectError, setRejectError] = useState<string | null>(null);
+
 
   const [shipments, setShipments] = useState<ShipmentForm[]>([
     { shipped_date: today, tracking_link: "" },
@@ -87,51 +90,66 @@ export default function ViewRequestModal({
     return null;
   };
 
-  const handleConfirm = async () => {
-    if (!confirmAction) return;
+const handleConfirm = async () => {
+  if (!confirmAction) return;
 
-          // 🔴 Validate shipment BEFORE submitting
-      if (confirmAction === "SHIPPED") {
-        const error = validateShipments();
-        if (error) {
-          setShipmentError(error);
-          return;
-        }
-      }
-
-      setSubmitting(true);
-      setShipmentError(null);
-
-    try {
-      if (confirmAction === "SHIPPED") {
-        await onShip({
-          requestId: request.id,
-          shipments,
-          remarks: actionRemarks || undefined,
-        });
-      } else if (confirmAction === "RECEIVED") {
-        await onReceive({
-          requestId: request.id,
-          shipments,
-          remarks: actionRemarks || undefined,
-        });
-      } else {
-        if (confirmAction === "REJECTED" && !actionRemarks.trim()) return;
-          await onConfirm({
-            requestId: request.id,
-            action: confirmAction,
-            remarks: actionRemarks || undefined,
-          });
-      }
-      onClose();
-    } finally {
-      setSubmitting(false);
-      setConfirmAction(null);
-      setActionRemarks("");
-      setShipmentError(null);
-      setShipments([{ shipped_date: today, tracking_link: "" }]);
+  // ✅ REJECT VALIDATION FIRST (ONLY FOR REJECT)
+  if (confirmAction === "REJECTED") {
+    if (!actionRemarks.trim()) {
+      setRejectError("Rejection reason is required.");
+      return; // stop here — don't submit
     }
-  };
+  }
+
+  // 🔴 Validate shipment BEFORE submitting
+  if (confirmAction === "SHIPPED") {
+    const error = validateShipments();
+    if (error) {
+      setShipmentError(error);
+      return;
+    }
+  }
+
+  setSubmitting(true);
+  setShipmentError(null);
+  setRejectError(null);
+
+  try {
+    if (confirmAction === "SHIPPED") {
+      await onShip({
+        requestId: request.id,
+        shipments,
+        remarks: actionRemarks || undefined,
+      });
+
+    } else if (confirmAction === "RECEIVED") {
+      await onReceive({
+        requestId: request.id,
+        shipments,
+        remarks: actionRemarks || undefined,
+      });
+
+    } else {
+      await onConfirm({
+        requestId: request.id,
+        action: confirmAction,
+        remarks: actionRemarks || undefined,
+      });
+    }
+
+    onClose();
+
+  } finally {
+    setSubmitting(false);
+    setConfirmAction(null);
+    setActionRemarks("");
+    setShipmentError(null);
+    setRejectError(null);
+    setShipments([{ shipped_date: today, tracking_link: "" }]);
+  }
+};
+
+
 
   const canEditShipment = request.status === "PENDING_INVENTORY" && isInventory;
   const canViewShipmentReadonly =
@@ -143,7 +161,8 @@ export default function ViewRequestModal({
 
   const canApproveReject =
   (isAccounting && request.status === "PENDING_ACCOUNTING") ||
-  (isSupervisor && request.status === "PENDING_SUPERVISOR");
+  (isSupervisor && request.status === "PENDING_SUPERVISOR") ||
+  (isClusterHead && request.status === "PENDING_CLUSTER_HEAD");;
 
   return (
     <Modal
@@ -432,10 +451,18 @@ export default function ViewRequestModal({
             {confirmAction && (
               <TextArea
                 value={actionRemarks}
-                onChange={setActionRemarks}
+                onChange={(val) => {
+                  setActionRemarks(val);
+                  if (rejectError) setRejectError(null);
+                }}
+                className={
+                  confirmAction === "REJECTED" && rejectError
+                    ? "border-red-500 focus:ring-red-300"
+                    : ""
+                }
                 placeholder={
                   confirmAction === "REJECTED"
-                    ? "Provide a clear rejection reason..."
+                    ? "Provide a clear rejection reason (Required)..."
                     : confirmAction === "APPROVED"
                     ? "Optional approval remarks..."
                     : confirmAction === "SHIPPED"
@@ -447,11 +474,17 @@ export default function ViewRequestModal({
               />
             )}
 
-          {shipmentError && (
-            <div className="mt-3 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
-              {shipmentError}
-            </div>
-          )}
+            {confirmAction === "REJECTED" && rejectError && (
+              <div className="mt-2 text-sm text-red-600">
+                {rejectError}
+              </div>
+            )}
+
+            {shipmentError && (
+              <div className="mt-3 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+                {shipmentError}
+              </div>
+            )}
 
           <div className="mt-6 flex justify-end gap-2">
             <Button

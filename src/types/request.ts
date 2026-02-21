@@ -1,3 +1,5 @@
+import { RequestStatus } from "../types/status";
+
 // User who created the request
 export interface Requestor {
   id: number;
@@ -39,7 +41,7 @@ export interface Request {
   id: number;
   request_id: string;
   requestor_id: string;
-  status: "PENDING_ACCOUNTING" |"PENDING_SUPERVISOR" |"PENDING_INVENTORY" | "SHIPPED" | "RECEIVED" | "APPROVED" | "REJECTED" | "CLOSED" | "COMPLETED";
+  status: RequestStatus;
   created_at: string;
   updated_at: string;
   requestor: Requestor;
