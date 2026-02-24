@@ -21,15 +21,17 @@ export default function CreateOrderModal({
   onClose,
   onSubmit,
 }: Props) {
-  const [items, setItems] = useState<OrderItem[]>([
-    {
-      id: crypto.randomUUID(),
-      categoryId: null,
-      productId: null,
-      unitId: null,
-      quantity: 1,
-    },
-  ]);
+
+  const createEmptyItem = (): OrderItem => ({
+    id: crypto.randomUUID(),
+    categoryId: null,
+    productId: null,
+    unitId: null,
+    quantity: 1,
+  });
+
+  const [items, setItems] = useState<OrderItem[]>([createEmptyItem()]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Record<number, Product[]>>({});
@@ -52,20 +54,37 @@ export default function CreateOrderModal({
     });
   };
 
-  const addItem = () =>
-    setItems((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        categoryId: null,
-        productId: null,
-        unitId: null,
-        quantity: 1,
-      },
-    ]);
+  const addItem = () => {
+    setItems((prev) => {
+      const next = [...prev, createEmptyItem()];
+      setSelectedIndex(next.length - 1);
+      return next;
+    });
+  };
 
-  const removeItem = (index: number) =>
-    setItems((prev) => prev.filter((_, i) => i !== index));
+  const duplicateItem = () => {
+    const selected = items[selectedIndex];
+    if (!selected) return;
+
+    const clone = { ...selected, id: crypto.randomUUID() };
+
+    setItems((prev) => {
+      const copy = [...prev];
+      copy.splice(selectedIndex + 1, 0, clone);
+      setSelectedIndex(selectedIndex + 1);
+      return copy;
+    });
+  };
+
+  const removeItem = () => {
+    if (items.length === 1) return;
+
+    setItems((prev) => {
+      const next = prev.filter((_, i) => i !== selectedIndex);
+      setSelectedIndex(Math.max(0, selectedIndex - 1));
+      return next;
+    });
+  };
 
   const loadProducts = async (categoryId: number) => {
     if (products[categoryId]) return;
@@ -80,212 +99,244 @@ export default function CreateOrderModal({
   };
 
   const submitToParent = () => {
-    if (
-      items.some(
-        (i) =>
-          !i.categoryId || !i.productId || !i.unitId || i.quantity < 1
-      )
-    ) {
-      alert("Please complete all items");
-      return;
-    }
-
     onSubmit?.(items);
     onClose();
   };
 
   const isFormInvalid = items.some(
-  (i) => !i.categoryId || !i.productId || !i.unitId || i.quantity < 1
-);
+    (i) => !i.categoryId || !i.productId || !i.unitId || i.quantity < 1
+  );
 
-const orderSummary = items.map((item) => {
-  const category = categories.find((c) => c.id === item.categoryId);
+  const orderSummary = items.map((item) => {
+    const category = categories.find((c) => c.id === item.categoryId);
 
-  const product =
-    item.categoryId && products[item.categoryId]
-      ? products[item.categoryId].find((p) => p.id === item.productId)
-      : null;
+    const product =
+      item.categoryId && products[item.categoryId]
+        ? products[item.categoryId].find((p) => p.id === item.productId)
+        : null;
 
-  const unit =
-    item.productId && units[item.productId]
-      ? units[item.productId].find((u) => u.id === item.unitId)
-      : null;
+    const unit =
+      item.productId && units[item.productId]
+        ? units[item.productId].find((u) => u.id === item.unitId)
+        : null;
 
-  return {
-    category: category?.name ?? "-",
-    product: product?.product_name ?? "-",
-    unit: unit?.name ?? "-",
-    quantity: item.quantity,
-  };
-});
-
-
+    return {
+      category: category?.name ?? "-",
+      product: product?.product_name ?? "-",
+      unit: unit?.name ?? "-",
+      quantity: item.quantity,
+    };
+  });
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-[760px]">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-[1300px]">
+
       <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
-        {/* HEADER */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Create Order
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Select category, product, unit, and quantity for each item
+
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold">Create Order</h2>
+          <p className="text-xs text-gray-500">
+            Click a row to select it before duplicating or removing
           </p>
         </div>
 
-        {/* ITEMS */}
-        <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1">
-          {items.map((item, index) => {
-            const productList = item.categoryId
-              ? products[item.categoryId] || []
-              : [];
+        <div className="grid grid-cols-12 gap-4 h-[540px]">
 
-            const unitList = item.productId
-              ? units[item.productId] || []
-              : [];
+          {/* ITEMS */}
+          <div className="col-span-9 overflow-y-auto pr-2 space-y-3">
 
-            return (
-              <div
-                key={item.id}
-                className="rounded-2xl border bg-gray-50 p-4 shadow-sm dark:bg-gray-800"
-              >
-                <div className="mb-3 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
-                  Item {index + 1}
-                </div>
+            {items.map((item, index) => {
 
-                <div className="grid grid-cols-12 gap-3 items-end">
-                  {/* CATEGORY */}
-                  <div className="col-span-4">
-                    <Label>Category</Label>
-                    <Select
-                      value={item.categoryId ? String(item.categoryId) : ""}
-                      placeholder="Select category"
-                      options={categories.map((c) => ({
-                        value: String(c.id),
-                        label: c.name,
-                      }))}
-                      onChange={(value) => {
-                        const numericValue = value ? Number(value) : null;
+              const productList = item.categoryId
+                ? products[item.categoryId] || []
+                : [];
 
-                        updateItem(index, "categoryId", numericValue);
-                        updateItem(index, "productId", null);
-                        updateItem(index, "unitId", null);
+              const unitList = item.productId
+                ? units[item.productId] || []
+                : [];
 
-                        if (numericValue) loadProducts(numericValue);
-                      }}
-                    />
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => setSelectedIndex(index)}
+                  className={`rounded-xl border p-4 cursor-pointer transition
+                  ${selectedIndex === index
+                    ? "border-blue-500 shadow-sm bg-blue-50/30"
+                    : "hover:border-gray-300"
+                  }`}
+                >
 
-                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-semibold bg-gray-200 px-2 py-0.5 rounded">
+                      Item #{index + 1}
+                    </span>
 
-                  {/* PRODUCT */}
-                  <div className="col-span-4">
-                    <Label>Product</Label>
-                  <Select
-                    value={item.productId ? String(item.productId) : ""}
-                    disabled={!item.categoryId}
-                    placeholder={
-                      item.categoryId
-                        ? "Select product"
-                        : "Select category first"
-                    }
-                    options={productList.map((p) => ({
-                      value: String(p.id),
-                      label: p.product_name,
-                    }))}
-                    onChange={(value) => {
-                      const numericValue = value ? Number(value) : null;
-
-                      updateItem(index, "productId", numericValue);
-                      updateItem(index, "unitId", null);
-
-                      if (numericValue) loadUnits(numericValue);
-                    }}
-                  />
-
-                  </div>
-
-                  {/* UNIT */}
-                  <div className="col-span-2">
-                    <Label>Unit</Label>
-                    <Select
-                      value={item.unitId ? String(item.unitId) : ""}
-                      disabled={!item.productId}
-                      placeholder={
-                        item.productId
-                          ? "Select unit"
-                          : "Select product first"
-                      }
-                      options={unitList.map((u) => ({
-                        value: String(u.id),
-                        label: u.name,
-                      }))}
-                      onChange={(value) =>
-                        updateItem(
-                          index,
-                          "unitId",
-                          value ? Number(value) : null
-                        )
-                      }
-                    />
-
-                  </div>
-
-                  {/* QTY */}
-                  <div className="col-span-2">
-                    <Label>Qty</Label>
-                    <Input
-                      type="number"
-                      min={"1"}
-                      value={item.quantity}
-                      onChange={(e) =>
-                        updateItem(index, "quantity", Number(e.target.value))
-                      }
-                    />
-                  </div>
-
-                  {/* REMOVE */}
-                  <div className="col-span-2 flex justify-end">
                     {items.length > 1 && (
                       <button
-                        type="button"
-                        onClick={() => removeItem(index)}
-                        className="text-xs font-medium text-red-600 hover:text-red-700"
-                        title="Remove item"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedIndex(index);
+                          removeItem();
+                        }}
+                        className="text-xs text-red-500 hover:text-red-600"
                       >
-                        ✕ Remove Item
+                        Remove
                       </button>
                     )}
                   </div>
+
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="grid grid-cols-12 gap-2 items-end"
+                  >
+
+                    <div className="col-span-4">
+                      <Label>Category</Label>
+                      <Select
+                        value={item.categoryId ? String(item.categoryId) : ""}
+                        options={categories.map((c) => ({
+                          value: String(c.id),
+                          label: c.name,
+                        }))}
+                        onChange={(value) => {
+                          const numericValue = value ? Number(value) : null;
+                          updateItem(index, "categoryId", numericValue);
+                          updateItem(index, "productId", null);
+                          updateItem(index, "unitId", null);
+                          if (numericValue) loadProducts(numericValue);
+                        }}
+                      />
+                    </div>
+
+                    <div className="col-span-4">
+                      <Label>Product</Label>
+                      <Select
+                        value={item.productId ? String(item.productId) : ""}
+                        disabled={!item.categoryId}
+                        options={productList.map((p) => ({
+                          value: String(p.id),
+                          label: p.product_name,
+                        }))}
+                        onChange={(value) => {
+                          const numericValue = value ? Number(value) : null;
+                          updateItem(index, "productId", numericValue);
+                          updateItem(index, "unitId", null);
+                          if (numericValue) loadUnits(numericValue);
+                        }}
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <Label>Unit</Label>
+                      <Select
+                        value={item.unitId ? String(item.unitId) : ""}
+                        disabled={!item.productId}
+                        options={unitList.map((u) => ({
+                          value: String(u.id),
+                          label: u.name,
+                        }))}
+                        onChange={(value) =>
+                          updateItem(index, "unitId", value ? Number(value) : null)
+                        }
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <Label>Qty</Label>
+                      <Input
+                        type="number"
+                        min={"1"}
+                        value={item.quantity}
+                        onChange={(e) =>
+                          updateItem(index, "quantity", Number(e.target.value))
+                        }
+                      />
+                    </div>
+
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
 
-        {/* ADD ITEM */}
-        <button
-          type="button"
-          onClick={addItem}
-          className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
-        >
-          + Add another item
-        </button>
+{/* CONTROL PANEL */}
+<div className="col-span-3 border-l pl-6 flex flex-col justify-between">
 
-        {/* ACTIONS */}
-        <div className="mt-6 flex justify-end gap-2">
-          <Button size="sm" variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button size="sm"   disabled={isFormInvalid} onClick={() => setShowConfirm(true)}>
-            Submit Order
-          </Button>
-        </div>
+  {/* TOP CONTROLS */}
+  <div className="space-y-5 sticky top-0 pt-2">
+
+    <div className="space-y-2">
+      <div className="text-xs font-semibold text-gray-500">
+        Line Controls
       </div>
 
+      <div className="flex flex-col gap-2">
+        <Button size="sm" onClick={addItem}>
+          + Add Item
+        </Button>
+
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={isFormInvalid}
+          onClick={duplicateItem}
+        >
+          Duplicate Selected
+        </Button>
+
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={items.length === 1}
+          onClick={removeItem}
+        >
+          Remove Selected
+        </Button>
+      </div>
+    </div>
+
+    {/* LIVE SUMMARY */}
+    <div className="rounded-xl border p-3 text-xs bg-gray-50 dark:bg-gray-800 space-y-2">
+      <div className="flex justify-between">
+        <span>Total Lines</span>
+        <span className="font-semibold">{items.length}</span>
+      </div>
+
+      <div className="flex justify-between">
+        <span>Selected</span>
+        <span className="font-semibold">
+          #{selectedIndex + 1}
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+{/* BOTTOM ACTIONS */}
+<div className="pt-5 mt-5 border-t flex flex-col gap-3">
+  <Button size="sm" variant="outline" onClick={onClose}>
+    Cancel
+  </Button>
+
+  <Button
+    size="sm"
+    disabled={isFormInvalid}
+    onClick={() => setShowConfirm(true)}
+  >
+    Submit Order
+  </Button>
+</div>
+
+</div>
+        </div>
+      </div>
 {/* CONFIRM MODAL */}
 {showConfirm && (
-  <Modal isOpen onClose={() => setShowConfirm(false)} className="max-w-2xl w-full max-h-[100vh]">
+  <Modal
+    isOpen
+    onClose={() => setShowConfirm(false)}
+    className="max-w-2xl w-full max-h-[100vh]"
+  >
     <div className="p-6 flex flex-col h-full max-h-[100vh]">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
         Confirm Order Submission
@@ -354,7 +405,7 @@ const orderSummary = items.map((item) => {
     </div>
   </Modal>
 )}
+      </Modal>
 
-    </Modal>
-  );
-}
+      
+  )};

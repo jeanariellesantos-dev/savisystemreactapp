@@ -143,10 +143,10 @@ export default function RequestsTable({ requests, onView }: Props) {
           {requests.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={4}
+                colSpan={5}
                 className="py-8 text-center text-gray-500"
               >
-                No orders found.
+                No orders found
               </TableCell>
             </TableRow>
           )}

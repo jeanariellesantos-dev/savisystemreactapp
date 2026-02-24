@@ -1,6 +1,6 @@
 import RequestsTab from "../../components/common/RequestsTab";
 import RequestsTable from "../../components/requests/RequestsTable";
-import ViewOrderModal from "../../components/common/ViewOrderModal";
+import ViewOrderModal from "../../components/requests/ViewOrderModal";
 import { useRequests } from "../../hooks/useRequests";
 import { useToast } from "../../context/ToastContext";
 import { useState, useEffect } from "react";

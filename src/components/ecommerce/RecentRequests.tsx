@@ -3,7 +3,7 @@ import { useModal } from "../../hooks/useModal";
 import { useRequests } from "../../hooks/useRequests";
 import RequestsTable from "../requests//RequestsTable";
 import CreateOrderModal from "../requests/CreateOrderModal";
-import ViewOrderModal from "../common/ViewOrderModal";
+import ViewOrderModal from "../requests/ViewOrderModal";
 import { Request } from "../../types/request";
 import { useState, useEffect} from "react";
 import { confirmRequest } from "../../services/orderService";
