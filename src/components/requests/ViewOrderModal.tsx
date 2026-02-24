@@ -66,7 +66,7 @@ export default function ViewRequestModal({
 
 
   const [shipments, setShipments] = useState<ShipmentForm[]>([
-    { shipped_date: today,received_date: today, tracking_link: "" },
+    { shipped_date: today,received_date: "", tracking_link: "" },
   ]);
 
   const remarksRef = useRef<HTMLDivElement>(null);
@@ -145,7 +145,7 @@ const handleConfirm = async () => {
     setActionRemarks("");
     setShipmentError(null);
     setRejectError(null);
-    setShipments([{ shipped_date: today,received_date: today, tracking_link: "" }]);
+    setShipments([{ shipped_date: today,received_date: "", tracking_link: "" }]);
   }
 };
 
@@ -286,8 +286,8 @@ return (
 ">
 
   {/* HEADER */}
-  <div className="px-4 py-2 shrink-0 text-xs font-semibold uppercase text-gray-500">
-    Products
+  <div className="px-4 py-1 shrink-0 text-xs uppercase text-gray-500">
+    {/* Products */}
   </div>
 
   {/* 🔴 10 ROW LIMIT SCROLL AREA */}
@@ -306,7 +306,7 @@ return (
     >
 
       <table className="w-full text-sm">
-        <thead className="sticky top-0 z-10 bg-gray-100 dark:bg-gray-800 text-xs uppercase">
+        <thead className="sticky top-0 z-10 bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs uppercase">
           <tr>
             <th className="px-3 py-2 text-left">Product</th>
             <th className="px-3 py-2 text-center">Category</th>
@@ -326,7 +326,7 @@ return (
                 {item.product.category?.name}
               </td>
 
-              <td className="px-3 py-2 text-center">
+              <td className="px-3 py-2 text-center text-gray-500">
                 {item.quantity}
               </td>
 
@@ -383,14 +383,17 @@ return (
               "
               />
               ) : (
-              <div className="
-              w-full h-full
-              px-3 rounded-lg border
-              flex items-center text-sm
-              dark:border-gray-700
-              ">
-              {s?.shipped_date || "No yet shipped"}
-              </div>
+                <div
+                  className={`
+                    w-full h-full px-3 rounded-lg border flex items-center text-sm
+                    dark:border-gray-700
+                    ${!s?.shipped_date
+                      ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
+                      : "bg-white dark:bg-gray-900 dark:text-white"}
+                  `}
+                >
+                  {s?.shipped_date || "Not yet shipped"}
+                </div>
               )}
               </div>
               </div>
@@ -417,14 +420,17 @@ return (
               "
               />
               ) : (
-              <div className="
-              w-full h-full
-              px-3 rounded-lg border
-              flex items-center text-sm
-              dark:border-gray-700
-              ">
-              {s?.received_date || "Not yet received"}
-              </div>
+                <div
+                  className={`
+                    w-full h-full px-3 rounded-lg border flex items-center text-sm
+                    dark:border-gray-700
+                    ${!s?.received_date
+                      ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
+                      : "bg-white dark:bg-gray-900 dark:text-white"}
+                  `}
+                >
+                  {s?.received_date || "Not yet received"}
+                </div>
               )}
               </div>
               </div>
@@ -438,6 +444,7 @@ return (
               {canEditShipment ? (
               <input
               type="url"
+              placeholder="Tracking link (optional)"
               value={s?.tracking_link || ""}
               onChange={(e)=>{
               const copy=[...shipments];
@@ -472,9 +479,9 @@ return (
               w-full h-full
               px-3 rounded-lg border
               flex items-center text-sm
-              text-gray-400 dark:border-gray-700
+              bg-gray-100 text-gray-400 dark:bg-gray-800
               ">
-              No tracking yet
+              No tracking link
               </div>
               )}
               </div>
