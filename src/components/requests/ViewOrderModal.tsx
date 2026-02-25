@@ -403,36 +403,25 @@ return (
               <div className="flex flex-col">
               <label className="text-[11px] text-gray-500">Received</label>
 
-              <div className="mt-1 h-[42px]">
-              {canMarkAsReceived ? (
-              <input
-              type="date"
-              value={s?.received_date || ""}
-              onChange={(e)=>{
-              const copy=[...shipments];
-              copy[i].received_date=e.target.value;
-              setShipments(copy);
-              }}
-              className="
-              w-full h-full
-              rounded-lg border px-3 text-sm
-              bg-white dark:bg-gray-900 dark:text-white dark:border-gray-700
-              "
-              />
-              ) : (
-                <div
-                  className={`
-                    w-full h-full px-3 rounded-lg border flex items-center text-sm
-                    dark:border-gray-700
-                    ${!s?.received_date
-                      ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
-                      : "bg-white dark:bg-gray-900 dark:text-white"}
-                  `}
-                >
-                  {s?.received_date || "Not yet received"}
+                <div className="mt-1 h-[42px]">
+
+                  <div
+                    className={`
+                      w-full h-full px-3 rounded-lg border flex items-center text-sm
+                      dark:border-gray-700
+                      ${!s?.received_date
+                        ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
+                        : "bg-white dark:bg-gray-900 dark:text-white"}
+                    `}
+                  >
+
+                    {s?.received_date
+                      ? new Date(s.received_date).toLocaleDateString()
+                      : "Not yet received"}
+
+                  </div>
+
                 </div>
-              )}
-              </div>
               </div>
 
 

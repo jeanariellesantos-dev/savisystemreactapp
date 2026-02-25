@@ -95,6 +95,7 @@ const handleCreateOrder = async (items: OrderItem[]) => {
           await markRequestAsShipped(requestId, {
             shipments: shipments.map((s) => ({
               shipped_date: s.shipped_date,
+              received_date: s.received_date,
               tracking_link: s.tracking_link,
             })),
             remarks: remarks ?? null,
@@ -122,6 +123,7 @@ const handleCreateOrder = async (items: OrderItem[]) => {
           await markRequestAsReceived(requestId,{
                shipments: shipments.map((s) => ({
               shipped_date: s.shipped_date,
+              received_date: s.received_date,
               tracking_link: s.tracking_link,
             })),
             remarks: remarks ?? null,
