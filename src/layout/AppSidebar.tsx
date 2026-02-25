@@ -420,7 +420,7 @@ const filteredNavItems = navItems
             </>
           ) : (
             <img
-              src={`${import.meta.env.BASE_URL}images/logo/savi-icon.svg`}
+              src={`${import.meta.env.BASE_URL}images/logo/savi-icon.png`}
               alt="Logo"
               width={32}
               height={32}
