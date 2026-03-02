@@ -398,7 +398,6 @@ return (
               </div>
               </div>
 
-
             {/* ================= RECEIVED DATE ================= */}
               <div className="flex flex-col">
               <label className="text-[11px] text-gray-500">Received</label>
