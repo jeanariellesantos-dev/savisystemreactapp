@@ -1,0 +1,23 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <linearGradient id="saviBlueIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2F80ED"/>
+      <stop offset="100%" stop-color="#1C4E9E"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="60" cy="60" r="55" fill="url(#saviBlueIcon)" />
+
+  <path d="M90 35
+           C75 20, 45 20, 35 40
+           C25 60, 60 65, 75 75
+           C95 85, 80 105, 55 105
+           C40 105, 30 98, 25 92"
+        fill="none"
+        stroke="#FFFFFF"
+        stroke-width="14"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+</svg>
