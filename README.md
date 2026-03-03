@@ -1,198 +1,232 @@
-# TailAdmin React - Free React Tailwind Admin Dashboard Template
+# SAVI Approval System --- Frontend (React Application)
 
-TailAdmin is a free and open-source admin dashboard template built on **React and Tailwind CSS**, providing developers
-with everything they need to create a comprehensive, data-driven back-end,
-dashboard, or admin panel solution for upcoming web projects.
+The **SAVI Approval System Frontend** is a modern web application built
+with **React** that provides an intuitive interface for managing
+approval workflows, requests, notifications, and dashboards within the
+SAVI ecosystem.
 
-With TailAdmin, you get access to all the necessary dashboard UI components, elements, and pages required to build a
-feature-rich and complete dashboard or admin panel. Whether you're building dashboard or admin panel for a complex web
-application or a simple website, TailAdmin is the perfect solution to help you get up and running quickly.
+------------------------------------------------------------------------
 
-![TailAdmin React.js Dashboard Preview](./banner.png)
+## 📌 Overview
 
-## Overview
+This React application serves as the **client-side interface** for the
+SAVI Approval System backend (Laravel API).\
+It enables users to create requests, approve workflows, track statuses,
+and receive notifications in real time.
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and
-control panels. It's built on:
+------------------------------------------------------------------------
 
-- React 19
-- TypeScript
-- Tailwind CSS v4
+## 🚀 Features
 
-### Quick Links
+-   Modern Responsive UI
+-   Request Creation & Management
+-   Multi-Level Approval Interface
+-   Real-time Status Updates
+-   Notification Dropdown System
+-   Dashboard Analytics
+-   Role-Based UI Rendering
+-   Dark Mode Support
+-   API Integration with Laravel Backend
 
-- [✨ Visit Website](https://tailadmin.com)
-- [📄 Documentation](https://tailadmin.com/docs)
-- [⬇️ Download](https://tailadmin.com/download)
-- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1214477970819985778)
-- [⚡ Get PRO Version](https://tailadmin.com/pricing)
+------------------------------------------------------------------------
 
-### Demos
+## 🏗️ Tech Stack
 
-- [Free Version](https://free-react-demo.tailadmin.com/)
-- [Pro Version](https://react-demo.tailadmin.com)
+  Technology                Description
+  ------------------------- ----------------------
+  React                     Frontend Framework
+  TypeScript / JavaScript   Application Language
+  Vite / CRA                Build Tool
+  Tailwind CSS              Styling
+  Axios                     API Communication
+  React Router              Routing
+  Context API / Hooks       State Management
+  Laravel API               Backend Service
 
-### Other Versions
+------------------------------------------------------------------------
 
-- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-- [Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
-- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
-- [Angular Version](https://github.com/TailAdmin/free-angular-tailwind-dashboard)
-- [Laravel Version](https://github.com/TailAdmin/tailadmin-laravel)
+## 📂 Project Structure
 
-## Installation
+    savi-approval-frontend/
+    │
+    ├── src/
+    │   ├── components/
+    │   ├── pages/
+    │   ├── services/
+    │   ├── hooks/
+    │   ├── layouts/
+    │   ├── context/
+    │   ├── assets/
+    │   └── App.jsx / App.tsx
+    │
+    ├── public/
+    ├── package.json
+    └── vite.config.js
 
-### Prerequisites
+------------------------------------------------------------------------
 
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
+## ⚙️ Installation
 
-- Node.js 18.x or later (recommended to use Node.js 20.x or later)
+### 1. Clone Repository
 
-### Cloning the Repository
-
-Clone the repository using the following command:
-
-```bash
-git clone https://github.com/TailAdmin/free-react-tailwind-admin-dashboard.git
+``` bash
+git clone https://github.com/your-repository/savi-approval-frontend.git
+cd savi-approval-frontend
 ```
 
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
+### 2. Install Dependencies
 
-1. Install dependencies:
+``` bash
+npm install
+```
 
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+or
 
-2. Start the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+``` bash
+yarn install
+```
 
-## Components
+------------------------------------------------------------------------
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using React.js and Tailwind CSS. The
-template includes:
+### 3. Environment Configuration
 
-- Sophisticated and accessible sidebar
-- Data visualization components
-- Prebuilt profile management and 404 page
-- Tables and Charts(Line and Bar)
-- Authentication forms and input elements
-- Alerts, Dropdowns, Modals, Buttons and more
-- FAQ & Accordion, Testimonials, and Carousels
-- Can't forget Dark Mode 🕶️
+Create `.env` file:
 
-All components are built with React and styled using Tailwind CSS for easy customization.
+    VITE_API_URL=http://127.0.0.1:8000/api
 
-## Feature Comparison
+------------------------------------------------------------------------
 
-### Free Version
+### 4. Start Development Server
 
-- 1 Unique Dashboard
-- 35+ dashboard components
-- 50+ UI elements
-- Basic Figma design files
-- Community support
+``` bash
+npm run dev
+```
 
-### Pro Version
+Application runs at:
 
-- 7 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, SaaS, Stocks, Logistics (more coming soon)
-- 500+ dashboard components and UI elements
-- Complete Figma design file
-- Email support
+    http://localhost:5173
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+------------------------------------------------------------------------
 
-## Changelog
+## 🔐 Authentication Flow
 
-### Version 2.1.0 - [Dec 30, 2025]
+1.  User logs in
+2.  JWT / Session token stored securely
+3.  API requests authenticated via headers
+4.  Protected routes enforced via middleware
 
-- Resolved Date Picker positioning and input issues in Charts.
+------------------------------------------------------------------------
 
-### Version 2.0.2 - [March 25, 2025]
+## 🔄 Application Workflow
 
-- Upgraded to React 19
-- Included overrides for packages to prevent peer dependency errors.
-- Migrated from react-flatpickr to flatpickr package for React 19 support
+    Login
+       ↓
+    Dashboard
+       ↓
+    Create Request
+       ↓
+    Approval Monitoring
+       ↓
+    Notifications & Updates
 
-### Version 2.0.1 - [February 27, 2025]
+------------------------------------------------------------------------
 
-#### Update Overview
+## 🔔 Notifications
 
-- Upgraded to Tailwind CSS v4 for better performance and efficiency.
-- Updated class usage to match the latest syntax and features.
-- Replaced deprecated class and optimized styles.
+-   Approval alerts
+-   Status changes
+-   Request updates
+-   Dropdown notification panel
 
-#### Next Steps
+------------------------------------------------------------------------
 
-- Run npm install or yarn install to update dependencies.
-- Check for any style changes or compatibility issues.
-- Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-- This update keeps the project up to date with the latest Tailwind improvements. 🚀
+## 🌐 API Integration
 
-### Version 2.0.0 - [February 2025]
+Example Axios setup:
 
-A major update with comprehensive redesign and modern React patterns implementation.
+``` javascript
+import axios from "axios";
 
-#### Major Improvements
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+```
 
-- Complete UI redesign with modern React patterns
-- New features: collapsible sidebar, chat, and calendar
-- Improved performance and accessibility
-- Updated data visualization using ApexCharts
+------------------------------------------------------------------------
 
-#### Key Features
+## 🧪 Running Tests
 
-- Redesigned dashboards (Ecommerce, Analytics, Marketing, CRM)
-- Enhanced navigation with React Router integration
-- Advanced tables with sorting and filtering
-- Calendar with drag-and-drop support
-- New UI components and improved existing ones
+``` bash
+npm run test
+```
 
-#### Breaking Changes
+------------------------------------------------------------------------
 
-- Updated sidebar component API
-- Migrated charts to ApexCharts
-- Revised authentication system
+## 🧹 Useful Scripts
 
-[Read more](https://tailadmin.com/docs/update-logs/react) on this release.
+``` bash
+npm run dev        # Start development
+npm run build      # Production build
+npm run preview    # Preview production build
+npm run lint       # Run linter
+```
 
-### Version 1.3.7 - [June 20, 2024]
+------------------------------------------------------------------------
 
-#### Enhancements
+## 📦 Build for Production
 
-1. Remove Repetition of DefaultLayout in every Pages
-2. Add ClickOutside Component for reduce repeated functionality in Header Message, Notification and User Dropdowns.
+``` bash
+npm run build
+```
 
-### Version 1.3.6 - [Jan 31, 2024]
+Output directory:
 
-#### Enhancements
+    /dist
 
-1. Integrate flatpickr in [Date Picker/Form Elements]
-2. Change color after select an option [Select Element/Form Elements].
-3. Make it functional [Multiselect Dropdown/Form Elements].
-4. Make best value editable [Pricing Table One/Pricing Table].
-5. Rearrange Folder structure.
+Deploy using:
 
-### Version 1.2.0 - [Apr 28, 2023]
+-   Nginx
+-   Apache
+-   Vercel
+-   Netlify
+-   Docker
 
-- Add Typescript in TailAdmin React.
+------------------------------------------------------------------------
 
-### Version 1.0.0 - Initial Release - [Mar 13, 2023]
+## 🔒 Security Practices
 
-- Initial release of TailAdmin React.
+-   Environment-based API configuration
+-   Protected Routes
+-   Token-based authentication
+-   Input validation
+-   Secure API communication
 
-## License
+------------------------------------------------------------------------
 
-TailAdmin React.js Free Version is released under the MIT License.
+## 📜 Version History
 
-## Support
+  Version   Date         Description
+  --------- ------------ ----------------------------------------
+  1.0.0     03/03/2026   Initial React frontend release
 
-If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing
-and maintaining this template.
-# submissionwebapp
+------------------------------------------------------------------------
+
+## 🤝 Contributing
+
+1.  Create a feature branch
+2.  Commit changes
+3.  Push branch
+4.  Open Pull Request
+
+------------------------------------------------------------------------
+
+## 📄 License
+
+Proprietary software owned by SAVI.
+
+------------------------------------------------------------------------
+
+## 📞 Support
+
+**SAVI Development Team**\
+Email: support@savi-system.com
