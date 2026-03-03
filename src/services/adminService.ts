@@ -3,6 +3,55 @@ import { Product, ProductPayload } from "../types/product";
 import { Category, CategoryPayload } from "../types/category";
 import { Dealership, DealershipPayload } from "../types/dealership";
 import { Role, RolePayload } from "../types/role";
+import { RequestStatusFigures } from "../types/dashboard";
+
+export type DashboardRange = "7d" | "30d" | "year";
+
+/* =========================================================
+   ADMIN DASHBOARD
+========================================================= */
+
+export const DashboardService = {
+  async getStatusFigures(params?: any) {
+    const { data } = await URL_API.get(
+      "/admin/dashboard/request-status",
+      { params }
+    );
+    return data;
+  },
+
+  async getMostOrderedProducts(params?: any) {
+    const { data } = await URL_API.get(
+      "/admin/dashboard/most-ordered-products",
+      { params }
+    );
+    return data;
+  },
+
+  async getMonthlyRequests(params?: any) {
+    const { data } = await URL_API.get(
+      "/admin/dashboard/monthly-requests",
+      { params }
+    );
+    return data;
+  },
+
+  async getAvgApprovalTime(params?: any) {
+    const { data } = await URL_API.get(
+      "/admin/dashboard/avg-approval-time",
+      { params }
+    );
+    return data;
+  },
+
+  async getDeliveryLeadTime(params?: any) {
+    const { data } = await URL_API.get(
+      "/admin/dashboard/delivery-lead-time",
+      { params }
+    );
+    return data;
+  }
+};
 
 /* =========================================================
    USERS

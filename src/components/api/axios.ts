@@ -21,7 +21,7 @@ URL_API.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401) {
-      // 🔥 TOKEN EXPIRED OR INVALID
+      // TOKEN EXPIRED OR INVALID
       localStorage.clear();
 
       // Hard redirect prevents back navigation

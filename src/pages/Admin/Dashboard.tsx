@@ -3,17 +3,35 @@ import RequestStatusChart from "../../components/admindashboard/RequestStatusCha
 import MostOrderedProductsChart from "../../components/admindashboard/MostOrderedProductsChart";
 import MonthlyRequestsChart from "../../components/admindashboard/MonthlyRequestsChart";
 import AvgApprovalTimeChart from "../../components/admindashboard/AvgApprovalTimeChart";
-import SupplierLeadTimeChart from "../../components/admindashboard/SupplierLeadTimeChart";
+import DeliveryLeadTimeChart from "../../components/admindashboard/DeliveryLeadTimeChart";
+import { useDashboard, DashboardProvider } from "../../context/DashboardContext";
+import DashboardDateFilter from "../../components/common/DashboardDateFilter";
 
 import PageMeta from "../../components/common/PageMeta";
 
 export default function Dashboard() {
   return (
+    <DashboardProvider>
+      <DashboardContent />
+    </DashboardProvider>
+  );
+}
+
+function DashboardContent() {
+
+  return (
     <>
+
       <PageMeta
         title="SAVI System"
         description="SAVI Submission and Approval system"
       />
+
+      {/* GLOBAL FILTER */}
+      <div className="flex justify-end mb-6">
+         <DashboardDateFilter />
+      </div>
+
       <div className="space-y-6">
         <RequestStatusCards />
 
@@ -26,10 +44,10 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <AvgApprovalTimeChart />
-          <SupplierLeadTimeChart />
+          <DeliveryLeadTimeChart />
         </div>
       </div>
-      
     </>
   );
 }
+
