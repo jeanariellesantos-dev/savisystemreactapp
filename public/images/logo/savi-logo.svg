@@ -1,0 +1,46 @@
+<svg width="520" height="160" viewBox="0 0 520 160" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <!-- Corporate Blue Gradient -->
+    <linearGradient id="saviBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2F80ED"/>
+      <stop offset="100%" stop-color="#1C4E9E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon -->
+  <g transform="translate(20,20)">
+    <!-- Circle Background -->
+    <circle cx="60" cy="60" r="55" fill="url(#saviBlue)" />
+
+    <!-- Integrated S -->
+    <path d="M90 35
+             C75 20, 45 20, 35 40
+             C25 60, 60 65, 75 75
+             C95 85, 80 105, 55 105
+             C40 105, 30 98, 25 92"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="14"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+  </g>
+
+  <!-- Text -->
+  <text x="150" y="80"
+        font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="56"
+        font-weight="700"
+        fill="#1F2D3D">
+    SAVI
+  </text>
+
+  <text x="152" y="110"
+        font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="18"
+        letter-spacing="6"
+        fill="#2F80ED">
+    SYSTEM
+  </text>
+
+</svg>

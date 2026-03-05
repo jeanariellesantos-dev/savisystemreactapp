@@ -1,0 +1,11 @@
+export type RequestStatus =
+  | "PENDING_ACCOUNTING"
+  | "PENDING_SUPERVISOR"
+  | "PENDING_CLUSTER_HEAD"
+  | "PENDING_INVENTORY"
+  | "SHIPPED"
+  | "RECEIVED"
+  | "APPROVED"
+  | "CLOSED"
+  | "COMPLETED"
+  | "REJECTED";
