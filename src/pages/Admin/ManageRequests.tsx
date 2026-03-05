@@ -1,33 +1,45 @@
 import RequestsTab from "../../components/common/RequestsTab";
 import RequestsTable from "../../components/requests/RequestsTable";
 import ViewOrderModal from "../../components/requests/ViewOrderModal";
+import CreateOrderModal from "../../components/requests/CreateOrderModal";
+
 import { useRequests } from "../../hooks/useRequests";
 import { useToast } from "../../context/ToastContext";
+import { useModal } from "../../hooks/useModal";
+
 import { useState, useEffect } from "react";
-import { confirmRequest } from "../../services/orderService";
+
+import { confirmRequest, createOrder } from "../../services/orderService";
 import {
   markRequestAsShipped,
   markRequestAsReceived,
 } from "../../services/shipmentService";
+
 import { ShipmentForm } from "../../types/shipment";
 import { Request } from "../../types/request";
+import { OrderItem } from "../../types/orderItem";
 
 export default function ManageRequests() {
   const { showToast } = useToast();
+  const { isOpen, openModal, closeModal } = useModal();
 
   const [selected, setSelected] = useState<Request | null>(null);
+
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<"ACTIVE" | "ALL">("ALL");
   const [search, setSearch] = useState("");
 
   const { requests, meta, loading, error, refreshRequests } =
-    useRequests(filter, page);
+    useRequests(filter, page, true);
 
   useEffect(() => {
     setPage(1);
   }, [filter]);
 
-  // ===== APPROVE / REJECT =====
+  /* ===============================
+     APPROVE / REJECT
+  =============================== */
+
   const handleConfirmRequest = async ({
     requestId,
     action,
@@ -49,13 +61,42 @@ export default function ManageRequests() {
 
       setSelected(null);
       refreshRequests();
-    } catch (err) {
+    } catch (error) {
+      console.error(error);
       showToast("Failed to process request", "error");
-      console.error(err);
     }
   };
 
-  // ===== SHIP =====
+  /* ===============================
+     CREATE REQUEST
+  =============================== */
+
+  const handleCreateOrder = async (items: OrderItem[]) => {
+    try {
+      const payload = {
+        status: "PENDING_ACCOUNTING",
+        items: items.map((i) => ({
+          product_id: i.productId,
+          unit_id: i.unitId,
+          quantity: i.quantity,
+        })),
+      };
+
+      await createOrder(payload);
+
+      showToast("Request created successfully", "success");
+      closeModal();
+      refreshRequests();
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to create request", "error");
+    }
+  };
+
+  /* ===============================
+     SHIP
+  =============================== */
+
   const handleShipRequest = async ({
     requestId,
     shipments,
@@ -75,11 +116,15 @@ export default function ManageRequests() {
       refreshRequests();
       setSelected(null);
     } catch (err) {
+      console.error(err);
       showToast("Failed to mark request as shipped", "error");
     }
   };
 
-  // ===== RECEIVE =====
+  /* ===============================
+     RECEIVE
+  =============================== */
+
   const handleReceiveRequest = async ({
     requestId,
     shipments,
@@ -99,11 +144,15 @@ export default function ManageRequests() {
       refreshRequests();
       setSelected(null);
     } catch (err) {
+      console.error(err);
       showToast("Failed to mark request as received", "error");
     }
   };
 
-  // ===== SEARCH FILTER =====
+  /* ===============================
+     SEARCH
+  =============================== */
+
   const filteredRequests = requests.filter((r) => {
     if (!search) return true;
 
@@ -118,13 +167,15 @@ export default function ManageRequests() {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+      
       {/* HEADER */}
-      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
           Manage Requests
         </h3>
 
         <div className="flex items-center gap-3">
+
           <RequestsTab value={filter} onChange={setFilter} />
 
           <input
@@ -134,6 +185,14 @@ export default function ManageRequests() {
             onChange={(e) => setSearch(e.target.value)}
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
           />
+
+          <button
+            onClick={openModal}
+            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            + Add Request
+          </button>
+
         </div>
       </div>
 
@@ -166,7 +225,7 @@ export default function ManageRequests() {
         </div>
       )}
 
-      {/* MODAL */}
+      {/* VIEW MODAL */}
       {selected && (
         <ViewOrderModal
           isOpen={true}
@@ -177,6 +236,13 @@ export default function ManageRequests() {
           onReceive={handleReceiveRequest}
         />
       )}
+
+      {/* CREATE MODAL */}
+      <CreateOrderModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        onSubmit={handleCreateOrder}
+      />
     </div>
   );
 }

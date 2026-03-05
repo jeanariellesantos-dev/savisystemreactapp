@@ -134,7 +134,7 @@ export default function CreateOrderModal({
       <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
 
         <div className="mb-4">
-          <h2 className="text-xl font-semibold">Create Order</h2>
+          <h2 className="text-xl font-semibold dark:text-white">Create Order</h2>
           <p className="text-xs text-gray-500">
             Click a row to select it before duplicating or removing
           </p>
@@ -298,13 +298,13 @@ export default function CreateOrderModal({
     {/* LIVE SUMMARY */}
     <div className="rounded-xl border p-3 text-xs bg-gray-50 dark:bg-gray-800 space-y-2">
       <div className="flex justify-between">
-        <span>Total Lines</span>
-        <span className="font-semibold">{items.length}</span>
+        <span className="dark:text-white">Total Lines</span>
+        <span className="font-semibold dark:text-white">{items.length}</span>
       </div>
 
       <div className="flex justify-between">
-        <span>Selected</span>
-        <span className="font-semibold">
+        <span className="dark:text-white">Selected</span>
+        <span className="font-semibold dark:text-white">
           #{selectedIndex + 1}
         </span>
       </div>

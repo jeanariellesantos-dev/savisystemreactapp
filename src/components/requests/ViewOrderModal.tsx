@@ -528,7 +528,7 @@ return (
 {/* ================= CONFIRM ================= */}
 <div className="flex flex-col">
 
-<h2 className="text-lg font-semibold mb-2">
+<h2 className="text-lg font-semibold mb-2 dark:text-white">
 {confirmAction==="SHIPPED"?"Confirm Shipment":
 confirmAction==="RECEIVED"?"Confirm Receipt":
 confirmAction==="APPROVED"?"Confirm Approval":

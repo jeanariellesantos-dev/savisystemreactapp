@@ -1,22 +1,5 @@
 import URL_API from "../components/api/axios";
-
-type CreateOrderItem = {  
-    product_id: number | null;
-    unit_id: number | null;
-    quantity: number;
-};
-
-type CreateOrderPayload = {
-  status: string;
-  items: CreateOrderItem[];
-};
-
-export type RequestAction = "APPROVED" | "REJECTED";
-export interface ConfirmRequestPayload {
-  requestId: number;
-  action: RequestAction;
-  remarks?: string;
-};
+import {CreateOrderPayload, ConfirmRequestPayload} from '../types/request';
 
 export const getPendingRequests = async () => {
    const response = await URL_API.get("/request/pending");
