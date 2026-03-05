@@ -1,25 +1,28 @@
 import axios from 'axios';
+import env from "../../config/env";
 
 const URL_API = axios.create({
-  baseURL: 'https://api.jeandev.xyz/api',
+  baseURL: env.apiUrl,
   withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json",
   },
 });
 
-URL_API.interceptors.request.use(config => {
+URL_API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
 URL_API.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
     if (error.response?.status === 401) {
       // TOKEN EXPIRED OR INVALID
       localStorage.clear();

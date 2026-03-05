@@ -1,9 +1,9 @@
-import RequestStatusCards from "../../components/admindashboard/RequestStatusCards";
-import RequestStatusChart from "../../components/admindashboard/RequestStatusChart";
-import MostOrderedProductsChart from "../../components/admindashboard/MostOrderedProductsChart";
-import MonthlyRequestsChart from "../../components/admindashboard/MonthlyRequestsChart";
-import AvgApprovalTimeChart from "../../components/admindashboard/AvgApprovalTimeChart";
-import DeliveryLeadTimeChart from "../../components/admindashboard/DeliveryLeadTimeChart";
+import RequestStatusCards from "../../components/AdminDashboard/RequestStatusCards";
+import RequestStatusChart from "../../components/AdminDashboard/RequestStatusChart";
+import MostOrderedProductsChart from "../../components/AdminDashboard/MostOrderedProductsChart";
+import MonthlyRequestsChart from "../../components/AdminDashboard/MonthlyRequestsChart";
+import AvgApprovalTimeChart from "../../components/AdminDashboard/AvgApprovalTimeChart";
+import DeliveryLeadTimeChart from "../../components/AdminDashboard/DeliveryLeadTimeChart";
 import { useDashboard, DashboardProvider } from "../../context/DashboardContext";
 import DashboardDateFilter from "../../components/common/DashboardDateFilter";
 
