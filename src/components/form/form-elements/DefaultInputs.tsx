@@ -7,6 +7,7 @@ import { EyeCloseIcon, EyeIcon, TimeIcon } from "../../../icons";
 import DatePicker from "../date-picker.tsx";
 
 export default function DefaultInputs() {
+  const [selectedValue, setSelectedValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const options = [
     { value: "marketing", label: "Marketing" },
@@ -14,9 +15,9 @@ export default function DefaultInputs() {
     { value: "development", label: "Development" },
   ];
   const handleSelectChange = (value: string) => {
+    setSelectedValue(value);
     console.log("Selected value:", value);
   };
-
   return (
     <ComponentCard title="Default Inputs">
       <div className="space-y-6">
@@ -30,12 +31,13 @@ export default function DefaultInputs() {
         </div>
         <div>
           <Label>Select Input</Label>
-          <Select
-            options={options}
-            placeholder="Select an option"
-            onChange={handleSelectChange}
-            className="dark:bg-dark-900"
-          />
+        <Select
+          options={options}
+          value={selectedValue}
+          placeholder="Select an option"
+          onChange={handleSelectChange}
+          className="dark:bg-dark-900"
+        />
         </div>
         <div>
           <Label>Password Input</Label>

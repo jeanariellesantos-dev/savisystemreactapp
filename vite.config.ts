@@ -15,5 +15,5 @@ export default defineConfig({
       },
     }),
   ],
-  base: "/submissionwebapp/",
+  base: "/savisystemreactapp/",
 });

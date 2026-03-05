@@ -3,7 +3,7 @@
   "private": true,
   "version": "2.1.0",
   "type": "module",
-  "homepage": "https://jeanariellesantos-dev.github.io/submissionwebapp/",
+  "homepage": "https://jeanariellesantos-dev.github.io/savisystemreactapp/",
   
   "scripts": {
     "dev": "vite",
