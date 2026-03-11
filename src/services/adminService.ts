@@ -5,7 +5,7 @@ import { Dealership, DealershipPayload } from "../types/dealership";
 import { Role, RolePayload } from "../types/role";
 import { RequestStatusFigures } from "../types/dashboard";
 import { Request } from "../types/request";
-import { RequestPayload } from "../types/request";
+import { CreateOrderPayload } from "../types/request";
 
 
 export type DashboardRange = "7d" | "30d" | "year";
@@ -89,12 +89,12 @@ export const RequestService = {
     return data;
   },
 
-  async create(payload: RequestPayload): Promise<Request> {
+  async create(payload: CreateOrderPayload): Promise<Request> {
     const { data } = await URL_API.post("/admin/requests", payload);
     return data;
   },
 
-  async update(id: number, payload: RequestPayload): Promise<Request> {
+  async update(id: number, payload: CreateOrderPayload): Promise<Request> {
     const { data } = await URL_API.put(`/admin/requests/${id}`, payload);
     return data;
   },
