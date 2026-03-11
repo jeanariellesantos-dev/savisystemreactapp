@@ -9,6 +9,7 @@ import Badge from "../ui/badge/Badge";
 
 type User = {
   id: number;
+  employee_number: string;
   firstname: string;
   lastname: string;
   email: string;
@@ -34,7 +35,7 @@ export default function UsersTable({ users, onEdit, onToggle }: Props) {
             </TableCell>
 
             <TableCell isHeader className="py-3 text-center text-theme-xs font-medium text-gray-500 dark:text-gray-400">
-              Email
+              Employee Number
             </TableCell>
 
             <TableCell isHeader className="py-3 text-center text-theme-xs font-medium text-gray-500 dark:text-gray-400">
@@ -63,7 +64,7 @@ export default function UsersTable({ users, onEdit, onToggle }: Props) {
               </TableCell>
 
               <TableCell className="py-3 text-center text-theme-sm text-gray-500 dark:text-gray-400">
-                {user.email}
+                {user.employee_number}
               </TableCell>
 
               <TableCell className="py-3 text-center text-theme-sm text-gray-500 dark:text-gray-400">

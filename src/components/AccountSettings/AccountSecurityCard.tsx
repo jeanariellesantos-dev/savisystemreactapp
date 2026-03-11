@@ -26,15 +26,15 @@ export default function AccountSecurityCard() {
           }
         />
 
-        <SettingRow
+        {/* <SettingRow
           title="Email Address"
-          description="Update your login email"
+          description="Update your email"
           action={
             <Button size="sm" variant="outline" onClick={() => setEmailOpen(true)}>
               Update
             </Button>
           }
-        />
+        /> */}
       </div>
 
       {/* Modals */}

@@ -21,6 +21,7 @@ export default function ManageUsers() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
   const [form, setForm] = useState({
+    employee_number: "",
     firstname: "",
     lastname: "",
     email: "",
@@ -64,6 +65,7 @@ export default function ManageUsers() {
 
   const openCreate = () => {
     setForm({
+      employee_number: "",
       firstname: "",
       lastname: "",
       email: "",
@@ -83,6 +85,7 @@ export default function ManageUsers() {
     const openEdit = (user: any) => {
 
       const data = {
+        employee_number: user.employee_number ?? "",
         firstname: user.firstname ?? "",
         lastname: user.lastname ?? "",
         email: user.email ?? "",
@@ -109,6 +112,7 @@ export default function ManageUsers() {
       if (!originalForm) return false;
 
       const infoChanged =
+        form.employee_number !== originalForm.employee_number ||
         form.firstname !== originalForm.firstname ||
         form.lastname !== originalForm.lastname ||
         form.email !== originalForm.email ||
@@ -157,6 +161,7 @@ export default function ManageUsers() {
   const submitCreate = async () => {
     try {
       await UserService.create({
+        employee_number: form.employee_number,
         firstname: form.firstname,
         lastname: form.lastname,
         email: form.email,
@@ -179,6 +184,7 @@ export default function ManageUsers() {
   if (!editingUser) return;
 
       const infoChanged =
+        form.employee_number !== originalForm.employee_number ||
         form.firstname !== originalForm.firstname ||
         form.lastname !== originalForm.lastname ||
         form.email !== originalForm.email ||
@@ -196,6 +202,7 @@ export default function ManageUsers() {
     try {
 
       await UserService.update(editingUser.id, {
+        employee_number: form.employee_number,
         firstname: form.firstname,
         lastname: form.lastname,
         email: form.email,
@@ -254,7 +261,7 @@ const handleToggle = async (user: any) => {
   /* ================= SEARCH ================= */
 
   const filteredUsers = users.filter((u) =>
-    `${u.firstname} ${u.lastname} ${u.email} ${u.role}`
+    `${u.employee_number} ${u.firstname} ${u.lastname} ${u.email} ${u.role}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );

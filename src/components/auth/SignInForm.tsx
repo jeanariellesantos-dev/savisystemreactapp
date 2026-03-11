@@ -16,6 +16,7 @@ export default function SignInForm() {
   const [isChecked, setIsChecked] = useState(false);
 
   const [email, setEmail] = useState('');
+  const [employee_number, setEmployeeNo] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function SignInForm() {
     setIsLoading(true);
 
     const payload = {
-      email,
+      employee_number,
       password
       
     };
@@ -48,6 +49,7 @@ export default function SignInForm() {
         // store auth data
         localStorage.setItem("role", user.role);
         localStorage.setItem("email", user.email);
+        localStorage.setItem("employee_number", user.employee_number);
         localStorage.setItem("firstname", user.firstname);
         localStorage.setItem("lastname", user.lastname);
         localStorage.setItem("mobile", user.mobile);
@@ -115,11 +117,11 @@ export default function SignInForm() {
         <div className="space-y-6 mb-5">
           <div>
             <Label>
-              Email <span className="text-error-500">*</span>
+              Username <span className="text-error-500">*</span>
             </Label>
             <Input
-              placeholder="info@gmail.com"
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your employee number"
+              onChange={(e) => setEmployeeNo(e.target.value)}
             />
           </div>
 
