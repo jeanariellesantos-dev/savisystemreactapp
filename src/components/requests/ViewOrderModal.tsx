@@ -128,17 +128,17 @@ const handleConfirm = async () => {
 
     if(confirmAction==="APPROVED" && editedItems.length){
 
-    const changes = generateOrderChanges(
-      mapItems(request.items),
-      editedItems
-    );
+      const changes = generateOrderChanges(
+        mapItems(request.items),
+        editedItems
+      );
 
-    if(changes.length){
-      finalRemarks =
-        (actionRemarks || "") +
-        "\n\nOrder Changes:\n" +
-        changes.map(c=>`• ${c}`).join("\n");
-    }
+      if (changes.length) {
+        finalRemarks =
+          (actionRemarks ? actionRemarks.trim() + ". " : "") +
+          "Order Changes:\n" +
+          changes.map((c) => `• ${c}`).join("\n");
+      }
 
     }
 
@@ -306,76 +306,84 @@ return (
     </Badge>
   </div>
 
-  {/* RIGHT ACTION BAR */}
-  <div className="flex items-center gap-2">
+{/* RIGHT ACTION BAR */}
+<div className="flex items-center gap-2">
 
-    {canApproveReject && (
-      <>
-        <Button
-          size="sm"
-          onClick={() => {
-            const mapped = mapItems(request.items);
-            setEditedItems(mapped);
-            setEditingOrder(true);
-          }}
-        >
-        Edit Order
-        </Button>
-        <Button
-          size="sm"
-          onClick={() => setConfirmAction("REJECTED")}
-          className="bg-red-500 text-white hover:bg-red-600"
-        >
-          Reject
-        </Button>
+  {/* APPROVAL ACTIONS */}
+  {canApproveReject && (
+    <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
 
-        <Button
-          size="sm"
-          onClick={() => setConfirmAction("APPROVED")}
-          className="bg-green-500 text-white hover:bg-green-600"
-        >
-          Approve
-        </Button>
-      </>
-    )}
-
-    {canEditShipment && (
       <Button
         size="sm"
-        onClick={() => setConfirmAction("SHIPPED")}
-        className="bg-blue-600 text-white hover:bg-blue-700"
+        variant="outline"
+        onClick={() => {
+          const mapped = mapItems(request.items);
+          setEditedItems(mapped);
+          setEditingOrder(true);
+        }}
+        className="flex items-center gap-1"
       >
-        🚚 Ship
+        ✏️ Edit
       </Button>
-    )}
 
-    {canMarkAsReceived && (
       <Button
         size="sm"
-        onClick={() => setConfirmAction("RECEIVED")}
-        className="bg-indigo-600 text-white hover:bg-indigo-700"
+        onClick={() => setConfirmAction("APPROVED")}
+        className="flex items-center gap-1 bg-green-600 text-white hover:bg-green-700"
       >
-        📦 Receive
+        ✔ Approve
       </Button>
-    )}
 
-    {/* X BUTTON */}
-    <button
-      onClick={onClose}
-      className="
-        ml-5
-        mb-3
-        w-9 h-9 ml-1
-        rounded-full
-        flex items-center justify-center
-        hover:bg-gray-200
-        dark:hover:bg-gray-700
-      "
+      <Button
+        size="sm"
+        onClick={() => setConfirmAction("REJECTED")}
+        className="flex items-center gap-1 bg-red-500 text-white hover:bg-red-600"
+      >
+        ✖ Reject
+      </Button>
+
+    </div>
+  )}
+
+  {/* SHIPPING ACTIONS */}
+  {canEditShipment && (
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("SHIPPED")}
+      className="flex items-center gap-1 bg-blue-600 text-white hover:bg-blue-700"
     >
-      ✕
-    </button>
+      🚚 Ship
+    </Button>
+  )}
 
-  </div>
+  {canMarkAsReceived && (
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("RECEIVED")}
+      className="flex items-center gap-1 bg-indigo-600 text-white hover:bg-indigo-700"
+    >
+      📦 Receive
+    </Button>
+  )}
+
+  {/* CLOSE */}
+  <button
+    onClick={onClose}
+    className="
+      ml-3
+      w-9 h-9
+      rounded-full
+      flex items-center justify-center
+      text-gray-500
+      hover:bg-gray-200
+      hover:text-gray-700
+      dark:hover:bg-gray-700
+    "
+  >
+    ✕
+  </button>
+
+</div>
 </div>
 
 {/* BODY */}
@@ -637,48 +645,48 @@ return (
 {/* ================= CONFIRM ================= */}
 <div className="flex flex-col">
 
-<h2 className="text-lg font-semibold mb-2 dark:text-white">
-{confirmAction==="SHIPPED"?"Confirm Shipment":
-confirmAction==="RECEIVED"?"Confirm Receipt":
-confirmAction==="APPROVED"?"Confirm Approval":
-"Confirm Rejection"}
-</h2>
+    <h2 className="text-lg font-semibold mb-2 dark:text-white">
+    {confirmAction==="SHIPPED"?"Confirm Shipment":
+    confirmAction==="RECEIVED"?"Confirm Receipt":
+    confirmAction==="APPROVED"?"Confirm Approval":
+    "Confirm Rejection"}
+    </h2>
 
-<p className="text-sm text-gray-500 mb-4">
-This action cannot be undone.
-</p>
+    <p className="text-sm text-gray-500 mb-4">
+    This action cannot be undone.
+    </p>
 
-<TextArea
-value={actionRemarks}
-onChange={(val)=>{
-setActionRemarks(val);
-if(rejectError)setRejectError(null);
-}}
-placeholder={
-confirmAction==="REJECTED"
-?"Provide rejection reason..."
-:"Optional remarks..."
-}
-/>
+    <TextArea
+    value={actionRemarks}
+    onChange={(val)=>{
+    setActionRemarks(val);
+    if(rejectError)setRejectError(null);
+    }}
+    placeholder={
+    confirmAction==="REJECTED"
+    ?"Provide rejection reason..."
+    :"Optional remarks..."
+    }
+    />
 
-{rejectError && (
-<p className="mt-2 text-sm text-red-600">{rejectError}</p>
-)}
+    {rejectError && (
+    <p className="mt-2 text-sm text-red-600">{rejectError}</p>
+    )}
 
-<div className="mt-6 flex justify-end gap-2">
-<Button size="sm" variant="outline" onClick={()=>setConfirmAction(null)}>
-Cancel
-</Button>
+    <div className="mt-6 flex justify-end gap-2">
+      <Button size="sm" variant="outline" onClick={()=>setConfirmAction(null)}>
+        Cancel
+      </Button>
 
-<Button
-size="sm"
-disabled={submitting}
-onClick={handleConfirm}
-className="bg-blue-600 text-white"
->
-{submitting?"Processing...":"Confirm"}
-</Button>
-</div>
+      <Button
+        size="sm"
+        disabled={submitting}
+        onClick={handleConfirm}
+        className="bg-blue-600 text-white"
+        >
+        {submitting?"Processing...":"Confirm"}
+        </Button>
+    </div>
 
 </div>
 </>
