@@ -11,7 +11,7 @@ export type CreateOrderPayload = {
   items: CreateOrderItem[];
 };
 
-export type RequestAction = "APPROVED" | "REJECTED";
+export type RequestAction = "APPROVED" | "REJECTED" | "ON_HOLD" | "CANCELLED";
 export interface ConfirmRequestPayload {
   requestId: number;
   action: RequestAction;

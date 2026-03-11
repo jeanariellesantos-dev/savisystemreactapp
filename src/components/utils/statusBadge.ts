@@ -1,22 +1,35 @@
 // utils/statusBadge.ts
 import { RequestStatus } from "../../types/status";
 
-export type BadgeColor = "success" | "warning" | "error";
+export type BadgeColor =
+  | "primary"
+  | "success"
+  | "error"
+  | "warning"
+  | "info"
+  | "light"
+  | "dark";
 
 export const STATUS_BADGE_MAP: Record<RequestStatus, BadgeColor> = {
-  // ⚠️ WARNING
+  // ⚠️ Pending approvals
   PENDING_ACCOUNTING: "warning",
   PENDING_SUPERVISOR: "warning",
-  PENDING_INVENTORY: "warning",
   PENDING_CLUSTER_HEAD: "warning",
-  SHIPPED: "warning",
+  PENDING_INVENTORY: "warning",
 
-  // ✅ SUCCESS
+  // 🚚 Shipment stage
+  SHIPPED: "info",
+
+  // ⏸ Paused
+  ON_HOLD: "light",
+
+  // ✅ Completed stages
   RECEIVED: "success",
   APPROVED: "success",
-  CLOSED: "success",
   COMPLETED: "success",
+  CLOSED: "success",
 
-  // ❌ ERROR
+  // ❌ Failed / terminated
   REJECTED: "error",
+  CANCELLED: "dark",
 };

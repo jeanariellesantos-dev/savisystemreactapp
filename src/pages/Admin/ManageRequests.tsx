@@ -16,7 +16,7 @@ import {
 } from "../../services/shipmentService";
 
 import { ShipmentForm } from "../../types/shipment";
-import { Request } from "../../types/request";
+import { Request, RequestAction } from "../../types/request";
 import { OrderItem } from "../../types/orderItem";
 import Button from "../../components/ui/button/Button";
 
@@ -38,7 +38,7 @@ export default function ManageRequests() {
   }, [filter]);
 
   /* ===============================
-     APPROVE / REJECT
+     APPROVE / REJECT / ON_HOLD / CANCELLED
   =============================== */
 const handleConfirmRequest = async ({
   requestId,
@@ -47,7 +47,7 @@ const handleConfirmRequest = async ({
   items,
 }: {
   requestId: number;
-  action: "APPROVED" | "REJECTED";
+  action: RequestAction;
   remarks?: string;
   items?: {
     product_id: number | null;
@@ -65,12 +65,17 @@ const handleConfirmRequest = async ({
     };
       await confirmRequest(payload);
 
-      showToast(
-        action === "APPROVED"
-          ? "Request approved successfully"
-          : "Request rejected successfully",
-        "success"
-      );
+      const messages: Record<string, string> = {
+        APPROVED: "Request approved successfully",
+        REJECTED: "Request rejected successfully",
+        ON_HOLD:
+          action === "ON_HOLD"
+            ? "Request activated successfully"
+            : "Request placed on hold",
+        CANCELLED: "Request cancelled successfully",
+      };
+
+      showToast(messages[action] || "Request updated successfully", "success");
 
       setSelected(null);
       refreshRequests();

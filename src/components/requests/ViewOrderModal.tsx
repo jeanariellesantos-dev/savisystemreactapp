@@ -3,7 +3,7 @@ import { Modal } from "../ui/modal";
 import { useState, useRef, useEffect } from "react";
 import TextArea from "../form/input/TextArea";
 import { ShipmentForm } from "../../types/shipment";
-import { Request } from "../../types/request";
+import { Request, RequestAction } from "../../types/request";
 import Badge from "../ui/badge/Badge";
 import {
   getStatusBadgeColor,
@@ -13,7 +13,14 @@ import DatePicker from "../form/date-picker";
 import CreateOrderModal from "../requests/CreateOrderModal";
 import { OrderItem } from "../../types/orderItem"
 
-type ActionType = "APPROVED" | "REJECTED" | "SHIPPED" | "RECEIVED" | null;
+type ActionType =
+  | "APPROVED"
+  | "REJECTED"
+  | "SHIPPED"
+  | "RECEIVED"
+  | "ON_HOLD"
+  | "CANCELLED"
+  | null;
 
 type Props = {
   isOpen: boolean;
@@ -21,7 +28,7 @@ type Props = {
   request: Request | null;
   onConfirm: (payload: {
     requestId: number;
-    action: "APPROVED" | "REJECTED";
+    action: RequestAction;
     remarks?: string;
     items?: {
       product_id: number | null;
@@ -54,6 +61,7 @@ export default function ViewRequestModal({
   const role =
     typeof window !== "undefined" ? localStorage.getItem("role") : null;
 
+  const isAdministrator = role === "ADMINISTRATOR";
   const isOperations = role === "OPERATION";
   const isInventory = role === "INVENTORY";
   const isAccounting = role === "ACCOUNTING";
@@ -142,6 +150,12 @@ const handleConfirm = async () => {
 
     }
 
+  // ✅ CANCELLED VALIDATION FIRST (ONLY FOR CANCELLED)
+  if (confirmAction === "CANCELLED" && !actionRemarks.trim()) {
+    setRejectError("Cancellation reason is required.");
+    return;
+  }
+
   // ✅ REJECT VALIDATION FIRST (ONLY FOR REJECT)
   if (confirmAction === "REJECTED") {
     if (!actionRemarks.trim()) {
@@ -180,20 +194,24 @@ const handleConfirm = async () => {
 
     } else {
         await onConfirm({
-          requestId: request.id,
-          action: confirmAction,
-          remarks: finalRemarks || undefined,
-          items:
-            confirmAction === "APPROVED" && editedItems.length
-              ? editedItems
-                  .filter(i => i.productId && i.unitId)
-                  .map(i => ({
-                    product_id: i.productId,
-                    unit_id: i.unitId,
-                    quantity: i.quantity
-                  }))
-              : undefined
-        });
+            requestId: request.id,
+            action: confirmAction as
+              | "APPROVED"
+              | "REJECTED"
+              | "ON_HOLD"
+              | "CANCELLED",
+            remarks: finalRemarks || undefined,
+            items:
+              confirmAction === "APPROVED" && editedItems.length
+                ? editedItems
+                    .filter(i => i.productId && i.unitId)
+                    .map(i => ({
+                      product_id: i.productId,
+                      unit_id: i.unitId,
+                      quantity: i.quantity
+                    }))
+                : undefined
+          });
     }
 
     onClose();
@@ -213,12 +231,20 @@ const handleConfirm = async () => {
     (request.status === "SHIPPED" || request.status === "RECEIVED");
 
   const canMarkAsReceived =
-  request.status === "SHIPPED" && isOperations;
+  request.status === "SHIPPED" && (isOperations || isAdministrator);
+
+  const hideApprovalActions =
+  request.status === "RECEIVED" || request.status === "CANCELLED" || request.status === "SHIPPED"|| request.status === "ON_HOLD";
 
   const canApproveReject =
+  isAdministrator ||
   (isAccounting && request.status === "PENDING_ACCOUNTING") ||
   (isSupervisor && request.status === "PENDING_SUPERVISOR") ||
   (isClusterHead && request.status === "PENDING_CLUSTER_HEAD");;
+
+  const canCancelOnHold =
+  isAdministrator &&
+  ["PENDING_ACCOUNTING", "PENDING_SUPERVISOR", "PENDING_CLUSTER_HEAD", "ON_HOLD"].includes(request.status);
 
   // Trace order changes
   const generateOrderChanges = (original:OrderItem[], edited:OrderItem[]) => {
@@ -309,41 +335,65 @@ return (
 {/* RIGHT ACTION BAR */}
 <div className="flex items-center gap-2">
 
-  {/* APPROVAL ACTIONS */}
-  {canApproveReject && (
-    <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
+{/* ================= ADMIN CONTROL ACTIONS ================= */}
+{canCancelOnHold  && (
+  <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
 
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => {
-          const mapped = mapItems(request.items);
-          setEditedItems(mapped);
-          setEditingOrder(true);
-        }}
-        className="flex items-center gap-1"
-      >
-        ✏️ Edit
-      </Button>
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("ON_HOLD")}
+      className="flex items-center gap-1 bg-yellow-500 text-white hover:bg-yellow-600"
+    >
+      {request.status === "ON_HOLD" ? "▶ Resume" : "⏸ On Hold"}
+    </Button>
 
-      <Button
-        size="sm"
-        onClick={() => setConfirmAction("APPROVED")}
-        className="flex items-center gap-1 bg-green-600 text-white hover:bg-green-700"
-      >
-        ✔ Approve
-      </Button>
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("CANCELLED")}
+      className="flex items-center gap-1 bg-gray-700 text-white hover:bg-gray-800"
+    >
+      ⛔ Cancel
+    </Button>
 
-      <Button
-        size="sm"
-        onClick={() => setConfirmAction("REJECTED")}
-        className="flex items-center gap-1 bg-red-500 text-white hover:bg-red-600"
-      >
-        ✖ Reject
-      </Button>
+  </div>
+)}
 
-    </div>
-  )}
+
+{/* ================= APPROVAL ACTIONS ================= */}
+{canApproveReject && !hideApprovalActions && (
+  <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
+
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => {
+        const mapped = mapItems(request.items);
+        setEditedItems(mapped);
+        setEditingOrder(true);
+      }}
+      className="flex items-center gap-1"
+    >
+      ✏️ Edit
+    </Button>
+
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("APPROVED")}
+      className="flex items-center gap-1 bg-green-600 text-white hover:bg-green-700"
+    >
+      ✔ Approve
+    </Button>
+
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("REJECTED")}
+      className="flex items-center gap-1 bg-red-500 text-white hover:bg-red-600"
+    >
+      ✖ Reject
+    </Button>
+
+  </div>
+)}
 
   {/* SHIPPING ACTIONS */}
   {canEditShipment && (
@@ -646,12 +696,19 @@ return (
 {/* ================= CONFIRM ================= */}
 <div className="flex flex-col">
 
-    <h2 className="text-lg font-semibold mb-2 dark:text-white">
-    {confirmAction==="SHIPPED"?"Confirm Shipment":
-    confirmAction==="RECEIVED"?"Confirm Receipt":
-    confirmAction==="APPROVED"?"Confirm Approval":
-    "Confirm Rejection"}
-    </h2>
+<h2 className="text-lg font-semibold mb-2 dark:text-white">
+  {confirmAction === "ON_HOLD"
+    ? request.status === "ON_HOLD"
+      ? "Activate Request"
+      : "Put Request On Hold"
+    : confirmAction === "SHIPPED"
+    ? "Confirm Shipment"
+    : confirmAction === "RECEIVED"
+    ? "Confirm Receipt"
+    : confirmAction === "APPROVED"
+    ? "Confirm Approval"
+    : "Confirm Rejection"}
+</h2>
 
     <p className="text-sm text-gray-500 mb-4">
     This action cannot be undone.
