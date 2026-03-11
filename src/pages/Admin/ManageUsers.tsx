@@ -208,6 +208,7 @@ export default function ManageUsers() {
         email: form.email,
         role_id: form.role_id,
         mobile: form.mobile,
+        password: form.password,
       });
 
       showToast("User info updated successfully", "success");
