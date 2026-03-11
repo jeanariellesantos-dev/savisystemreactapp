@@ -18,6 +18,7 @@ import {
 import { ShipmentForm } from "../../types/shipment";
 import { Request } from "../../types/request";
 import { OrderItem } from "../../types/orderItem";
+import Button from "../../components/ui/button/Button";
 
 export default function ManageRequests() {
   const { showToast } = useToast();
@@ -186,12 +187,27 @@ export default function ManageRequests() {
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
           />
 
-          <button
-            onClick={openModal}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            + Add Request
-          </button>
+            <Button 
+              size="sm" 
+              variant="primary" 
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
+              onClick={openModal}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Create Request
+            </Button>
 
         </div>
       </div>
@@ -205,7 +221,7 @@ export default function ManageRequests() {
           <button
             disabled={meta.current_page === 1}
             onClick={() => setPage((p) => p - 1)}
-            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 dark:text-white/90"
           >
             Previous
           </button>
@@ -218,7 +234,7 @@ export default function ManageRequests() {
           <button
             disabled={meta.current_page === meta.last_page}
             onClick={() => setPage((p) => p + 1)}
-            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 dark:text-white/90"
           >
             Next
           </button>
