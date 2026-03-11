@@ -371,6 +371,7 @@ return (
     onClick={onClose}
     className="
       ml-3
+      mb-4
       w-9 h-9
       rounded-full
       flex items-center justify-center
