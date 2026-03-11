@@ -40,18 +40,30 @@ export default function ManageRequests() {
   /* ===============================
      APPROVE / REJECT
   =============================== */
+const handleConfirmRequest = async ({
+  requestId,
+  action,
+  remarks,
+  items,
+}: {
+  requestId: number;
+  action: "APPROVED" | "REJECTED";
+  remarks?: string;
+  items?: {
+    product_id: number | null;
+    unit_id: number | null;
+    quantity: number;
+  }[];
+}) => {
+  try {
 
-  const handleConfirmRequest = async ({
-    requestId,
-    action,
-    remarks,
-  }: {
-    requestId: number;
-    action: "APPROVED" | "REJECTED";
-    remarks?: string;
-  }) => {
-    try {
-      await confirmRequest({ requestId, action, remarks });
+    const payload = {
+      requestId,
+      action,
+      remarks,
+      items,
+    };
+      await confirmRequest(payload);
 
       showToast(
         action === "APPROVED"
