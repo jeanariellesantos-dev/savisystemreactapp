@@ -19,14 +19,24 @@ export default function RequestStatusChart() {
       fontFamily: "Outfit, sans-serif",
     },
 
-    labels: ["Pending", "Approved", "Rejected", "Shipped", "Received"],
+    labels: [
+      "Pending",
+      "Approved",
+      "Shipped",
+      "Received",
+      "Rejected",
+      "On Hold",
+      "Cancelled",
+    ],
 
     colors: [
-      "#f59e0b",
-      "#22c55e",
-      "#ef4444",
-      "#3b82f6",
-      "#a855f7",
+      "#f59e0b", // Pending
+      "#22c55e", // Approved
+      "#3b82f6", // Shipped
+      "#a855f7", // Received
+      "#ef4444", // Rejected
+      "#eab308", // On Hold
+      "#6b7280", // Cancelled
     ],
 
     legend: {
@@ -56,9 +66,11 @@ export default function RequestStatusChart() {
                 (
                   statusFigures.pending +
                   statusFigures.approved +
-                  statusFigures.rejected +
                   statusFigures.shipped +
-                  statusFigures.received
+                  statusFigures.received +
+                  statusFigures.rejected +
+                  statusFigures.on_hold +
+                  statusFigures.cancelled
                 ).toString(),
             },
           },
@@ -72,9 +84,11 @@ export default function RequestStatusChart() {
   const series = [
     statusFigures.pending,
     statusFigures.approved,
-    statusFigures.rejected,
     statusFigures.shipped,
     statusFigures.received,
+    statusFigures.rejected,
+    statusFigures.on_hold,
+    statusFigures.cancelled,
   ];
 
   return (
