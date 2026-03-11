@@ -32,17 +32,31 @@ export default function RecentRequests() {
     setPage(1);
   }, [filter]);
 
- const handleConfirmRequest = async ({
+const handleConfirmRequest = async ({
   requestId,
   action,
   remarks,
+  items,
 }: {
   requestId: number;
   action: "APPROVED" | "REJECTED";
   remarks?: string;
+  items?: {
+    product_id: number | null;
+    unit_id: number | null;
+    quantity: number;
+  }[];
 }) => {
   try {
-    await confirmRequest({ requestId, action, remarks });
+
+    const payload = {
+      requestId,
+      action,
+      remarks,
+      items,
+    };
+
+    await confirmRequest(payload);
 
     showToast(
       action === "APPROVED"
@@ -52,10 +66,11 @@ export default function RecentRequests() {
     );
 
     setSelected(null);
-    refreshRequests();  // refresh list
+    refreshRequests();
+
   } catch (error) {
-    showToast("Failed to process request", "error");
     console.error(error);
+    showToast("Failed to process request", "error");
   }
 };
 

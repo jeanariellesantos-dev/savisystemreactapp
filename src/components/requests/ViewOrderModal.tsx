@@ -10,6 +10,8 @@ import {
   formatStatusLabel,
 } from "../utils/statusHelper";
 import DatePicker from "../form/date-picker";
+import CreateOrderModal from "../requests/CreateOrderModal";
+import { OrderItem } from "../../types/orderItem"
 
 type ActionType = "APPROVED" | "REJECTED" | "SHIPPED" | "RECEIVED" | null;
 
@@ -20,7 +22,12 @@ type Props = {
   onConfirm: (payload: {
     requestId: number;
     action: "APPROVED" | "REJECTED";
-    remarks?: string ;
+    remarks?: string;
+    items?: {
+      product_id: number | null;
+      unit_id: number | null;
+      quantity: number;
+    }[];
   }) => Promise<void>;
   onShip: (payload: {
     requestId: number;
@@ -64,6 +71,28 @@ export default function ViewRequestModal({
 
   const [rejectError, setRejectError] = useState<string | null>(null);
 
+  const [editingOrder, setEditingOrder] = useState(false);
+  const [editedItems, setEditedItems] = useState<OrderItem[]>([]);
+
+const mapItems = (items: any[]): OrderItem[] =>
+  items.map((i) => ({
+    id: String(i.id),
+    categoryId: i.product?.category?.id ?? null,
+    categoryName: i.product?.category?.name ?? "",
+    productId: i.product?.id ?? null,
+    productName: i.product?.product_name ?? "",
+    unitId: i.unit?.id ?? null,
+    unitName: i.unit?.name ?? "",
+    quantity: i.quantity,
+  }));
+
+  useEffect(() => {
+  if (!request) return;
+
+  const mapped = mapItems(request.items);
+  setEditedItems(mapped);
+}, [request]);
+
 
   const [shipments, setShipments] = useState<ShipmentForm[]>([
     { shipped_date: today,received_date: "", tracking_link: "" },
@@ -72,11 +101,13 @@ export default function ViewRequestModal({
   const remarksRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    remarksRef.current?.scrollTo({
+    if (!remarksRef.current) return;
+
+    remarksRef.current.scrollTo({
       top: remarksRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [request.approvals]);
+  }, [request?.approvals]);
 
   const validateShipments = () => {
     for (let i = 0; i < shipments.length; i++) {
@@ -92,6 +123,24 @@ export default function ViewRequestModal({
 
 const handleConfirm = async () => {
   if (!confirmAction) return;
+
+  let finalRemarks = actionRemarks;
+
+    if(confirmAction==="APPROVED" && editedItems.length){
+
+    const changes = generateOrderChanges(
+      mapItems(request.items),
+      editedItems
+    );
+
+    if(changes.length){
+      finalRemarks =
+        (actionRemarks || "") +
+        "\n\nOrder Changes:\n" +
+        changes.map(c=>`• ${c}`).join("\n");
+    }
+
+    }
 
   // ✅ REJECT VALIDATION FIRST (ONLY FOR REJECT)
   if (confirmAction === "REJECTED") {
@@ -130,11 +179,21 @@ const handleConfirm = async () => {
       });
 
     } else {
-      await onConfirm({
-        requestId: request.id,
-        action: confirmAction,
-        remarks: actionRemarks || undefined,
-      });
+        await onConfirm({
+          requestId: request.id,
+          action: confirmAction,
+          remarks: finalRemarks || undefined,
+          items:
+            confirmAction === "APPROVED" && editedItems.length
+              ? editedItems
+                  .filter(i => i.productId && i.unitId)
+                  .map(i => ({
+                    product_id: i.productId,
+                    unit_id: i.unitId,
+                    quantity: i.quantity
+                  }))
+              : undefined
+        });
     }
 
     onClose();
@@ -161,7 +220,45 @@ const handleConfirm = async () => {
   (isSupervisor && request.status === "PENDING_SUPERVISOR") ||
   (isClusterHead && request.status === "PENDING_CLUSTER_HEAD");;
 
+  // Trace order changes
+  const generateOrderChanges = (original:OrderItem[], edited:OrderItem[]) => {
+
+      const changes:string[]=[];
+
+      const originalMap = new Map(original.map(i=>[i.productId,i]));
+
+      edited.forEach(item=>{
+
+      const originalItem = originalMap.get(item.productId);
+
+      if(!originalItem){
+        changes.push(`Added product (${item.productName}) (${item.quantity} ${item.unitName}) `);
+        return;
+      }
+
+      if(originalItem.quantity !== item.quantity){
+        changes.push(`Changed product (${item.productName}): ${originalItem.quantity} → ${item.quantity} ${item.unitName}`);
+      }
+
+      });
+
+      original.forEach(item=>{
+      const exists = edited.find(i=>i.productId===item.productId);
+      if(!exists){
+        changes.push(`Removed product (${item.productName})`);
+      }
+      });
+
+      return changes;
+
+  };
+
+  const displayItems =
+    editedItems.length > 0 ? editedItems : mapItems(request.items);
+
 return (
+
+  <>
 <Modal
   isOpen={isOpen}
   onClose={onClose}
@@ -214,6 +311,16 @@ return (
 
     {canApproveReject && (
       <>
+        <Button
+          size="sm"
+          onClick={() => {
+            const mapped = mapItems(request.items);
+            setEditedItems(mapped);
+            setEditingOrder(true);
+          }}
+        >
+        Edit Order
+        </Button>
         <Button
           size="sm"
           onClick={() => setConfirmAction("REJECTED")}
@@ -315,27 +422,29 @@ return (
           </tr>
         </thead>
 
-        <tbody className="divide-y dark:divide-gray-700">
-          {request.items.map(item => (
-            <tr key={item.id} className="h-[42px]">
-              <td className="px-3 py-2 font-medium dark:text-white">
-                {item.product.product_name}
-              </td>
+<tbody className="divide-y dark:divide-gray-700">
+  {displayItems.map((item) => (
+    <tr key={item.id} className="h-[42px]">
 
-              <td className="px-3 py-2 text-center text-gray-500">
-                {item.product.category?.name}
-              </td>
+      <td className="px-3 py-2 font-medium dark:text-white">
+        {item.productName ?? "-"}
+      </td>
 
-              <td className="px-3 py-2 text-center text-gray-500">
-                {item.quantity}
-              </td>
+      <td className="px-3 py-2 text-center text-gray-500">
+        {item.categoryName ?? "-"}
+      </td>
 
-              <td className="px-3 py-2 text-center text-gray-500">
-                {item.unit.name}
-              </td>
-            </tr>
-          ))}
-        </tbody>
+      <td className="px-3 py-2 text-center text-gray-500">
+        {item.quantity}
+      </td>
+
+      <td className="px-3 py-2 text-center text-gray-500">
+        {item.unitName ?? "-"}
+      </td>
+
+    </tr>
+  ))}
+</tbody>
       </table>
 
     </div>
@@ -576,6 +685,54 @@ className="bg-blue-600 text-white"
 
 )}
 
+
 </Modal>
+
+      {/* ORDER EDIT MODAL */}
+        <CreateOrderModal
+          isOpen={editingOrder}
+          onClose={() => setEditingOrder(false)}
+          title="Edit Order"
+          initialItems={
+            editedItems.length ? editedItems : mapItems(request.items)
+          }
+onSubmit={(items) => {
+
+  const enriched = items.map(i => {
+
+    const original = request.items.find(
+      (r:any) => r.product?.id === i.productId
+    );
+
+    return {
+      ...i,
+
+      productName:
+        i.productName ||
+        original?.product?.product_name ||
+        "",
+
+      categoryName:
+        i.categoryName ||
+        original?.product?.category?.name ||
+        "",
+
+      unitName:
+        i.unitName ||
+        original?.unit?.name ||
+        ""
+
+    };
+
+  });
+
+  setEditedItems(enriched);
+  setEditingOrder(false);
+}}
+        />
+</>
 );
+
+
+
 }

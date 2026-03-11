@@ -16,6 +16,7 @@ export interface ConfirmRequestPayload {
   requestId: number;
   action: RequestAction;
   remarks?: string;
+  items: CreateOrderItem[];
 };
 
 

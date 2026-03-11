@@ -21,14 +21,17 @@ export async function createOrder(payload: CreateOrderPayload) {
   const res = await URL_API.post("/request", payload);
   return res.data;
 }
-
 export const confirmRequest = async ({
   requestId,
   action,
   remarks,
+  items,
 }: ConfirmRequestPayload): Promise<void> => {
+
   await URL_API.post(`/request/${requestId}/approve`, {
     action,
     remarks: remarks ?? null,
+    items: items ?? [],
   });
+
 };
