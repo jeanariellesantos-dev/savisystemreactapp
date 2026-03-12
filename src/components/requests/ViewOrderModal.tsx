@@ -236,6 +236,10 @@ const handleConfirm = async () => {
   const hideApprovalActions =
   request.status === "RECEIVED" || request.status === "CANCELLED" || request.status === "SHIPPED"|| request.status === "ON_HOLD";
 
+
+  const canEditOrder =
+  (isAccounting && request.status === "PENDING_ACCOUNTING");
+
   const canApproveReject =
   isAdministrator ||
   (isAccounting && request.status === "PENDING_ACCOUNTING") ||
@@ -358,23 +362,25 @@ return (
   </div>
 )}
 
-
 {/* ================= APPROVAL ACTIONS ================= */}
 {canApproveReject && !hideApprovalActions && (
   <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
 
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={() => {
-        const mapped = mapItems(request.items);
-        setEditedItems(mapped);
-        setEditingOrder(true);
-      }}
-      className="flex items-center gap-1"
-    >
-      ✏️ Edit
-    </Button>
+      {canEditOrder && (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            const mapped = mapItems(request.items);
+            setEditedItems(mapped);
+            setEditingOrder(true);
+          }}
+          className="flex items-center gap-1"
+        >
+          ✏️ Edit
+        </Button>
+      )
+    }
 
     <Button
       size="sm"
