@@ -236,7 +236,6 @@ const handleConfirm = async () => {
   const hideApprovalActions =
   request.status === "RECEIVED" || request.status === "CANCELLED" || request.status === "SHIPPED"|| request.status === "ON_HOLD";
 
-
   const canEditOrder =
   (isAccounting && request.status === "PENDING_ACCOUNTING");
 
