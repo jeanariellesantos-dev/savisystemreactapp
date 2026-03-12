@@ -7,6 +7,7 @@ import Label from "../form/Label";
 import { UserService } from "../../services/userService";
 
 type Profile = {
+  employee_number: string;
   firstname: string;
   lastname: string;
   email: string;
@@ -18,6 +19,7 @@ export default function UserInfoCard() {
 
   /** DISPLAY STATE */
   const [profile, setProfile] = useState<Profile>({
+    employee_number: "",
     firstname: "",
     lastname: "",
     email: "",
@@ -26,6 +28,7 @@ export default function UserInfoCard() {
 
   /** EDIT STATE */
   const [form, setForm] = useState<Profile>({
+    employee_number: "",
     firstname: "",
     lastname: "",
     email: "",
@@ -40,6 +43,7 @@ export default function UserInfoCard() {
   /* Load profile immediately (NO MODAL REQUIRED) */
   useEffect(() => {
     const data = {
+      employee_number: localStorage.getItem("employee_number") || "",
       firstname: localStorage.getItem("firstname") || "",
       lastname: localStorage.getItem("lastname") || "",
       email: localStorage.getItem("email") || "",
@@ -74,6 +78,7 @@ export default function UserInfoCard() {
       setProfile(data);
 
       // Sync to localStorage
+      localStorage.setItem("employee_number", data.employee_number);
       localStorage.setItem("firstname", data.firstname);
       localStorage.setItem("lastname", data.lastname);
       localStorage.setItem("email", data.email);

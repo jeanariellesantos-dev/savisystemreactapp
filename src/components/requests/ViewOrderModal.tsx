@@ -3,15 +3,24 @@ import { Modal } from "../ui/modal";
 import { useState, useRef, useEffect } from "react";
 import TextArea from "../form/input/TextArea";
 import { ShipmentForm } from "../../types/shipment";
-import { Request } from "../../types/request";
+import { Request, RequestAction } from "../../types/request";
 import Badge from "../ui/badge/Badge";
 import {
   getStatusBadgeColor,
   formatStatusLabel,
 } from "../utils/statusHelper";
 import DatePicker from "../form/date-picker";
+import CreateOrderModal from "../requests/CreateOrderModal";
+import { OrderItem } from "../../types/orderItem"
 
-type ActionType = "APPROVED" | "REJECTED" | "SHIPPED" | "RECEIVED" | null;
+type ActionType =
+  | "APPROVED"
+  | "REJECTED"
+  | "SHIPPED"
+  | "RECEIVED"
+  | "ON_HOLD"
+  | "CANCELLED"
+  | null;
 
 type Props = {
   isOpen: boolean;
@@ -19,8 +28,13 @@ type Props = {
   request: Request | null;
   onConfirm: (payload: {
     requestId: number;
-    action: "APPROVED" | "REJECTED";
-    remarks?: string ;
+    action: RequestAction;
+    remarks?: string;
+    items?: {
+      product_id: number | null;
+      unit_id: number | null;
+      quantity: number;
+    }[];
   }) => Promise<void>;
   onShip: (payload: {
     requestId: number;
@@ -47,6 +61,7 @@ export default function ViewRequestModal({
   const role =
     typeof window !== "undefined" ? localStorage.getItem("role") : null;
 
+  const isAdministrator = role === "ADMINISTRATOR";
   const isOperations = role === "OPERATION";
   const isInventory = role === "INVENTORY";
   const isAccounting = role === "ACCOUNTING";
@@ -64,6 +79,28 @@ export default function ViewRequestModal({
 
   const [rejectError, setRejectError] = useState<string | null>(null);
 
+  const [editingOrder, setEditingOrder] = useState(false);
+  const [editedItems, setEditedItems] = useState<OrderItem[]>([]);
+
+const mapItems = (items: any[]): OrderItem[] =>
+  items.map((i) => ({
+    id: String(i.id),
+    categoryId: i.product?.category?.id ?? null,
+    categoryName: i.product?.category?.name ?? "",
+    productId: i.product?.id ?? null,
+    productName: i.product?.product_name ?? "",
+    unitId: i.unit?.id ?? null,
+    unitName: i.unit?.name ?? "",
+    quantity: i.quantity,
+  }));
+
+  useEffect(() => {
+  if (!request) return;
+
+  const mapped = mapItems(request.items);
+  setEditedItems(mapped);
+}, [request]);
+
 
   const [shipments, setShipments] = useState<ShipmentForm[]>([
     { shipped_date: today,received_date: "", tracking_link: "" },
@@ -72,11 +109,13 @@ export default function ViewRequestModal({
   const remarksRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    remarksRef.current?.scrollTo({
+    if (!remarksRef.current) return;
+
+    remarksRef.current.scrollTo({
       top: remarksRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [request.approvals]);
+  }, [request?.approvals]);
 
   const validateShipments = () => {
     for (let i = 0; i < shipments.length; i++) {
@@ -92,6 +131,30 @@ export default function ViewRequestModal({
 
 const handleConfirm = async () => {
   if (!confirmAction) return;
+
+  let finalRemarks = actionRemarks;
+
+    if(confirmAction==="APPROVED" && editedItems.length){
+
+      const changes = generateOrderChanges(
+        mapItems(request.items),
+        editedItems
+      );
+
+      if (changes.length) {
+        finalRemarks =
+          (actionRemarks ? actionRemarks.trim() + ". " : "") +
+          "Order Changes:\n" +
+          changes.map((c) => `• ${c}`).join("\n");
+      }
+
+    }
+
+  // ✅ CANCELLED VALIDATION FIRST (ONLY FOR CANCELLED)
+  if (confirmAction === "CANCELLED" && !actionRemarks.trim()) {
+    setRejectError("Cancellation reason is required.");
+    return;
+  }
 
   // ✅ REJECT VALIDATION FIRST (ONLY FOR REJECT)
   if (confirmAction === "REJECTED") {
@@ -130,11 +193,25 @@ const handleConfirm = async () => {
       });
 
     } else {
-      await onConfirm({
-        requestId: request.id,
-        action: confirmAction,
-        remarks: actionRemarks || undefined,
-      });
+        await onConfirm({
+            requestId: request.id,
+            action: confirmAction as
+              | "APPROVED"
+              | "REJECTED"
+              | "ON_HOLD"
+              | "CANCELLED",
+            remarks: finalRemarks || undefined,
+            items:
+              confirmAction === "APPROVED" && editedItems.length
+                ? editedItems
+                    .filter(i => i.productId && i.unitId)
+                    .map(i => ({
+                      product_id: i.productId,
+                      unit_id: i.unitId,
+                      quantity: i.quantity
+                    }))
+                : undefined
+          });
     }
 
     onClose();
@@ -154,14 +231,63 @@ const handleConfirm = async () => {
     (request.status === "SHIPPED" || request.status === "RECEIVED");
 
   const canMarkAsReceived =
-  request.status === "SHIPPED" && isOperations;
+  request.status === "SHIPPED" && (isOperations || isAdministrator);
+
+  const hideApprovalActions =
+  request.status === "RECEIVED" || request.status === "CANCELLED" || request.status === "SHIPPED"|| request.status === "ON_HOLD";
+
+  const canEditOrder =
+  (isAccounting && request.status === "PENDING_ACCOUNTING");
 
   const canApproveReject =
+  isAdministrator ||
   (isAccounting && request.status === "PENDING_ACCOUNTING") ||
   (isSupervisor && request.status === "PENDING_SUPERVISOR") ||
   (isClusterHead && request.status === "PENDING_CLUSTER_HEAD");;
 
+  const canCancelOnHold =
+  isAdministrator &&
+  ["PENDING_ACCOUNTING", "PENDING_SUPERVISOR", "PENDING_CLUSTER_HEAD", "ON_HOLD"].includes(request.status);
+
+  // Trace order changes
+  const generateOrderChanges = (original:OrderItem[], edited:OrderItem[]) => {
+
+      const changes:string[]=[];
+
+      const originalMap = new Map(original.map(i=>[i.productId,i]));
+
+      edited.forEach(item=>{
+
+      const originalItem = originalMap.get(item.productId);
+
+      if(!originalItem){
+        changes.push(`Added product (${item.productName}) (${item.quantity} ${item.unitName}) `);
+        return;
+      }
+
+      if(originalItem.quantity !== item.quantity){
+        changes.push(`Changed product (${item.productName}): ${originalItem.quantity} → ${item.quantity} ${item.unitName}`);
+      }
+
+      });
+
+      original.forEach(item=>{
+      const exists = edited.find(i=>i.productId===item.productId);
+      if(!exists){
+        changes.push(`Removed product (${item.productName})`);
+      }
+      });
+
+      return changes;
+
+  };
+
+  const displayItems =
+    editedItems.length > 0 ? editedItems : mapItems(request.items);
+
 return (
+
+  <>
 <Modal
   isOpen={isOpen}
   onClose={onClose}
@@ -209,66 +335,111 @@ return (
     </Badge>
   </div>
 
-  {/* RIGHT ACTION BAR */}
-  <div className="flex items-center gap-2">
+{/* RIGHT ACTION BAR */}
+<div className="flex items-center gap-2">
 
-    {canApproveReject && (
-      <>
-        <Button
-          size="sm"
-          onClick={() => setConfirmAction("REJECTED")}
-          className="bg-red-500 text-white hover:bg-red-600"
-        >
-          Reject
-        </Button>
+{/* ================= ADMIN CONTROL ACTIONS ================= */}
+{canCancelOnHold  && (
+  <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
 
-        <Button
-          size="sm"
-          onClick={() => setConfirmAction("APPROVED")}
-          className="bg-green-500 text-white hover:bg-green-600"
-        >
-          Approve
-        </Button>
-      </>
-    )}
-
-    {canEditShipment && (
-      <Button
-        size="sm"
-        onClick={() => setConfirmAction("SHIPPED")}
-        className="bg-blue-600 text-white hover:bg-blue-700"
-      >
-        🚚 Ship
-      </Button>
-    )}
-
-    {canMarkAsReceived && (
-      <Button
-        size="sm"
-        onClick={() => setConfirmAction("RECEIVED")}
-        className="bg-indigo-600 text-white hover:bg-indigo-700"
-      >
-        📦 Receive
-      </Button>
-    )}
-
-    {/* X BUTTON */}
-    <button
-      onClick={onClose}
-      className="
-        ml-5
-        mb-3
-        w-9 h-9 ml-1
-        rounded-full
-        flex items-center justify-center
-        hover:bg-gray-200
-        dark:hover:bg-gray-700
-      "
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("ON_HOLD")}
+      className="flex items-center gap-1 bg-yellow-500 text-white hover:bg-yellow-600"
     >
-      ✕
-    </button>
+      {request.status === "ON_HOLD" ? "▶ Resume" : "⏸ On Hold"}
+    </Button>
+
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("CANCELLED")}
+      className="flex items-center gap-1 bg-gray-700 text-white hover:bg-gray-800"
+    >
+      ⛔ Cancel
+    </Button>
 
   </div>
+)}
+
+{/* ================= APPROVAL ACTIONS ================= */}
+{canApproveReject && !hideApprovalActions && (
+  <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
+
+      {canEditOrder && (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            const mapped = mapItems(request.items);
+            setEditedItems(mapped);
+            setEditingOrder(true);
+          }}
+          className="flex items-center gap-1"
+        >
+          ✏️ Edit
+        </Button>
+      )
+    }
+
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("APPROVED")}
+      className="flex items-center gap-1 bg-green-600 text-white hover:bg-green-700"
+    >
+      ✔ Approve
+    </Button>
+
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("REJECTED")}
+      className="flex items-center gap-1 bg-red-500 text-white hover:bg-red-600"
+    >
+      ✖ Reject
+    </Button>
+
+  </div>
+)}
+
+  {/* SHIPPING ACTIONS */}
+  {canEditShipment && (
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("SHIPPED")}
+      className="flex items-center gap-1 bg-blue-600 text-white hover:bg-blue-700"
+    >
+      🚚 Ship
+    </Button>
+  )}
+
+  {canMarkAsReceived && (
+    <Button
+      size="sm"
+      onClick={() => setConfirmAction("RECEIVED")}
+      className="flex items-center gap-1 bg-indigo-600 text-white hover:bg-indigo-700"
+    >
+      📦 Receive
+    </Button>
+  )}
+
+  {/* CLOSE */}
+  <button
+    onClick={onClose}
+    className="
+      ml-3
+      mb-4
+      w-9 h-9
+      rounded-full
+      flex items-center justify-center
+      text-gray-500
+      hover:bg-gray-200
+      hover:text-gray-700
+      dark:hover:bg-gray-700
+    "
+  >
+    ✕
+  </button>
+
+</div>
 </div>
 
 {/* BODY */}
@@ -315,27 +486,29 @@ return (
           </tr>
         </thead>
 
-        <tbody className="divide-y dark:divide-gray-700">
-          {request.items.map(item => (
-            <tr key={item.id} className="h-[42px]">
-              <td className="px-3 py-2 font-medium dark:text-white">
-                {item.product.product_name}
-              </td>
+<tbody className="divide-y dark:divide-gray-700">
+  {displayItems.map((item) => (
+    <tr key={item.id} className="h-[42px]">
 
-              <td className="px-3 py-2 text-center text-gray-500">
-                {item.product.category?.name}
-              </td>
+      <td className="px-3 py-2 font-medium dark:text-white">
+        {item.productName ?? "-"}
+      </td>
 
-              <td className="px-3 py-2 text-center text-gray-500">
-                {item.quantity}
-              </td>
+      <td className="px-3 py-2 text-center text-gray-500">
+        {item.categoryName ?? "-"}
+      </td>
 
-              <td className="px-3 py-2 text-center text-gray-500">
-                {item.unit.name}
-              </td>
-            </tr>
-          ))}
-        </tbody>
+      <td className="px-3 py-2 text-center text-gray-500">
+        {item.quantity}
+      </td>
+
+      <td className="px-3 py-2 text-center text-gray-500">
+        {item.unitName ?? "-"}
+      </td>
+
+    </tr>
+  ))}
+</tbody>
       </table>
 
     </div>
@@ -528,54 +701,109 @@ return (
 {/* ================= CONFIRM ================= */}
 <div className="flex flex-col">
 
-<h2 className="text-lg font-semibold mb-2">
-{confirmAction==="SHIPPED"?"Confirm Shipment":
-confirmAction==="RECEIVED"?"Confirm Receipt":
-confirmAction==="APPROVED"?"Confirm Approval":
-"Confirm Rejection"}
+<h2 className="text-lg font-semibold mb-2 dark:text-white">
+  {confirmAction === "ON_HOLD"
+    ? request.status === "ON_HOLD"
+      ? "Activate Request"
+      : "Put Request On Hold"
+    : confirmAction === "SHIPPED"
+    ? "Confirm Shipment"
+    : confirmAction === "RECEIVED"
+    ? "Confirm Receipt"
+    : confirmAction === "APPROVED"
+    ? "Confirm Approval"
+    : "Confirm Rejection"}
 </h2>
 
-<p className="text-sm text-gray-500 mb-4">
-This action cannot be undone.
-</p>
+    <p className="text-sm text-gray-500 mb-4">
+    This action cannot be undone.
+    </p>
 
-<TextArea
-value={actionRemarks}
-onChange={(val)=>{
-setActionRemarks(val);
-if(rejectError)setRejectError(null);
-}}
-placeholder={
-confirmAction==="REJECTED"
-?"Provide rejection reason..."
-:"Optional remarks..."
-}
-/>
+    <TextArea
+    value={actionRemarks}
+    onChange={(val)=>{
+    setActionRemarks(val);
+    if(rejectError)setRejectError(null);
+    }}
+    placeholder={
+    confirmAction==="REJECTED"
+    ?"Provide rejection reason..."
+    :"Optional remarks..."
+    }
+    />
 
-{rejectError && (
-<p className="mt-2 text-sm text-red-600">{rejectError}</p>
-)}
+    {rejectError && (
+    <p className="mt-2 text-sm text-red-600">{rejectError}</p>
+    )}
 
-<div className="mt-6 flex justify-end gap-2">
-<Button size="sm" variant="outline" onClick={()=>setConfirmAction(null)}>
-Cancel
-</Button>
+    <div className="mt-6 flex justify-end gap-2">
+      <Button size="sm" variant="outline" onClick={()=>setConfirmAction(null)}>
+        Cancel
+      </Button>
 
-<Button
-size="sm"
-disabled={submitting}
-onClick={handleConfirm}
-className="bg-blue-600 text-white"
->
-{submitting?"Processing...":"Confirm"}
-</Button>
-</div>
+      <Button
+        size="sm"
+        disabled={submitting}
+        onClick={handleConfirm}
+        className="bg-blue-600 text-white"
+        >
+        {submitting?"Processing...":"Confirm"}
+        </Button>
+    </div>
 
 </div>
 </>
 
 )}
 
+
 </Modal>
+
+      {/* ORDER EDIT MODAL */}
+        <CreateOrderModal
+          isOpen={editingOrder}
+          onClose={() => setEditingOrder(false)}
+          title="Edit Order"
+          initialItems={
+            editedItems.length ? editedItems : mapItems(request.items)
+          }
+onSubmit={(items) => {
+
+  const enriched = items.map(i => {
+
+    const original = request.items.find(
+      (r:any) => r.product?.id === i.productId
+    );
+
+    return {
+      ...i,
+
+      productName:
+        i.productName ||
+        original?.product?.product_name ||
+        "",
+
+      categoryName:
+        i.categoryName ||
+        original?.product?.category?.name ||
+        "",
+
+      unitName:
+        i.unitName ||
+        original?.unit?.name ||
+        ""
+
+    };
+
+  });
+
+  setEditedItems(enriched);
+  setEditingOrder(false);
+}}
+        />
+</>
 );
+
+
+
 }

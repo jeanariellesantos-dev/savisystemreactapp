@@ -4,6 +4,9 @@ import { Category, CategoryPayload } from "../types/category";
 import { Dealership, DealershipPayload } from "../types/dealership";
 import { Role, RolePayload } from "../types/role";
 import { RequestStatusFigures } from "../types/dashboard";
+import { Request } from "../types/request";
+import { CreateOrderPayload } from "../types/request";
+
 
 export type DashboardRange = "7d" | "30d" | "year";
 
@@ -51,6 +54,54 @@ export const DashboardService = {
     );
     return data;
   }
+};
+
+/* =========================================================
+   REQUESTS
+========================================================= */
+
+export const RequestService = {
+
+  /* ===============================
+     ADMIN REQUESTS
+  =============================== */
+  async getAll(params?: {
+    page?: number;
+    search?: string;
+    filter?: "ACTIVE" | "ALL";
+  }): Promise<any> {
+
+    const { page = 1, search = "", filter = "ALL" } = params || {};
+
+    const status =
+      filter === "ACTIVE"
+        ? "active"
+        : "";
+
+    const { data } = await URL_API.get("/admin/requests", {
+      params: {
+        page,
+        search,
+        status,
+      },
+    });
+
+    return data;
+  },
+
+  async create(payload: CreateOrderPayload): Promise<Request> {
+    const { data } = await URL_API.post("/admin/requests", payload);
+    return data;
+  },
+
+  async update(id: number, payload: CreateOrderPayload): Promise<Request> {
+    const { data } = await URL_API.put(`/admin/requests/${id}`, payload);
+    return data;
+  },
+
+  async delete(id: number): Promise<void> {
+    await URL_API.delete(`/admin/requests/${id}`);
+  },
 };
 
 /* =========================================================

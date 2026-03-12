@@ -13,7 +13,7 @@ export const UserService = {
     return URL_API.put("/user/profile", payload);
   },
 
-    changePassword(payload: {
+  changePassword(payload: {
     current_password: string;
     password: string;
     password_confirmation: string;

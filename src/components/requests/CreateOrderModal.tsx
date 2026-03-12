@@ -14,23 +14,40 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (items: OrderItem[]) => void | Promise<void>;
+  initialItems?: OrderItem[];   // NEW
+  title?: string;               // NEW
 };
 
 export default function CreateOrderModal({
   isOpen,
   onClose,
   onSubmit,
+  initialItems,
+  title,
 }: Props) {
 
-  const createEmptyItem = (): OrderItem => ({
-    id: crypto.randomUUID(),
-    categoryId: null,
-    productId: null,
-    unitId: null,
-    quantity: 1,
-  });
+const createEmptyItem = (): OrderItem => ({
+  id: crypto.randomUUID(),
+  categoryId: null,
+  categoryName: "",
+  productId: null,
+  productName: "",
+  unitId: null,
+  unitName: "",
+  quantity: 1,
+});
 
-  const [items, setItems] = useState<OrderItem[]>([createEmptyItem()]);
+const [items, setItems] = useState<OrderItem[]>([createEmptyItem()]);
+
+useEffect(() => {
+  if (initialItems?.length) {
+    setItems(initialItems);
+  } else {
+    setItems([createEmptyItem()]);
+  }
+}, [initialItems]);
+
+
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -41,6 +58,27 @@ export default function CreateOrderModal({
   useEffect(() => {
     CategoryService.getAll().then(setCategories);
   }, []);
+
+
+  useEffect(() => {
+  if (!initialItems?.length) return;
+
+  const loadDependencies = async () => {
+    for (const item of initialItems) {
+
+      if (item.categoryId) {
+        await loadProducts(item.categoryId);
+      }
+
+      if (item.productId) {
+        await loadUnits(item.productId);
+      }
+
+    }
+  };
+
+  loadDependencies();
+}, [initialItems]);
 
   const updateItem = <K extends keyof OrderItem>(
     index: number,
@@ -134,7 +172,9 @@ export default function CreateOrderModal({
       <div className="rounded-3xl bg-white p-6 dark:bg-gray-900">
 
         <div className="mb-4">
-          <h2 className="text-xl font-semibold">Create Order</h2>
+          <h2 className="text-xl font-semibold dark:text-white">
+            {title ?? "Create Order"}
+          </h2>
           <p className="text-xs text-gray-500">
             Click a row to select it before duplicating or removing
           </p>
@@ -200,9 +240,15 @@ export default function CreateOrderModal({
                         }))}
                         onChange={(value) => {
                           const numericValue = value ? Number(value) : null;
+                          const category = categories.find(c => c.id === numericValue);
+
                           updateItem(index, "categoryId", numericValue);
+                          updateItem(index, "categoryName", category?.name ?? "");
                           updateItem(index, "productId", null);
+                          updateItem(index, "productName", "");
                           updateItem(index, "unitId", null);
+                          updateItem(index, "unitName", "");
+         
                           if (numericValue) loadProducts(numericValue);
                         }}
                       />
@@ -219,8 +265,12 @@ export default function CreateOrderModal({
                         }))}
                         onChange={(value) => {
                           const numericValue = value ? Number(value) : null;
+                          const product = productList.find(p => p.id === numericValue);
+
                           updateItem(index, "productId", numericValue);
+                          updateItem(index, "productName", product?.product_name ?? "");
                           updateItem(index, "unitId", null);
+                          updateItem(index, "unitName", "");
                           if (numericValue) loadUnits(numericValue);
                         }}
                       />
@@ -235,8 +285,11 @@ export default function CreateOrderModal({
                           value: String(u.id),
                           label: u.name,
                         }))}
-                        onChange={(value) =>
-                          updateItem(index, "unitId", value ? Number(value) : null)
+                        onChange={(value) => {
+                          const unit = unitList.find(u => u.id === Number(value));
+                          updateItem(index, "unitId", value ? Number(value) : null);
+                          updateItem(index, "unitName", unit?.name ?? "");
+                        }
                         }
                       />
                     </div>
@@ -298,13 +351,13 @@ export default function CreateOrderModal({
     {/* LIVE SUMMARY */}
     <div className="rounded-xl border p-3 text-xs bg-gray-50 dark:bg-gray-800 space-y-2">
       <div className="flex justify-between">
-        <span>Total Lines</span>
-        <span className="font-semibold">{items.length}</span>
+        <span className="dark:text-white">Total Lines</span>
+        <span className="font-semibold dark:text-white">{items.length}</span>
       </div>
 
       <div className="flex justify-between">
-        <span>Selected</span>
-        <span className="font-semibold">
+        <span className="dark:text-white">Selected</span>
+        <span className="font-semibold dark:text-white">
           #{selectedIndex + 1}
         </span>
       </div>

@@ -18,6 +18,7 @@ export default function UserDropdown() {
 
   const firstName = localStorage.getItem("firstname");
   const lastName = localStorage.getItem("lastname");
+  const employeeNumber = localStorage.getItem("employee_number");
   const email = localStorage.getItem("email");
 
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ export default function UserDropdown() {
            {firstName + ' ' + lastName}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {email}
+            {employeeNumber}
           </span>
         </div>
 

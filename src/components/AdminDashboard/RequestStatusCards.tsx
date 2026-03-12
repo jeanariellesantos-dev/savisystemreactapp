@@ -17,11 +17,6 @@ export default function RequestStatusCards() {
       color: "text-green-600",
     },
     {
-      label: "Rejected",
-      value: statusFigures.rejected,
-      color: "text-red-600",
-    },
-    {
       label: "Shipped",
       value: statusFigures.shipped,
       color: "text-blue-600",
@@ -31,10 +26,25 @@ export default function RequestStatusCards() {
       value: statusFigures.received,
       color: "text-purple-600",
     },
+    {
+      label: "Rejected",
+      value: statusFigures.rejected,
+      color: "text-red-600",
+    },
+    {
+      label: "On Hold",
+      value: statusFigures.on_hold,
+      color: "text-yellow-600",
+    },
+    {
+      label: "Cancelled",
+      value: statusFigures.cancelled,
+      color: "text-gray-700",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">
       {stats.map((s) => (
         <div
           key={s.label}

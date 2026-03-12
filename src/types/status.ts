@@ -6,6 +6,8 @@ export type RequestStatus =
   | "SHIPPED"
   | "RECEIVED"
   | "APPROVED"
+  | "ON_HOLD"
+  | "CANCELLED"
   | "CLOSED"
   | "COMPLETED"
   | "REJECTED";

@@ -43,27 +43,29 @@ export default function NotificationDropdown() {
     }
   };
 
-    const openNotification = async (notif:any) => {
+const openNotification = async (notif: any) => {
 
-      setSelectedNotif(notif);
-      setShowViewModal(true);
+  // close all notifications modal if open
+  setShowAllModal(false);
 
-      if (notif.is_read === 0) {
+  setSelectedNotif(notif);
+  setShowViewModal(true);
 
-        await NotificationService.markAsRead(notif.id);
+  if (notif.is_read === 0) {
 
-        setNotifications(prev =>
-          prev.map(n =>
-            n.id === notif.id
-              ? { ...n, is_read: 1 }
-              : n
-          )
-        );
+    await NotificationService.markAsRead(notif.id);
 
-        setNotifying(false);
-      }
+    setNotifications(prev =>
+      prev.map(n =>
+        n.id === notif.id
+          ? { ...n, is_read: 1 }
+          : n
+      )
+    );
 
-    };
+    setNotifying(false);
+  }
+};
 
     const handleClick = async () => {
 
@@ -282,7 +284,7 @@ export default function NotificationDropdown() {
 
             <button
               onClick={() => setShowViewModal(false)}
-              className="w-full mt-5 py-2 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+              className="w-full mt-5 py-2 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white"
             >
               Close
             </button>
@@ -292,49 +294,96 @@ export default function NotificationDropdown() {
         </div>
         )}
 
-      {showAllModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+{showAllModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
 
-        <div className="w-[500px] h-[600px] overflow-y-auto rounded-2xl bg-white dark:bg-gray-900 p-4 shadow-xl">
+    <div className="w-[520px] h-[620px] flex flex-col rounded-2xl bg-white shadow-2xl dark:bg-gray-900 dark:border dark:border-gray-800">
 
-          <div className="flex justify-between mb-4">
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800">
 
-            <h3 className="text-lg font-semibold dark:text-white">
-              All Notifications
-            </h3>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+          Notifications
+        </h3>
 
-            <button onClick={()=>setShowAllModal(false)}>✕</button>
+        <button
+          onClick={() => setShowAllModal(false)}
+          className="flex items-center justify-center w-8 h-8 text-gray-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-300"
+        >
+          ✕
+        </button>
 
+      </div>
+
+      {/* LIST */}
+      <div className="flex-1 overflow-y-auto px-3 py-3 custom-scrollbar">
+
+        {notifications.length === 0 && (
+          <div className="flex items-center justify-center h-full text-sm text-gray-400">
+            No notifications yet
           </div>
+        )}
 
-          {notifications.map(n => (
+{notifications.map((n) => (
+  <div
+    key={n.id}
+    onClick={() => openNotification(n)}
+    className={`relative flex gap-3 p-4 mb-2 rounded-xl cursor-pointer transition-all duration-150 border
+    ${
+      n.is_read === 0
+        ? "bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800"
+        : "border-transparent hover:bg-gray-100 dark:hover:bg-gray-800"
+    }`}
+  >
 
-            <div
-            key={n.id}
-            onClick={()=>openNotification(n)}
-            className={`p-3 rounded-lg mb-2 cursor-pointer
-            ${n.is_read === 0
-              ? "bg-orange-50 dark:bg-orange-900/20"
-              : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+    {/* CONTENT */}
+    <div className="flex-1 min-w-0">
 
-            >
+      {/* TITLE ROW */}
+      <div className="flex items-start justify-between gap-2">
 
-              <p className="text-sm font-medium dark:text-white">
-                {n.title}
-              </p>
+        <div className="flex items-center gap-2 flex-wrap">
 
-              <p className="text-xs text-gray-400 truncate">
-                {n.message}
-              </p>
+          <p className="text-sm font-semibold text-gray-800 dark:text-white">
+            {n.title}
+          </p>
 
-            </div>
-
-          ))}
+          {n.request?.request_id && (
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+              {n.request?.request_id}
+            </span>
+          )}
 
         </div>
 
+        {/* TIME */}
+        <span className="text-[11px] text-gray-400 whitespace-nowrap">
+          {timeAgo(n.created_at)}
+        </span>
+
       </div>
-      )}
+
+      {/* MESSAGE */}
+      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+        {n.message}
+      </p>
+
+    </div>
+
+    {/* UNREAD INDICATOR */}
+    {n.is_read === 0 && (
+      <span className="absolute top-3 right-3 w-2 h-2 bg-orange-500 rounded-full"></span>
+    )}
+
+  </div>
+))}
+
+      </div>
+
+    </div>
+
+  </div>
+)}
     </div>
   );
 }

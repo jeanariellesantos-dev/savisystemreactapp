@@ -36,6 +36,15 @@ export default function UsersModal({
 
           {/* ===== BASIC INFO ===== */}
 
+          <input
+            value={form.employee_number}
+            onChange={(e) =>
+              setForm({ ...form, employee_number: e.target.value })
+            }
+            className="border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-gray-400"
+            placeholder="Employee Number"
+          />
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input
               value={form.firstname}

@@ -208,6 +208,10 @@ Deploy using:
   Version   Date         Description
   --------- ------------ ----------------------------------------
   1.0.0     03/03/2026   Initial React frontend release
+  1.1.0     03/11/2026   -> Change username from email address to employee number (new users table attribute)
+                         -> Integrate edit orders for all the approvers [ACCOUNTING, SUPERVISOR, CLUSTER HEAD]
+                         -> Add new status [ON_HOLD, CANCELLED] for Administrator
+                         -> Modify Administrator page eg. Dashboard and Manage Requests
 
 ------------------------------------------------------------------------
 

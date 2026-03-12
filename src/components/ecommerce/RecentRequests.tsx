@@ -4,7 +4,7 @@ import { useRequests } from "../../hooks/useRequests";
 import RequestsTable from "../requests//RequestsTable";
 import CreateOrderModal from "../requests/CreateOrderModal";
 import ViewOrderModal from "../requests/ViewOrderModal";
-import { Request } from "../../types/request";
+import { Request, RequestAction } from "../../types/request";
 import { useState, useEffect} from "react";
 import { confirmRequest } from "../../services/orderService";
 import { isOperations } from "../../services/authService";
@@ -32,30 +32,50 @@ export default function RecentRequests() {
     setPage(1);
   }, [filter]);
 
- const handleConfirmRequest = async ({
+const handleConfirmRequest = async ({
   requestId,
   action,
   remarks,
+  items,
 }: {
   requestId: number;
-  action: "APPROVED" | "REJECTED";
+  action: RequestAction;
   remarks?: string;
+  items?: {
+    product_id: number | null;
+    unit_id: number | null;
+    quantity: number;
+  }[];
 }) => {
   try {
-    await confirmRequest({ requestId, action, remarks });
 
-    showToast(
-      action === "APPROVED"
-        ? "Request approved successfully"
-        : "Request rejected successfully",
-      "success"
-    );
+    const payload = {
+      requestId,
+      action,
+      remarks,
+      items,
+    };
+
+    await confirmRequest(payload);
+
+    const messages: Record<string, string> = {
+      APPROVED: "Request approved successfully",
+      REJECTED: "Request rejected successfully",
+      ON_HOLD:
+        action === "ON_HOLD"
+          ? "Request activated successfully"
+          : "Request placed on hold",
+      CANCELLED: "Request cancelled successfully",
+    };
+
+    showToast(messages[action] || "Request updated successfully", "success");
 
     setSelected(null);
-    refreshRequests();  // refresh list
+    refreshRequests();
+
   } catch (error) {
-    showToast("Failed to process request", "error");
     console.error(error);
+    showToast("Failed to process request", "error");
   }
 };
 

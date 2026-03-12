@@ -1,5 +1,25 @@
 import { RequestStatus } from "../types/status";
 
+export type CreateOrderItem = {  
+    product_id: number | null;
+    unit_id: number | null;
+    quantity: number;
+};
+
+export type CreateOrderPayload = {
+  status: string;
+  items: CreateOrderItem[];
+};
+
+export type RequestAction = "APPROVED" | "REJECTED" | "ON_HOLD" | "CANCELLED";
+export interface ConfirmRequestPayload {
+  requestId: number;
+  action: RequestAction;
+  remarks?: string;
+  items: CreateOrderItem[];
+};
+
+
 // User who created the request
 export interface Requestor {
   id: number;
