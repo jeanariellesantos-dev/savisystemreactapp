@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
+import { getUserRole, Role } from "../components/utils/authHelper";
 
 // Assume these icons are imported from an icon library
 import {
@@ -23,19 +24,13 @@ import {
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
-type Role =
-  | "ADMINISTRATOR"
-  | "OPERATION"
-  | "ACCOUNTING"
-  | "SUPERVISOR"
-  | "INVENTORY";
-
 const ADMIN_ROLE: Role = "ADMINISTRATOR";
 
 const NORMAL_ROLES: Role[] = [
   "OPERATION",
   "ACCOUNTING",
   "SUPERVISOR",
+  "CLUSTER_HEAD",
   "INVENTORY",
 ];
 
@@ -362,7 +357,7 @@ const AppSidebar: React.FC = () => {
     
   );
 
-  const userRole = localStorage.getItem("role") as Role | null;
+  const userRole = getUserRole() as Role | null;
 
 const filteredNavItems = navItems
   .filter((item) => {

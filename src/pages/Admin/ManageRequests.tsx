@@ -89,9 +89,16 @@ const handleConfirmRequest = async ({
      CREATE REQUEST
   =============================== */
 
-  const handleCreateOrder = async (items: OrderItem[]) => {
+const handleCreateOrder = async (payload: {
+  requestor_id: number;
+  items: OrderItem[];
+}) => {
     try {
-      const payload = {
+   
+      const { requestor_id, items } = payload;
+
+      const formatted = {
+        requestor_id,
         status: "PENDING_ACCOUNTING",
         items: items.map((i) => ({
           product_id: i.productId,
@@ -100,7 +107,7 @@ const handleConfirmRequest = async ({
         })),
       };
 
-      await createOrder(payload);
+      await createOrder(formatted);
 
       showToast("Request created successfully", "success");
       closeModal();
