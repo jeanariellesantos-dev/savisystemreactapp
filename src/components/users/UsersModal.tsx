@@ -10,6 +10,7 @@ type Props = {
   setForm: any;
   onSave: () => void;
   roles: any[];
+  dealerships: any[];
   hasChanges: boolean; 
 };
 
@@ -21,6 +22,7 @@ export default function UsersModal({
   setForm,
   onSave,
   roles,
+  dealerships,
   hasChanges,   
 }: Props) {
   const isCreate = mode === "create";
@@ -98,6 +100,23 @@ export default function UsersModal({
             {roles.map((role) => (
               <option key={role.id} value={role.id}>
                 {role.role_name}
+              </option>
+            ))}
+          </select>
+
+          {/* DEALERSHIP SELECT */}
+          <select
+             value={String(form.dealership_id || "")}
+            onChange={(e) =>
+              setForm({ ...form, dealership_id: e.target.value })
+            }
+            className="border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-gray-400"
+          >
+            <option value="">Select Dealerships</option>
+
+            {dealerships.map((dealership) => (
+              <option key={dealership.id} value={dealership.id}>
+                {dealership.dealership_name}
               </option>
             ))}
           </select>

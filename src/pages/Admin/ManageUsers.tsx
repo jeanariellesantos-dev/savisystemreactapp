@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import UsersTable from "../../components/users/UsersTable";
 import UsersModal from "../../components/users/UsersModal";
 import ConfirmPasswordModal from "../../components/users/ConfirmPasswordModal";
-import { UserService } from "../../services/adminService";
-import { RoleService } from "../../services/adminService";
+import { UserService, RoleService, DealershipService } from "../../services/adminService";
 import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/button/Button";
 
@@ -12,6 +11,7 @@ export default function ManageUsers() {
 
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
+  const [dealerships, setDealerships] = useState<any[]>([]);
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [isCreateMode, setIsCreateMode] = useState(false);
   const [confirmPasswordModal, setConfirmPasswordModal] = useState(false);
@@ -26,6 +26,7 @@ export default function ManageUsers() {
     lastname: "",
     email: "",
     role_id: "",
+    dealership_id: "",
     mobile: "",
     password: "",
     confirmPassword: "",
@@ -56,9 +57,19 @@ export default function ManageUsers() {
     }
   };
 
+  const loadDealerships = async () => {
+    try {
+      const data = await DealershipService.getAll();
+      setDealerships(data);
+    } catch {
+      showToast("Failed to load dealerships", "error");
+    }
+  };
+
   useEffect(() => {
     loadUsers();
     loadRoles();
+    loadDealerships();
   }, []);
 
   /* ================= OPEN CREATE ================= */
@@ -71,6 +82,7 @@ export default function ManageUsers() {
       email: "",
       mobile: "",
       role_id: "",
+      dealership_id: "",
       password: "",
       confirmPassword: "",
     });
@@ -90,6 +102,7 @@ export default function ManageUsers() {
         lastname: user.lastname ?? "",
         email: user.email ?? "",
         mobile: user.mobile ?? "",
+        dealership_id: user.dealership_id ?? "",
         role_id: user.role_id ?? "",
       };
 
@@ -117,6 +130,7 @@ export default function ManageUsers() {
         form.lastname !== originalForm.lastname ||
         form.email !== originalForm.email ||
         form.mobile !== originalForm.mobile ||
+        form.dealership_id !== originalForm.dealership_id ||
         String(form.role_id) !== String(originalForm.role_id);
 
       const passwordFilled =
@@ -165,7 +179,9 @@ export default function ManageUsers() {
         firstname: form.firstname,
         lastname: form.lastname,
         email: form.email,
+        mobile: form.mobile,
         role_id: form.role_id,
+        dealership_id: form.dealership_id,
         password: form.password,
       });
 
@@ -189,6 +205,7 @@ export default function ManageUsers() {
         form.lastname !== originalForm.lastname ||
         form.email !== originalForm.email ||
         form.mobile !== originalForm.mobile ||
+        form.dealership_id !== originalForm.dealership_id ||
         String(form.role_id) !== String(originalForm.role_id);
 
       const passwordFilled =
@@ -207,6 +224,7 @@ export default function ManageUsers() {
         lastname: form.lastname,
         email: form.email,
         role_id: form.role_id,
+        dealership_id: form.dealership_id,
         mobile: form.mobile,
         password: form.password,
       });
@@ -338,6 +356,7 @@ const handleToggle = async (user: any) => {
             setForm={setForm}
             onSave={handleSave}
             roles={roles}
+            dealerships={dealerships}
             hasChanges={hasChanges}
           />
         )}
