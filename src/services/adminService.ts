@@ -5,8 +5,8 @@ import { Dealership, DealershipPayload } from "../types/dealership";
 import { Role, RolePayload } from "../types/role";
 import { RequestStatusFigures } from "../types/dashboard";
 import { Request } from "../types/request";
-import { CreateOrderPayload } from "../types/request";
-
+import { CreateOrderPayload, ConfirmRequestPayload } from "../types/request";
+import { CreateShipmentPayload } from "../types/shipment";
 
 export type DashboardRange = "7d" | "30d" | "year";
 
@@ -253,4 +253,55 @@ export const RoleService = {
   async toggleStatus(id: number): Promise<void> {
     await URL_API.patch(`/admin/roles/${id}/toggle`);
   },
+};
+
+
+/* =========================================================
+   REQUEST WORKFLOW (USER)
+========================================================= */
+export const RequestWorkflowService = {
+
+  async approve({
+    requestId,
+    action,
+    remarks,
+    items,
+  }: ConfirmRequestPayload) {
+
+    const { data } = await URL_API.post(
+      `/admin/requests/${requestId}/approve`,
+      {
+        action,
+        remarks: remarks ?? null,
+        items: items ?? [],
+      }
+    );
+
+    return data;
+  },
+
+  async fulfill(
+    requestId: number,
+    payload: CreateShipmentPayload
+  ) {
+    const { data } = await URL_API.post(
+      `admin/requests/${requestId}/fulfill`,
+      payload
+    );
+
+    return data;
+  },
+
+  async receive(
+    requestId: number,
+    payload: CreateShipmentPayload
+  ) {
+    const { data } = await URL_API.post(
+      `admin/requests/${requestId}/receive`,
+      payload
+    );
+
+    return data;
+  },
+
 };

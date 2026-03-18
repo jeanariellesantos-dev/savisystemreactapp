@@ -12,7 +12,6 @@ import {
 import DatePicker from "../form/date-picker";
 import CreateOrderModal from "../requests/CreateOrderModal";
 import { OrderItem } from "../../types/orderItem"
-import { getRoleFlags } from "../../components/utils/authHelper";
 import { getRequestPermissions } from "../../components/utils/permissionHelper";
 
 type ActionType =
@@ -59,8 +58,6 @@ export default function ViewRequestModal({
   onReceive,
 }: Props) {
   if (!request) return null;
-
-  const {isAdministrator, isAccounting,isInventory, isOperations, isSupervisor, isClusterHead } = getRoleFlags();
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -222,7 +219,6 @@ const handleConfirm = async () => {
 
   const {
     canEditShipment,
-    canViewShipmentReadonly,
     canMarkAsReceived,
     canEditOrder,
     canApproveReject,
@@ -453,7 +449,7 @@ return (
         dark:border-gray-700
       "
       style={{
-        maxHeight: "400px"   // ≈ 10 rows (each row ~42px)
+        maxHeight: "450px"   // ≈ 10 rows (each row ~42px)
       }}
     >
 
@@ -499,11 +495,12 @@ return (
 
 {/* RIGHT */}
 {/* ================= RIGHT ================= */}
-<div className="flex flex-col min-h-0 gap-4 overflow-hidden">
+
+<div className="flex flex-col min-h-0 h-full overflow-hidden max-h-full">
 
 {/* ================= SHIPMENT CARD ================= */}
-<div className="rounded-2xl border bg-gray-50/70 p-4 dark:bg-gray-800/50 dark:border-gray-700">
-  <p className="text-xs mb-3 uppercase text-gray-500">
+ <div className="shrink-0 mb-3 rounded-2xl border bg-gray-50/70 p-4 dark:bg-gray-800/50 dark:border-gray-700">
+   <p className="text-xs mb-3 uppercase text-gray-500">
     Shipment
   </p>
 
@@ -635,13 +632,12 @@ return (
 
 
 {/* ================= REMARKS CARD ================= */}
-<div className="
-  flex flex-col min-h-0
-  rounded-2xl border
-  bg-gray-50/70
-  dark:bg-gray-800/50 dark:border-gray-700
-  overflow-hidden
-">
+  <div className="
+    flex flex-col flex-1 min-h-0
+    rounded-2xl border
+    bg-gray-50/70
+    dark:bg-gray-800/50 dark:border-gray-700
+  ">
 
   <div className="px-4 py-2 text-xs uppercase text-gray-500 shrink-0">
     Remarks
@@ -649,7 +645,8 @@ return (
 
   <div
     ref={remarksRef}
-    className="flex-1 min-h-0 overflow-y-auto px-4 pb-2 space-y-3"
+  className="flex-1 min-h-0 overflow-y-auto px-4 py-2 space-y-3"
+  style={{ maxHeight: "300px" }} // 🔥 IMPORTANT
   >
 
     {request.approvals?.length ? (

@@ -41,7 +41,7 @@ const createEmptyItem = (): OrderItem => ({
   quantity: 1,
 });
 
-  const { isAccounting, isOperations } = getRoleFlags();
+  const {isAdministrator, isAccounting, isOperations } = getRoleFlags();
   //load operation users
 
   const [operationUsers, setOperationUsers] = useState<any[]>([]);
@@ -416,7 +416,7 @@ const createEmptyItem = (): OrderItem => ({
         Requestor
       </div>
 
-      {userRole === "ACCOUNTING" ? (
+      {(isAccounting || isAdministrator) ? (
         <Select
           value={requestorId}
           placeholder="Select..."

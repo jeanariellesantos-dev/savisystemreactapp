@@ -13,24 +13,20 @@ export const getRequestPermissions = (status: string) => {
   return {
     // ================= SHIPMENT =================
     canEditShipment:
-      status === "PENDING_INVENTORY" && isInventory,
-
-    canViewShipmentReadonly:
-      status === "SHIPPED" || status === "RECEIVED",
+      status === "PENDING_INVENTORY" && (isInventory || isAdministrator),
 
     canMarkAsReceived:
       status === "SHIPPED" && (isOperations || isAdministrator),
 
     // ================= ORDER =================
     canEditOrder:
-      isAccounting && status === "PENDING_ACCOUNTING",
+      (isAdministrator || isAccounting) && status === "PENDING_ACCOUNTING",
 
     // ================= APPROVAL =================
     canApproveReject:
-      isAdministrator ||
-      (isAccounting && status === "PENDING_ACCOUNTING") ||
-      (isSupervisor && status === "PENDING_SUPERVISOR") ||
-      (isClusterHead && status === "PENDING_CLUSTER_HEAD"),
+      ((isAccounting || isAdministrator) && status === "PENDING_ACCOUNTING") ||
+      ((isSupervisor  || isAdministrator) && status === "PENDING_SUPERVISOR") ||
+      ((isClusterHead  || isAdministrator) && status === "PENDING_CLUSTER_HEAD"),
 
     hideApprovalActions: [
       "RECEIVED",
