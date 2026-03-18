@@ -78,6 +78,12 @@ const createEmptyItem = (): OrderItem => ({
       setItems([createEmptyItem()]);
     }
   }, [initialItems]);
+  
+  useEffect(() => {
+  if ((isAccounting || isAdministrator) && operationUsers.length > 0 && !requestorId) {
+    setRequestorId(String(operationUsers[0].user_id));
+  }
+}, [operationUsers, isAccounting, isAdministrator]);
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
@@ -416,40 +422,40 @@ const createEmptyItem = (): OrderItem => ({
         Requestor
       </div>
 
-      {(isAccounting || isAdministrator) ? (
-        <Select
-          value={requestorId}
-          placeholder="Select..."
-          options={operationUsers.map((u) => ({
-            value: String(u.user_id),
-            label: `${u.firstname} - ${u.dealership_name}${
-              String(u.user_id) === currentUserId ? " (You)" : ""
-            }`,
-          }))}
-          onChange={(value) => setRequestorId(value)}
-        />
-      ) : (
-        <div className="flex justify-between text-sm px-2 py-1.5 bg-gray-100 dark:bg-gray-700 rounded">
+        {(isAccounting || isAdministrator) ? (
+          <Select
+            value={requestorId}
+            placeholder="Select..."
+            options={operationUsers.map((u) => ({
+              value: String(u.user_id),
+              label: `${u.employee_number} ${u.firstname} - ${u.dealership_name}${
+                String(u.user_id) === currentUserId ? " (You)" : ""
+              }`,
+            }))}
+            onChange={(value) => setRequestorId(value)}
+          />
+        ) : (
+          <div className="flex justify-between text-sm px-2 py-1.5 bg-gray-100 dark:bg-gray-700 rounded">
 
-          <span>
-            {
-              operationUsers.find(
-                (u) => String(u.user_id) === currentUserId
-              )?.firstname
-            }{" - "}
-            {
-              operationUsers.find(
-                (u) => String(u.user_id) === currentUserId
-              )?.dealership_name
-            }
-          </span>
+            <span>
+              {
+                operationUsers.find(
+                  (u) => String(u.user_id) === currentUserId
+                )?.firstname
+              }{" - "}
+              {
+                operationUsers.find(
+                  (u) => String(u.user_id) === currentUserId
+                )?.dealership_name
+              }
+            </span>
 
-          <span className="text-[10px] text-blue-600">
-            You
-          </span>
+            <span className="text-[10px] text-blue-600">
+              You
+            </span>
 
-        </div>
-      )}
+          </div>
+        )}
 
     </div>
 
