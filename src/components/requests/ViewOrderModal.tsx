@@ -619,6 +619,7 @@ return (
               px-3 rounded-lg border
               flex items-center text-sm
               bg-gray-100 text-gray-400 dark:bg-gray-800
+              dark:border-gray-700
               ">
               No tracking link
               </div>
