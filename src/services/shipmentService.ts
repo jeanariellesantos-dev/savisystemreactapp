@@ -1,10 +1,5 @@
-import { ShipmentForm } from "../types/shipment";
+import { ShipmentForm, CreateShipmentPayload } from "../types/shipment";
 import URL_API from "../components/api/axios";
-
-type CreateShipmentPayload = {  
-    remarks?: string | null;
-    shipments : ShipmentForm[];
-};
 
 export async function markRequestAsShipped(  
 requestId: number,

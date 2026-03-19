@@ -3,17 +3,21 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useEffect, useState } from "react";
-
+import { getRoleFlags, getUserRole } from "../../components/utils/authHelper";
 import { Category } from "../../types/category";
 import { CategoryService } from "../../services/categoryService";
 import Select from "../form/Select";
 import { Product, Unit, ProductService } from "../../services/productService";
+import { UserService } from "../../services/userService";
 import { OrderItem } from "../../types/orderItem";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (items: OrderItem[]) => void | Promise<void>;
+  onSubmit?: (payload: {
+    requestor_id: number;
+    items: OrderItem[];
+  }) => void | Promise<void>;
   initialItems?: OrderItem[];   // NEW
   title?: string;               // NEW
 };
@@ -37,16 +41,49 @@ const createEmptyItem = (): OrderItem => ({
   quantity: 1,
 });
 
-const [items, setItems] = useState<OrderItem[]>([createEmptyItem()]);
+  const {isAdministrator, isAccounting, isOperations } = getRoleFlags();
+  //load operation users
 
-useEffect(() => {
-  if (initialItems?.length) {
-    setItems(initialItems);
-  } else {
-    setItems([createEmptyItem()]);
+  const [operationUsers, setOperationUsers] = useState<any[]>([]);
+  const [userRole, setUserRole] = useState("");
+  const [currentUserId, setCurrentUserId] = useState("");
+  const [requestorId, setRequestorId] = useState("");
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userid") || "";
+
+    setUserRole(getUserRole);
+    setCurrentUserId(userId);
+
+    if (isOperations) {
+      setRequestorId(userId);
+    }
+  }, []);
+
+  useEffect(() => {
+  const loadOperationUsers = async () => {
+    const users = await UserService.getByRole("OPERATION");
+    setOperationUsers(users);
+  };
+
+  loadOperationUsers();
+}, []);
+
+  const [items, setItems] = useState<OrderItem[]>([createEmptyItem()]);
+
+  useEffect(() => {
+    if (initialItems?.length) {
+      setItems(initialItems);
+    } else {
+      setItems([createEmptyItem()]);
+    }
+  }, [initialItems]);
+  
+  useEffect(() => {
+  if ((isAccounting || isAdministrator) && operationUsers.length > 0 && !requestorId) {
+    setRequestorId(String(operationUsers[0].user_id));
   }
-}, [initialItems]);
-
+}, [operationUsers, isAccounting, isAdministrator]);
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
@@ -77,8 +114,8 @@ useEffect(() => {
     }
   };
 
-  loadDependencies();
-}, [initialItems]);
+    loadDependencies();
+  }, [initialItems]);
 
   const updateItem = <K extends keyof OrderItem>(
     index: number,
@@ -136,14 +173,20 @@ useEffect(() => {
     setUnits((prev) => ({ ...prev, [productId]: data }));
   };
 
+  const isEditMode = !!initialItems?.length;
+
   const submitToParent = () => {
-    onSubmit?.(items);
+    onSubmit?.({
+      requestor_id: isEditMode ? 0 : Number(requestorId),
+      items,
+    });
+
     onClose();
   };
 
   const isFormInvalid = items.some(
     (i) => !i.categoryId || !i.productId || !i.unitId || i.quantity < 1
-  );
+  ) || (!isEditMode && !requestorId);
 
   const orderSummary = items.map((item) => {
     const category = categories.find((c) => c.id === item.categoryId);
@@ -166,6 +209,8 @@ useEffect(() => {
     };
   });
 
+
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[1300px]">
 
@@ -173,7 +218,7 @@ useEffect(() => {
 
         <div className="mb-4">
           <h2 className="text-xl font-semibold dark:text-white">
-            {title ?? "Create Order"}
+            {title ?? (isEditMode ? "Edit Order" : "Create Order")}
           </h2>
           <p className="text-xs text-gray-500">
             Click a row to select it before duplicating or removing
@@ -367,17 +412,77 @@ useEffect(() => {
 
 {/* BOTTOM ACTIONS */}
 <div className="pt-5 mt-5 border-t flex flex-col gap-3">
-  <Button size="sm" variant="outline" onClick={onClose}>
-    Cancel
-  </Button>
 
-  <Button
-    size="sm"
-    disabled={isFormInvalid}
-    onClick={() => setShowConfirm(true)}
-  >
-    Submit Order
-  </Button>
+    {/* REQUESTOR */}
+
+    {!isEditMode && (
+    <div className="space-y-1">
+
+      <div className="text-xs font-semibold text-gray-500">
+        Requestor
+      </div>
+
+        {(isAccounting || isAdministrator) ? (
+          <Select
+            value={requestorId}
+            placeholder="Select..."
+            options={operationUsers.map((u) => ({
+              value: String(u.user_id),
+              label: `${u.employee_number} ${u.firstname} - ${u.dealership_name}${
+                String(u.user_id) === currentUserId ? " (You)" : ""
+              }`,
+            }))}
+            onChange={(value) => setRequestorId(value)}
+          />
+        ) : (
+          <div className="flex justify-between text-sm px-2 py-1.5 bg-gray-100 dark:bg-gray-700 rounded">
+
+            <span>
+              {
+                operationUsers.find(
+                  (u) => String(u.user_id) === currentUserId
+                )?.firstname
+              }{" - "}
+              {
+                operationUsers.find(
+                  (u) => String(u.user_id) === currentUserId
+                )?.dealership_name
+              }
+            </span>
+
+            <span className="text-[10px] text-blue-600">
+              You
+            </span>
+
+          </div>
+        )}
+
+    </div>
+
+    )}
+
+
+    {/* ACTIONS */}
+    <div className="flex flex-col gap-2 pt-1">
+
+      <Button
+        size="sm"
+        disabled={isFormInvalid}
+        onClick={() => setShowConfirm(true)}
+        className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+      >
+        Submit
+      </Button>
+
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={onClose}
+      >
+        Cancel
+      </Button>
+
+    </div>
 </div>
 
 </div>

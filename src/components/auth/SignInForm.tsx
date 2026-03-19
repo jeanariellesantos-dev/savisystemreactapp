@@ -45,6 +45,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
     // store auth data
     localStorage.setItem("role", user.role);
+    localStorage.setItem("userid", user.id);
     localStorage.setItem("email", user.email);
     localStorage.setItem("employee_number", user.employee_number);
     localStorage.setItem("firstname", user.firstname);

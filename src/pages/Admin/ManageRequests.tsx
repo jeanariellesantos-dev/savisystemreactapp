@@ -15,6 +15,8 @@ import {
   markRequestAsReceived,
 } from "../../services/shipmentService";
 
+import { RequestWorkflowService } from "../../services/adminService";
+
 import { ShipmentForm } from "../../types/shipment";
 import { Request, RequestAction } from "../../types/request";
 import { OrderItem } from "../../types/orderItem";
@@ -63,7 +65,7 @@ const handleConfirmRequest = async ({
       remarks,
       items,
     };
-      await confirmRequest(payload);
+      await RequestWorkflowService.approve(payload);
 
       const messages: Record<string, string> = {
         APPROVED: "Request approved successfully",
@@ -89,9 +91,16 @@ const handleConfirmRequest = async ({
      CREATE REQUEST
   =============================== */
 
-  const handleCreateOrder = async (items: OrderItem[]) => {
+const handleCreateOrder = async (payload: {
+  requestor_id: number;
+  items: OrderItem[];
+}) => {
     try {
-      const payload = {
+   
+      const { requestor_id, items } = payload;
+
+      const formatted = {
+        requestor_id,
         status: "PENDING_ACCOUNTING",
         items: items.map((i) => ({
           product_id: i.productId,
@@ -100,7 +109,7 @@ const handleConfirmRequest = async ({
         })),
       };
 
-      await createOrder(payload);
+      await createOrder(formatted);
 
       showToast("Request created successfully", "success");
       closeModal();
@@ -125,7 +134,7 @@ const handleConfirmRequest = async ({
     remarks?: string | null;
   }) => {
     try {
-      await markRequestAsShipped(requestId, {
+      await RequestWorkflowService.fulfill(requestId, {
         shipments,
         remarks: remarks ?? null,
       });
@@ -153,7 +162,7 @@ const handleConfirmRequest = async ({
     remarks?: string | null;
   }) => {
     try {
-      await markRequestAsReceived(requestId, {
+      await RequestWorkflowService.receive(requestId, {
         shipments,
         remarks: remarks ?? null,
       });

@@ -1,11 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-
-type Role =
-  | "ADMINISTRATOR"
-  | "OPERATION"
-  | "ACCOUNTING"
-  | "SUPERVISOR"
-  | "INVENTORY";
+import { getUserRole, Role, getRoleFlags } from "../components/utils/authHelper";
 
 export default function ProtectedRoute({
   adminOnly = false,
@@ -15,17 +9,19 @@ export default function ProtectedRoute({
   normalOnly?: boolean;
 }) {
   
-  const role = localStorage.getItem("role") as Role | null;
+  const role = getUserRole() as Role | null;
+
+  const {isAdministrator} = getRoleFlags ();
 
   if (!role) {
     return <Navigate to="/signin" replace />;
   }
 
-  if (adminOnly && role !== "ADMINISTRATOR") {
+  if (adminOnly && !isAdministrator) {
     return <Navigate to="*" replace />;
   }
 
-  if (normalOnly && role === "ADMINISTRATOR") {
+  if (normalOnly && isAdministrator) {
     return <Navigate to="*" replace />;
   }
 

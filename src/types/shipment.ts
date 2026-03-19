@@ -5,3 +5,8 @@ export type ShipmentForm = {
   received_date: string;
   tracking_link: string;
 };
+
+export type CreateShipmentPayload = {  
+    remarks?: string | null;
+    shipments : ShipmentForm[];
+};

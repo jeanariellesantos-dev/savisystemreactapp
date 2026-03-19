@@ -23,6 +23,14 @@ export const UserService = {
 
   updateEmail(payload: { email: string }) {
     return URL_API.put("/user/update_email", payload);
+  },
+
+    // ✅ NEW: Get users by role
+  async getByRole(role: string) {
+    const res = await URL_API.get(`/user`, {
+      params: { role },
+    });
+    return res.data.data; // adjust if your API structure differs
   }
   
 };

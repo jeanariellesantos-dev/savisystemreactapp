@@ -12,6 +12,7 @@ import {
 import DatePicker from "../form/date-picker";
 import CreateOrderModal from "../requests/CreateOrderModal";
 import { OrderItem } from "../../types/orderItem"
+import { getRequestPermissions } from "../../components/utils/permissionHelper";
 
 type ActionType =
   | "APPROVED"
@@ -57,16 +58,6 @@ export default function ViewRequestModal({
   onReceive,
 }: Props) {
   if (!request) return null;
-
-  const role =
-    typeof window !== "undefined" ? localStorage.getItem("role") : null;
-
-  const isAdministrator = role === "ADMINISTRATOR";
-  const isOperations = role === "OPERATION";
-  const isInventory = role === "INVENTORY";
-  const isAccounting = role === "ACCOUNTING";
-  const isSupervisor = role === "SUPERVISOR";
-  const isClusterHead = role === "CLUSTER_HEAD";
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -226,28 +217,14 @@ const handleConfirm = async () => {
   }
 };
 
-  const canEditShipment = request.status === "PENDING_INVENTORY" && isInventory;
-  const canViewShipmentReadonly =
-    (request.status === "SHIPPED" || request.status === "RECEIVED");
-
-  const canMarkAsReceived =
-  request.status === "SHIPPED" && (isOperations || isAdministrator);
-
-  const hideApprovalActions =
-  request.status === "RECEIVED" || request.status === "CANCELLED" || request.status === "SHIPPED"|| request.status === "ON_HOLD";
-
-  const canEditOrder =
-  (isAccounting && request.status === "PENDING_ACCOUNTING");
-
-  const canApproveReject =
-  isAdministrator ||
-  (isAccounting && request.status === "PENDING_ACCOUNTING") ||
-  (isSupervisor && request.status === "PENDING_SUPERVISOR") ||
-  (isClusterHead && request.status === "PENDING_CLUSTER_HEAD");;
-
-  const canCancelOnHold =
-  isAdministrator &&
-  ["PENDING_ACCOUNTING", "PENDING_SUPERVISOR", "PENDING_CLUSTER_HEAD", "ON_HOLD"].includes(request.status);
+  const {
+    canEditShipment,
+    canMarkAsReceived,
+    canEditOrder,
+    canApproveReject,
+    hideApprovalActions,
+    canCancelOnHold,
+  } = getRequestPermissions(request.status);
 
   // Trace order changes
   const generateOrderChanges = (original:OrderItem[], edited:OrderItem[]) => {
@@ -472,7 +449,7 @@ return (
         dark:border-gray-700
       "
       style={{
-        maxHeight: "400px"   // ≈ 10 rows (each row ~42px)
+        maxHeight: "450px"   // ≈ 10 rows (each row ~42px)
       }}
     >
 
@@ -518,11 +495,12 @@ return (
 
 {/* RIGHT */}
 {/* ================= RIGHT ================= */}
-<div className="flex flex-col min-h-0 gap-4 overflow-hidden">
+
+<div className="flex flex-col min-h-0 h-full overflow-hidden max-h-full">
 
 {/* ================= SHIPMENT CARD ================= */}
-<div className="rounded-2xl border bg-gray-50/70 p-4 dark:bg-gray-800/50 dark:border-gray-700">
-  <p className="text-xs mb-3 uppercase text-gray-500">
+ <div className="shrink-0 mb-3 rounded-2xl border bg-gray-50/70 p-4 dark:bg-gray-800/50 dark:border-gray-700">
+   <p className="text-xs mb-3 uppercase text-gray-500">
     Shipment
   </p>
 
@@ -654,13 +632,12 @@ return (
 
 
 {/* ================= REMARKS CARD ================= */}
-<div className="
-  flex flex-col min-h-0
-  rounded-2xl border
-  bg-gray-50/70
-  dark:bg-gray-800/50 dark:border-gray-700
-  overflow-hidden
-">
+  <div className="
+    flex flex-col flex-1 min-h-0
+    rounded-2xl border
+    bg-gray-50/70
+    dark:bg-gray-800/50 dark:border-gray-700
+  ">
 
   <div className="px-4 py-2 text-xs uppercase text-gray-500 shrink-0">
     Remarks
@@ -668,7 +645,8 @@ return (
 
   <div
     ref={remarksRef}
-    className="flex-1 min-h-0 overflow-y-auto px-4 pb-2 space-y-3"
+  className="flex-1 min-h-0 overflow-y-auto px-4 py-2 space-y-3"
+  style={{ maxHeight: "300px" }} // 🔥 IMPORTANT
   >
 
     {request.approvals?.length ? (
@@ -767,39 +745,41 @@ return (
           initialItems={
             editedItems.length ? editedItems : mapItems(request.items)
           }
-onSubmit={(items) => {
+          onSubmit={(payload) => {
 
-  const enriched = items.map(i => {
+            const { items } = payload; // ✅ ignore requestor_id
 
-    const original = request.items.find(
-      (r:any) => r.product?.id === i.productId
-    );
+            const enriched = items.map(i => {
 
-    return {
-      ...i,
+              const original = request.items.find(
+                (r:any) => r.product?.id === i.productId
+              );
 
-      productName:
-        i.productName ||
-        original?.product?.product_name ||
-        "",
+              return {
+                ...i,
 
-      categoryName:
-        i.categoryName ||
-        original?.product?.category?.name ||
-        "",
+                productName:
+                  i.productName ||
+                  original?.product?.product_name ||
+                  "",
 
-      unitName:
-        i.unitName ||
-        original?.unit?.name ||
-        ""
+                categoryName:
+                  i.categoryName ||
+                  original?.product?.category?.name ||
+                  "",
 
-    };
+                unitName:
+                  i.unitName ||
+                  original?.unit?.name ||
+                  ""
 
-  });
+              };
 
-  setEditedItems(enriched);
-  setEditingOrder(false);
-}}
+            });
+
+            setEditedItems(enriched);
+            setEditingOrder(false);
+          }}
         />
 </>
 );

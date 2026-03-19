@@ -7,6 +7,7 @@ export type CreateOrderItem = {
 };
 
 export type CreateOrderPayload = {
+  requestor_id: number;
   status: string;
   items: CreateOrderItem[];
 };

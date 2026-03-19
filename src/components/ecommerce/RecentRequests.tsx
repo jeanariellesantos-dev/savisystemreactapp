@@ -7,7 +7,7 @@ import ViewOrderModal from "../requests/ViewOrderModal";
 import { Request, RequestAction } from "../../types/request";
 import { useState, useEffect} from "react";
 import { confirmRequest } from "../../services/orderService";
-import { isOperations } from "../../services/authService";
+import { getRoleFlags } from "../../components/utils/authHelper";
 import { useToast } from "../../context/ToastContext";
 import { createOrder } from "../../services/orderService";
 import { markRequestAsShipped, markRequestAsReceived } from "../../services/shipmentService";
@@ -26,6 +26,8 @@ export default function RecentRequests() {
   const [search, setSearch] = useState("");    
 
   const { requests, meta, loading, error, refreshRequests } = useRequests(filter, page);
+
+  const { isAccounting, isOperations } = getRoleFlags();
 
     // ADD THIS HERE
   useEffect(() => {
@@ -79,10 +81,16 @@ const handleConfirmRequest = async ({
   }
 };
 
-
-const handleCreateOrder = async (items: OrderItem[]) => {
+const handleCreateOrder = async (payload: {
+  requestor_id: number;
+  items: OrderItem[];
+}) => {
     try {
-      const payload = {
+   
+      const { requestor_id, items } = payload;
+
+      const formatted = {
+        requestor_id,
         status: "PENDING_ACCOUNTING",
         items: items.map((i) => ({
           product_id: i.productId,
@@ -91,7 +99,7 @@ const handleCreateOrder = async (items: OrderItem[]) => {
         })),
       };
 
-      await createOrder(payload);
+      await createOrder(formatted);
 
       showToast("Order created successfully", "success");
       closeModal();
@@ -196,7 +204,7 @@ const handleCreateOrder = async (items: OrderItem[]) => {
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
         />
 
-          {isOperations() && (
+          {(isOperations|| isAccounting) && (
             <Button 
               size="sm" 
               variant="primary" 
