@@ -386,6 +386,7 @@ return (
           onClick={() => {
             setConfirmAction("REJECTED");
             setRejectError(null);
+            setStockErrors?.([]);
           }}
           className="flex items-center gap-1 bg-red-500 text-white hover:bg-red-600"
         >

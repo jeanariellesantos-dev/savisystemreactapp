@@ -308,6 +308,7 @@ const handleCreateOrder = async (payload: {
           onShip={handleShipRequest}
           onReceive={handleReceiveRequest}
           stockErrors={stockErrors}
+          setStockErrors={setStockErrors}
         />
       )}
 
