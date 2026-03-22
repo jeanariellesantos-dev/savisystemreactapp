@@ -46,6 +46,14 @@ export default function ProductTable({
               Units
             </TableCell>
 
+
+            <TableCell
+              isHeader
+              className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
+            >
+              Stock
+            </TableCell>
+
             <TableCell
               isHeader
               className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
@@ -93,6 +101,11 @@ export default function ProductTable({
                     <span className="text-gray-400 text-xs">No units</span>
                   )}
                 </div>
+              </TableCell>
+
+            {/* CATEGORY */}
+              <TableCell className="py-3 text-center text-gray-500 text-theme-sm dark:text-gray-400">
+                {product.stock}
               </TableCell>
 
               {/* STATUS */}

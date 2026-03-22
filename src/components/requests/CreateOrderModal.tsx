@@ -418,7 +418,7 @@ const createEmptyItem = (): OrderItem => ({
     {!isEditMode && (
     <div className="space-y-1">
 
-      <div className="text-xs font-semibold text-gray-500">
+      <div className="mb-2 text-xs font-semibold text-gray-500">
         Requestor
       </div>
 
@@ -450,7 +450,7 @@ const createEmptyItem = (): OrderItem => ({
               }
             </span>
 
-            <span className="text-[10px] text-blue-600">
+            <span className="mt-1 text-[10px] text-blue-600">
               You
             </span>
 

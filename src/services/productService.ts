@@ -19,7 +19,7 @@ export const ProductService = {
   },
 
   async getUnits(productId: number): Promise<Unit[]> {
-  const res = await URL_API.get(`/products/${productId}/units`);
-  return res.data; // ✅ unwrap
+    const res = await URL_API.get(`/products/${productId}/units`);
+    return res.data; // ✅ unwrap
   },
 };

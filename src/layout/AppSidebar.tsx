@@ -14,6 +14,7 @@ import {
   PieChartIcon,
   PlugInIcon,
   TableIcon,
+  BoxIconLine,
   SettingsIcon,
   UserCircleIcon,
   FileIcon,
@@ -21,6 +22,7 @@ import {
   DealershipIcon,
   RoleIcon,
   AccountsIcon,
+  InventoryIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -44,6 +46,7 @@ type NavItem = {
   path?: string;
   adminOnly?: boolean;
   normalOnly?: boolean;
+  roles?: Role[];
   subItems?: { name: string; path: string;adminOnly?: boolean; normalOnly?: boolean; pro?: boolean; new?: boolean }[];
 };
 
@@ -53,6 +56,12 @@ const navItems: NavItem[] = [
     name: "Requests",
     path: "/home",
     normalOnly: true,
+  },
+  {
+  icon: <InventoryIcon />,
+  name: "Inventory",
+  path: "/inventory",
+  roles: ["ACCOUNTING"], // ✅ custom role control
   },
     {
     icon: <GridIcon />,
@@ -361,6 +370,10 @@ const AppSidebar: React.FC = () => {
 
 const filteredNavItems = navItems
   .filter((item) => {
+    // ✅ Role-based filter (NEW)
+    if (item.roles && userRole) {
+      return item.roles.includes(userRole);
+    }
     if (item.adminOnly) return isAdmin(userRole);
     if (item.normalOnly) return !isAdmin(userRole);
     return true; // visible to both

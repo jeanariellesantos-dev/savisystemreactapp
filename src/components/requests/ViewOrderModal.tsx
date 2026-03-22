@@ -47,6 +47,8 @@ type Props = {
     shipments: ShipmentForm[];
     remarks?: string | null ;
   }) => Promise<void>;
+  stockErrors?: any[];
+  setStockErrors?: (errors: any[]) => void;
 };
 
 export default function ViewRequestModal({
@@ -56,6 +58,9 @@ export default function ViewRequestModal({
   onConfirm,
   onShip,
   onReceive,
+  stockErrors,
+  setStockErrors,
+  
 }: Props) {
   if (!request) return null;
 
@@ -205,9 +210,15 @@ const handleConfirm = async () => {
           });
     }
 
-    onClose();
+    setConfirmAction(null);
+    setActionRemarks("");
 
-  } finally {
+  }  catch (err) {
+    // ❌ DO NOTHING → keep modal open
+    // errors are already handled in parent (stockErrors)
+    return;
+  }
+  finally {
     setSubmitting(false);
     setConfirmAction(null);
     setActionRemarks("");
@@ -265,477 +276,520 @@ const handleConfirm = async () => {
 return (
 
   <>
-<Modal
-  isOpen={isOpen}
-  onClose={onClose}
-  className={`
-    flex flex-col
-    overflow-hidden
-    rounded-3xl
-    bg-white/90
-    backdrop-blur-xl
-    border border-gray-200/70
-    shadow-xl
-    dark:bg-gray-900/90
-    dark:border-gray-700
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      className={`
+        flex flex-col
+        overflow-y-auto
+        rounded-3xl
+        bg-white/90
+        backdrop-blur-xl
+        border border-gray-200/70
+        shadow-xl
+        dark:bg-gray-900/90
+        dark:border-gray-700
 
-    ${
-      confirmAction
-        ? "w-[95vw] max-w-[480px] p-6"
-        : "w-[85vw] max-w-[1400px] h-[80vh]"
-    }
-  `}
->
-
-{/* ================= MAIN ================= */}
-{!confirmAction ? (
-<>
-
-{/* ================= HEADER WITH ACTIONS ================= */}
-<div className="
-  shrink-0
-  flex items-center justify-between
-  px-6 pt-5 pb-3
-  border-b
-  bg-white
-  dark:bg-gray-900
-">
-
-  {/* LEFT */}
-  <div className="flex items-center gap-3">
-    <h2 className="text-lg font-semibold dark:text-white">
-      Order Details
-    </h2>
-
-    <Badge size="sm" color={getStatusBadgeColor(request.status)}>
-      {formatStatusLabel(request.status)}
-    </Badge>
-  </div>
-
-{/* RIGHT ACTION BAR */}
-<div className="flex items-center gap-2">
-
-{/* ================= ADMIN CONTROL ACTIONS ================= */}
-{canCancelOnHold  && (
-  <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
-
-    <Button
-      size="sm"
-      onClick={() => setConfirmAction("ON_HOLD")}
-      className="flex items-center gap-1 bg-yellow-500 text-white hover:bg-yellow-600"
+        ${
+          confirmAction
+            ? "w-[95vw] max-w-[480px] p-6"
+            : "w-[85vw] max-w-[1400px]"
+        }
+      `}
     >
-      {request.status === "ON_HOLD" ? "▶ Resume" : "⏸ On Hold"}
-    </Button>
 
-    <Button
-      size="sm"
-      onClick={() => setConfirmAction("CANCELLED")}
-      className="flex items-center gap-1 bg-gray-700 text-white hover:bg-gray-800"
-    >
-      ⛔ Cancel
-    </Button>
+    {/* ================= MAIN ================= */}
+    {!confirmAction ? (
+    <>
 
-  </div>
-)}
+    {/* ================= HEADER WITH ACTIONS ================= */}
+    <div className="
+      shrink-0
+      flex items-center justify-between
+      px-6 pt-5 pb-3
+      border-b
+      bg-white
+      dark:bg-gray-900
+    ">
 
-{/* ================= APPROVAL ACTIONS ================= */}
-{canApproveReject && !hideApprovalActions && (
-  <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
+      {/* LEFT */}
+      <div className="flex items-center gap-3">
+        <h2 className="text-lg font-semibold dark:text-white">
+          Order Details
+        </h2>
 
-      {canEditOrder && (
+        <Badge size="sm" color={getStatusBadgeColor(request.status)}>
+          {formatStatusLabel(request.status)}
+        </Badge>
+      </div>
+
+    {/* RIGHT ACTION BAR */}
+    <div className="flex items-center gap-2">
+
+    {/* ================= ADMIN CONTROL ACTIONS ================= */}
+    {canCancelOnHold  && (
+      <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
+
         <Button
           size="sm"
-          variant="outline"
+          onClick={() => setConfirmAction("ON_HOLD")}
+          className="flex items-center gap-1 bg-yellow-500 text-white hover:bg-yellow-600"
+        >
+          {request.status === "ON_HOLD" ? "▶ Resume" : "⏸ On Hold"}
+        </Button>
+
+        <Button
+          size="sm"
+          onClick={() => setConfirmAction("CANCELLED")}
+          className="flex items-center gap-1 bg-gray-700 text-white hover:bg-gray-800"
+        >
+          ⛔ Cancel
+        </Button>
+
+      </div>
+    )}
+
+    {/* ================= APPROVAL ACTIONS ================= */}
+    {canApproveReject && !hideApprovalActions && (
+      <div className="flex items-center gap-2 pr-3 border-r dark:border-gray-700">
+
+          {canEditOrder && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const mapped = mapItems(request.items);
+                setEditedItems(mapped);
+                setEditingOrder(true);
+                setStockErrors?.([]); 
+              }}
+              className="flex items-center gap-1"
+            >
+              ✏️ Edit
+            </Button>
+          )
+        }
+
+        <Button
+          size="sm"
           onClick={() => {
-            const mapped = mapItems(request.items);
-            setEditedItems(mapped);
-            setEditingOrder(true);
+            setConfirmAction("APPROVED");
+            setRejectError(null);
           }}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 bg-green-600 text-white hover:bg-green-700"
         >
-          ✏️ Edit
+          ✔ Approve
         </Button>
-      )
-    }
 
-    <Button
-      size="sm"
-      onClick={() => setConfirmAction("APPROVED")}
-      className="flex items-center gap-1 bg-green-600 text-white hover:bg-green-700"
-    >
-      ✔ Approve
-    </Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            setConfirmAction("REJECTED");
+            setRejectError(null);
+            setStockErrors?.([]);
+          }}
+          className="flex items-center gap-1 bg-red-500 text-white hover:bg-red-600"
+        >
+          ✖ Reject
+        </Button>
 
-    <Button
-      size="sm"
-      onClick={() => setConfirmAction("REJECTED")}
-      className="flex items-center gap-1 bg-red-500 text-white hover:bg-red-600"
-    >
-      ✖ Reject
-    </Button>
+      </div>
+    )}
 
-  </div>
-)}
+      {/* SHIPPING ACTIONS */}
+      {canEditShipment && (
+        <Button
+          size="sm"
+          onClick={() => setConfirmAction("SHIPPED")}
+          className="flex items-center gap-1 bg-blue-600 text-white hover:bg-blue-700"
+        >
+          🚚 Ship
+        </Button>
+      )}
 
-  {/* SHIPPING ACTIONS */}
-  {canEditShipment && (
-    <Button
-      size="sm"
-      onClick={() => setConfirmAction("SHIPPED")}
-      className="flex items-center gap-1 bg-blue-600 text-white hover:bg-blue-700"
-    >
-      🚚 Ship
-    </Button>
-  )}
+      {canMarkAsReceived && (
+        <Button
+          size="sm"
+          onClick={() => setConfirmAction("RECEIVED")}
+          className="flex items-center gap-1 bg-indigo-600 text-white hover:bg-indigo-700"
+        >
+          📦 Receive
+        </Button>
+      )}
 
-  {canMarkAsReceived && (
-    <Button
-      size="sm"
-      onClick={() => setConfirmAction("RECEIVED")}
-      className="flex items-center gap-1 bg-indigo-600 text-white hover:bg-indigo-700"
-    >
-      📦 Receive
-    </Button>
-  )}
-
-  {/* CLOSE */}
-  <button
-    onClick={onClose}
-    className="
-      ml-3
-      mb-4
-      w-9 h-9
-      rounded-full
-      flex items-center justify-center
-      text-gray-500
-      hover:bg-gray-200
-      hover:text-gray-700
-      dark:hover:bg-gray-700
-    "
-  >
-    ✕
-  </button>
-
-</div>
-</div>
-
-{/* BODY */}
-<div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 overflow-hidden">
-
-{/* ================= LEFT : PRODUCTS ================= */}
-<div className="
-  flex flex-col
-  h-full
-  min-h-0
-  rounded-2xl border
-  bg-gray-50/70
-  dark:bg-gray-800/50 dark:border-gray-700
-  overflow-hidden
-">
-
-  {/* HEADER */}
-  <div className="px-4 py-1 shrink-0 text-xs uppercase text-gray-500">
-    {/* Products */}
-  </div>
-
-  {/* 🔴 10 ROW LIMIT SCROLL AREA */}
-  <div className="shrink-0 overflow-hidden px-2 pb-2">
-
-    <div
-      className="
-        overflow-y-auto
-        rounded-lg
-        border
-        dark:border-gray-700
-      "
-      style={{
-        maxHeight: "450px"   // ≈ 10 rows (each row ~42px)
-      }}
-    >
-
-      <table className="w-full text-sm">
-        <thead className="sticky top-0 z-10 bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs uppercase">
-          <tr>
-            <th className="px-3 py-2 text-left">Product</th>
-            <th className="px-3 py-2 text-center">Category</th>
-            <th className="px-3 py-2 text-center">Qty</th>
-            <th className="px-3 py-2 text-center">Unit</th>
-          </tr>
-        </thead>
-
-<tbody className="divide-y dark:divide-gray-700">
-  {displayItems.map((item) => (
-    <tr key={item.id} className="h-[42px]">
-
-      <td className="px-3 py-2 font-medium dark:text-white">
-        {item.productName ?? "-"}
-      </td>
-
-      <td className="px-3 py-2 text-center text-gray-500">
-        {item.categoryName ?? "-"}
-      </td>
-
-      <td className="px-3 py-2 text-center text-gray-500">
-        {item.quantity}
-      </td>
-
-      <td className="px-3 py-2 text-center text-gray-500">
-        {item.unitName ?? "-"}
-      </td>
-
-    </tr>
-  ))}
-</tbody>
-      </table>
+      {/* CLOSE */}
+      <button
+        onClick={onClose}
+        className="
+          ml-3
+          mb-4
+          w-9 h-9
+          rounded-full
+          flex items-center justify-center
+          text-gray-500
+          hover:bg-gray-200
+          hover:text-gray-700
+          dark:hover:bg-gray-700
+        "
+      >
+        ✕
+      </button>
 
     </div>
+    </div>
 
-  </div>
-</div>
+    {/* 🔥 SCROLLABLE CONTENT (ERROR + BODY) */}
+    <div className="flex-1 min-h-0 overflow-y-auto">
 
-{/* RIGHT */}
-{/* ================= RIGHT ================= */}
+      {/* 🔴 GLOBAL STOCK ERROR (FULL WIDTH) */}
+      {stockErrors?.length > 0 && (
+        <div className="mt-4 px-4">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm">
 
-<div className="flex flex-col min-h-0 h-full overflow-hidden max-h-full">
+            <p className="font-semibold text-red-600 mb-2">
+              ⚠ Insufficient stock
+            </p>
 
-{/* ================= SHIPMENT CARD ================= */}
- <div className="shrink-0 mb-3 rounded-2xl border bg-gray-50/70 p-4 dark:bg-gray-800/50 dark:border-gray-700">
-   <p className="text-xs mb-3 uppercase text-gray-500">
-    Shipment
-  </p>
+            {/* ✅ SCROLLABLE AREA */}
+            <div className="max-h-[80px] overflow-y-auto pr-2">
+              <ul className="list-disc pl-5 space-y-1 text-red-500">
+                {stockErrors.map((e, i) => (
+                  <li key={i}>
+                    <b>{e.product_name || `Product #${e.product_name}`}</b> — 
+                    Available: {e.available_stock}, 
+                    Requested: {e.requested_quantity}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-  {(canEditShipment
-    ? shipments
-    : request.shipments?.length
-      ? request.shipments
-      : [{}]
-  ).map((s: any, i: number) => (
-        <div key={i} className="grid grid-cols-4 gap-3 text-sm items-start">
+          </div>
+        </div>
+      )}
 
-            {/* ================= SHIPPED DATE ================= */}
-              <div className="flex flex-col">
-              <label className="text-[11px] text-gray-500">Shipped</label>
+        {/* BODY */}
+        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 overflow-auto">
 
-              <div className="mt-1 h-[42px]">
-              {canEditShipment ? (
-              <input
-              type="date"
-              value={s?.shipped_date || ""}
-              onChange={(e)=>{
-              const copy=[...shipments];
-              copy[i].shipped_date=e.target.value;
-              setShipments(copy);
-              setShipmentError(null);
-              }}
-              className="
-              w-full h-full
-              rounded-lg border px-3 text-sm
-              bg-white dark:bg-gray-900 dark:text-white dark:border-gray-700
-              "
-              />
-              ) : (
+            {/* ================= LEFT : PRODUCTS ================= */}
+            <div className="
+              flex flex-col
+              h-full
+              min-h-0
+              rounded-2xl border
+              bg-gray-50/70
+              dark:bg-gray-800/50 dark:border-gray-700
+              overflow-hidden
+            ">
+
+              {/* HEADER */}
+              <div className="px-4 py-1 shrink-0 text-xs uppercase text-gray-500">
+                {/* Products */}
+              </div>
+
+              {/* 🔴 10 ROW LIMIT SCROLL AREA */}
+              <div className="shrink-0 overflow-hidden px-2 pb-2">
+
                 <div
-                  className={`
-                    w-full h-full px-3 rounded-lg border flex items-center text-sm
+                  className="
+                    overflow-y-auto
+                    rounded-lg
+                    border
                     dark:border-gray-700
-                    ${!s?.shipped_date
-                      ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
-                      : "bg-white dark:bg-gray-900 dark:text-white"}
-                  `}
+                  "
+                  style={{
+                    maxHeight: "450px"   // ≈ 10 rows (each row ~42px)
+                  }}
                 >
-                  {s?.shipped_date || "Not yet shipped"}
+
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 z-10 bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs uppercase">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Product</th>
+                        <th className="px-3 py-2 text-center">Category</th>
+                        <th className="px-3 py-2 text-center">Qty</th>
+                        <th className="px-3 py-2 text-center">Unit</th>
+                      </tr>
+                    </thead>
+
+            <tbody className="divide-y dark:divide-gray-700">
+              {displayItems.map((item) => (
+                <tr key={item.id} className="h-[42px]">
+
+                  <td className="px-3 py-2 font-medium dark:text-white">
+                    {item.productName ?? "-"}
+                  </td>
+
+                  <td className="px-3 py-2 text-center text-gray-500">
+                    {item.categoryName ?? "-"}
+                  </td>
+
+                  <td className="px-3 py-2 text-center text-gray-500">
+                    {item.quantity}
+                  </td>
+
+                  <td className="px-3 py-2 text-center text-gray-500">
+                    {item.unitName ?? "-"}
+                  </td>
+
+                </tr>
+              ))}
+            </tbody>
+                  </table>
+
                 </div>
-              )}
+
               </div>
-              </div>
+            </div>
 
-            {/* ================= RECEIVED DATE ================= */}
-              <div className="flex flex-col">
-              <label className="text-[11px] text-gray-500">Received</label>
+            {/* RIGHT */}
+            {/* ================= RIGHT ================= */}
 
-                <div className="mt-1 h-[42px]">
+            <div className="flex flex-col min-h-0 h-full overflow-hidden max-h-full">
 
-                  <div
-                    className={`
-                      w-full h-full px-3 rounded-lg border flex items-center text-sm
-                      dark:border-gray-700
-                      ${!s?.received_date
-                        ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
-                        : "bg-white dark:bg-gray-900 dark:text-white"}
-                    `}
-                  >
+            {/* ================= SHIPMENT CARD ================= */}
+            <div className="shrink-0 mb-3 rounded-2xl border bg-gray-50/70 p-4 dark:bg-gray-800/50 dark:border-gray-700">
+              <p className="text-xs mb-3 uppercase text-gray-500">
+                Shipment
+              </p>
 
-                    {s?.received_date
-                      ? new Date(s.received_date).toLocaleDateString()
-                      : "Not yet received"}
+              {(canEditShipment
+                ? shipments
+                : request.shipments?.length
+                  ? request.shipments
+                  : [{}]
+              ).map((s: any, i: number) => (
+                    <div key={i} className="grid grid-cols-4 gap-3 text-sm items-start">
 
-                  </div>
+                        {/* ================= SHIPPED DATE ================= */}
+                          <div className="flex flex-col">
+                          <label className="text-[11px] text-gray-500">Shipped</label>
 
-                </div>
-              </div>
+                          <div className="mt-1 h-[42px]">
+                          {canEditShipment ? (
+                          <input
+                          type="date"
+                          value={s?.shipped_date || ""}
+                          onChange={(e)=>{
+                          const copy=[...shipments];
+                          copy[i].shipped_date=e.target.value;
+                          setShipments(copy);
+                          setShipmentError(null);
+                          }}
+                          className="
+                          w-full h-full
+                          rounded-lg border px-3 text-sm
+                          bg-white dark:bg-gray-900 dark:text-white dark:border-gray-700
+                          "
+                          />
+                          ) : (
+                            <div
+                              className={`
+                                w-full h-full px-3 rounded-lg border flex items-center text-sm
+                                dark:border-gray-700
+                                ${!s?.shipped_date
+                                  ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
+                                  : "bg-white dark:bg-gray-900 dark:text-white"}
+                              `}
+                            >
+                              {s?.shipped_date || "Not yet shipped"}
+                            </div>
+                          )}
+                          </div>
+                          </div>
+
+                        {/* ================= RECEIVED DATE ================= */}
+                          <div className="flex flex-col">
+                          <label className="text-[11px] text-gray-500">Received</label>
+
+                            <div className="mt-1 h-[42px]">
+
+                              <div
+                                className={`
+                                  w-full h-full px-3 rounded-lg border flex items-center text-sm
+                                  dark:border-gray-700
+                                  ${!s?.received_date
+                                    ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
+                                    : "bg-white dark:bg-gray-900 dark:text-white"}
+                                `}
+                              >
+
+                                {s?.received_date
+                                  ? new Date(s.received_date).toLocaleDateString()
+                                  : "Not yet received"}
+
+                              </div>
+
+                            </div>
+                          </div>
 
 
-            {/* ================= TRACKING ================= */}
-              <div className="col-span-2 flex flex-col">
-              <label className="text-[11px] text-gray-500">Tracking</label>
+                        {/* ================= TRACKING ================= */}
+                          <div className="col-span-2 flex flex-col">
+                          <label className="text-[11px] text-gray-500">Tracking</label>
 
-              <div className="mt-1 h-[42px]">
-              {canEditShipment ? (
-              <input
-              type="url"
-              placeholder="Tracking link (optional)"
-              value={s?.tracking_link || ""}
-              onChange={(e)=>{
-              const copy=[...shipments];
-              copy[i].tracking_link=e.target.value;
-              setShipments(copy);
-              setShipmentError(null);
-              }}
-              className="
-              w-full h-full
-              rounded-lg border px-3 text-sm
-              bg-white dark:bg-gray-900 dark:text-white dark:border-gray-700
-              "
-              />
-              ) : s?.tracking_link ? (
-              <a
-              href={s.tracking_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="
-              w-full h-full
-              px-3 rounded-lg border
-              flex items-center truncate text-sm
-              bg-gray-50 dark:bg-gray-900
-              dark:text-blue-400 dark:border-gray-700
-              text-blue-600 hover:underline
-              "
-              >
-              {s.tracking_link}
-              </a>
-              ) : (
+                          <div className="mt-1 h-[42px]">
+                          {canEditShipment ? (
+                          <input
+                          type="url"
+                          placeholder="Tracking link (optional)"
+                          value={s?.tracking_link || ""}
+                          onChange={(e)=>{
+                          const copy=[...shipments];
+                          copy[i].tracking_link=e.target.value;
+                          setShipments(copy);
+                          setShipmentError(null);
+                          }}
+                          className="
+                          w-full h-full
+                          rounded-lg border px-3 text-sm
+                          bg-white dark:bg-gray-900 dark:text-white dark:border-gray-700
+                          "
+                          />
+                          ) : s?.tracking_link ? (
+                          <a
+                          href={s.tracking_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="
+                          w-full h-full
+                          px-3 rounded-lg border
+                          flex items-center truncate text-sm
+                          bg-gray-50 dark:bg-gray-900
+                          dark:text-blue-400 dark:border-gray-700
+                          text-blue-600 hover:underline
+                          "
+                          >
+                          {s.tracking_link}
+                          </a>
+                          ) : (
+                          <div className="
+                          w-full h-full
+                          px-3 rounded-lg border
+                          flex items-center text-sm
+                          bg-gray-100 text-gray-400 dark:bg-gray-800
+                          dark:border-gray-700
+                          ">
+                          No tracking link
+                          </div>
+                          )}
+                          </div>
+                          </div>
+
+                    </div>
+              ))}
+            </div>
+
+
+            {/* ================= REMARKS CARD ================= */}
               <div className="
-              w-full h-full
-              px-3 rounded-lg border
-              flex items-center text-sm
-              bg-gray-100 text-gray-400 dark:bg-gray-800
+                flex flex-col flex-1 min-h-0
+                rounded-2xl border
+                bg-gray-50/70
+                dark:bg-gray-800/50 dark:border-gray-700
               ">
-              No tracking link
-              </div>
-              )}
-              </div>
+
+              <div className="px-4 py-2 text-xs uppercase text-gray-500 shrink-0">
+                Remarks
               </div>
 
+              <div
+                ref={remarksRef}
+              className="flex-1 min-h-0 overflow-y-auto px-4 py-2 space-y-3"
+              style={{ maxHeight: "300px" }} // 🔥 IMPORTANT
+              >
+
+                {request.approvals?.length ? (
+                  request.approvals.map((a, i) => (
+                    <div key={i} className="pl-3 border-l-2">
+                      <p className="text-sm dark:text-white">
+                        {a.remarks || "No remarks provided"}
+                      </p>
+                      <p className="text-[11px] text-gray-500">
+                        {new Date(a.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-400 py-2">
+                    No remarks yet
+                  </p>
+                )}
+
+              </div>
+            </div>
+
+            </div>
         </div>
-  ))}
-</div>
-
-
-{/* ================= REMARKS CARD ================= */}
-  <div className="
-    flex flex-col flex-1 min-h-0
-    rounded-2xl border
-    bg-gray-50/70
-    dark:bg-gray-800/50 dark:border-gray-700
-  ">
-
-  <div className="px-4 py-2 text-xs uppercase text-gray-500 shrink-0">
-    Remarks
-  </div>
-
-  <div
-    ref={remarksRef}
-  className="flex-1 min-h-0 overflow-y-auto px-4 py-2 space-y-3"
-  style={{ maxHeight: "300px" }} // 🔥 IMPORTANT
-  >
-
-    {request.approvals?.length ? (
-      request.approvals.map((a, i) => (
-        <div key={i} className="pl-3 border-l-2">
-          <p className="text-sm dark:text-white">
-            {a.remarks || "No remarks provided"}
-          </p>
-          <p className="text-[11px] text-gray-500">
-            {new Date(a.created_at).toLocaleString()}
-          </p>
-        </div>
-      ))
-    ) : (
-      <p className="text-sm text-gray-400 py-2">
-        No remarks yet
-      </p>
-    )}
-
-  </div>
-</div>
-
-</div>
-</div>
-
-</>
-) : (
-
-<>
-{/* ================= CONFIRM ================= */}
-<div className="flex flex-col">
-
-<h2 className="text-lg font-semibold mb-2 dark:text-white">
-  {confirmAction === "ON_HOLD"
-    ? request.status === "ON_HOLD"
-      ? "Activate Request"
-      : "Put Request On Hold"
-    : confirmAction === "SHIPPED"
-    ? "Confirm Shipment"
-    : confirmAction === "RECEIVED"
-    ? "Confirm Receipt"
-    : confirmAction === "APPROVED"
-    ? "Confirm Approval"
-    : "Confirm Rejection"}
-</h2>
-
-    <p className="text-sm text-gray-500 mb-4">
-    This action cannot be undone.
-    </p>
-
-    <TextArea
-    value={actionRemarks}
-    onChange={(val)=>{
-    setActionRemarks(val);
-    if(rejectError)setRejectError(null);
-    }}
-    placeholder={
-    confirmAction==="REJECTED"
-    ?"Provide rejection reason..."
-    :"Optional remarks..."
-    }
-    />
-
-    {rejectError && (
-    <p className="mt-2 text-sm text-red-600">{rejectError}</p>
-    )}
-
-    <div className="mt-6 flex justify-end gap-2">
-      <Button size="sm" variant="outline" onClick={()=>setConfirmAction(null)}>
-        Cancel
-      </Button>
-
-      <Button
-        size="sm"
-        disabled={submitting}
-        onClick={handleConfirm}
-        className="bg-blue-600 text-white"
-        >
-        {submitting?"Processing...":"Confirm"}
-        </Button>
     </div>
+    </>
+    ) : (
 
-</div>
-</>
+    <>
+    {/* ================= CONFIRM ================= */}
+    <div className="flex flex-col">
 
-)}
+    <h2 className="text-lg font-semibold mb-2 dark:text-white">
+      {confirmAction === "ON_HOLD"
+        ? request.status === "ON_HOLD"
+          ? "Activate Request"
+          : "Put Request On Hold"
+        : confirmAction === "SHIPPED"
+        ? "Confirm Shipment"
+        : confirmAction === "RECEIVED"
+        ? "Confirm Receipt"
+        : confirmAction === "APPROVED"
+        ? "Confirm Approval"
+        : "Confirm Rejection"}
+    </h2>
 
+        <p className="text-sm text-gray-500 mb-4">
+        This action cannot be undone.
+        </p>
 
-</Modal>
+        <TextArea
+        value={actionRemarks}
+        onChange={(val)=>{
+        setActionRemarks(val);
+        if(rejectError)setRejectError(null);
+        }}
+        placeholder={
+        confirmAction==="REJECTED"
+        ?"Provide rejection reason..."
+        :"Optional remarks..."
+        }
+        />
+
+        {rejectError && (
+        <p className="mt-2 text-sm text-red-600">{rejectError}</p>
+        )}
+
+        <div className="mt-6 flex justify-end gap-2">
+          <Button size="sm" variant="outline" onClick={()=>setConfirmAction(null)}>
+            Cancel
+          </Button>
+
+          <Button
+            size="sm"
+            disabled={submitting || (stockErrors?.length ?? 0) > 0}
+            onClick={handleConfirm}
+            className={`
+              text-white
+              ${
+                submitting || (stockErrors?.length ?? 0) > 0
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }
+            `}
+          >
+            {submitting ? "Processing..." : "Confirm"}
+          </Button>
+        </div>
+
+    </div>
+    </>
+
+    )}
+    </Modal>
 
       {/* ORDER EDIT MODAL */}
         <CreateOrderModal
@@ -779,6 +833,7 @@ return (
 
             setEditedItems(enriched);
             setEditingOrder(false);
+            setStockErrors?.([]);
           }}
         />
 </>
