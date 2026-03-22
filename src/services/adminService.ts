@@ -268,7 +268,7 @@ export const RequestWorkflowService = {
     items,
   }: ConfirmRequestPayload) {
 
-    const { data } = await URL_API.post(
+    return await URL_API.post(
       `/admin/requests/${requestId}/approve`,
       {
         action,
@@ -277,7 +277,6 @@ export const RequestWorkflowService = {
       }
     );
 
-    return data;
   },
 
   async fulfill(

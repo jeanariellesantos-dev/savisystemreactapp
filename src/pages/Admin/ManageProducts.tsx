@@ -3,8 +3,6 @@ import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/button/Button";
 import ProductTable from "../../components/products/ProductTable";
 import ProductModal from "../../components/products/ProductModal";
-import PageMeta from "../../components/common/PageMeta";
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { ProductService } from "../../services/adminService";
 import { CategoryService } from "../../services/categoryService";
 import { UnitService } from "../../services/unitService";

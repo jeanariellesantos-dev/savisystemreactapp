@@ -3,8 +3,6 @@ import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/button/Button";
 import DealershipTable from "../../components/dealerships/DealershipTable";
 import DealershipModal from "../../components/dealerships/DealershipModal";
-import PageMeta from "../../components/common/PageMeta";
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { DealershipService } from "../../services/adminService";
 import { Dealership } from "../../types/dealership";
 

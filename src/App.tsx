@@ -12,6 +12,7 @@
   import { ScrollToTop } from "./components/common/ScrollToTop";
   import Dashboard from "./pages/Admin/Dashboard";
   import Home from "./pages/Dashboard/Home";
+  import Inventory from "./pages/Dashboard/Inventory";
   import { ToastProvider } from "./context/ToastContext";
   import AccountSettings from "./pages/AccounSettings";
   import ProtectedRoute from "./routes/ProtectedRoute";
@@ -47,6 +48,10 @@
                   {/* NORMAL USERS ONLY */}
                   <Route element={<ProtectedRoute normalOnly />}>
                     <Route path="/home" element={<Home />} />
+                  </Route>
+
+                  <Route element={<ProtectedRoute allowedRoles={["ACCOUNTING", "OPERATION"]} />}>
+                    <Route path="/inventory" element={<Inventory />} />
                   </Route>
 
                   {/* Others Page */}

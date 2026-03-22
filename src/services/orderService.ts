@@ -1,4 +1,6 @@
 import URL_API from "../components/api/axios";
+import { AxiosResponse } from "axios";
+
 import {CreateOrderPayload, ConfirmRequestPayload} from '../types/request';
 
 export const getPendingRequests = async () => {
@@ -7,31 +9,37 @@ export const getPendingRequests = async () => {
   return response.data;
 };
 
-export const getRequests = (filter: string, page = 1) => {
+export const getRequests = (
+  filter: string,
+  page = 1,
+  search: string
+) => {
   const url =
     filter === "ACTIVE"
       ? "/request/pending"
       : "/request/history";
 
-  return URL_API.get(`${url}?page=${page}`);
+  return URL_API.get(url, {
+    params: {
+      page,
+      search, 
+    },
+  });
 };
-
 
 export async function createOrder(payload: CreateOrderPayload) {
   const res = await URL_API.post("/request", payload);
   return res.data;
 }
-export const confirmRequest = async ({
+export const confirmRequest = ({
   requestId,
   action,
   remarks,
   items,
-}: ConfirmRequestPayload): Promise<void> => {
-
-  await URL_API.post(`/request/${requestId}/approve`, {
+}: ConfirmRequestPayload) => {
+  return URL_API.post(`/request/${requestId}/approve`, {
     action,
     remarks: remarks ?? null,
     items: items ?? [],
   });
-
 };

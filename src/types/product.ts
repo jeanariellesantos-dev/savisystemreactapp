@@ -8,6 +8,7 @@ export type ProductUnit = {
 export type Product = {
   id: number;
   product_name: string;
+  stock: number;
   description?: string;
   category_id: number;
   is_active: boolean;
@@ -19,5 +20,6 @@ export type ProductPayload = {
   product_name: string;
   description?: string;
   category_id: number;
+  stock: number;
   units: ProductUnit[];
 };

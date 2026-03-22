@@ -27,17 +27,28 @@ export default function ManageRequests() {
   const { isOpen, openModal, closeModal } = useModal();
 
   const [selected, setSelected] = useState<Request | null>(null);
-
+  const [stockErrors, setStockErrors] = useState<any[]>([]);
+ 
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<"ACTIVE" | "ALL">("ALL");
   const [search, setSearch] = useState("");
 
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const { requests, meta, loading, error, refreshRequests } =
-    useRequests(filter, page, true);
+    useRequests(filter, page, true, debouncedSearch);
 
   useEffect(() => {
     setPage(1);
-  }, [filter]);
+  }, [filter, debouncedSearch]);
 
   /* ===============================
      APPROVE / REJECT / ON_HOLD / CANCELLED
@@ -58,6 +69,7 @@ const handleConfirmRequest = async ({
   }[];
 }) => {
   try {
+    setStockErrors([]);
 
     const payload = {
       requestId,
@@ -65,7 +77,14 @@ const handleConfirmRequest = async ({
       remarks,
       items,
     };
-      await RequestWorkflowService.approve(payload);
+     const res = await RequestWorkflowService.approve(payload);
+     
+     const insufficient = res.data.errors?.insufficient_products || [];
+
+      if (insufficient.length > 0) {
+        setStockErrors(insufficient);
+        return; // ✅ keeps modal open only when there ARE errors
+      }
 
       const messages: Record<string, string> = {
         APPROVED: "Request approved successfully",
@@ -81,7 +100,14 @@ const handleConfirmRequest = async ({
 
       setSelected(null);
       refreshRequests();
-    } catch (error) {
+    } catch (error:any) {
+
+      const insufficient = error.data.errors?.insufficient_products || [];
+
+      if (insufficient) {
+        setStockErrors(insufficient);
+        return;
+      }
       console.error(error);
       showToast("Failed to process request", "error");
     }
@@ -180,14 +206,14 @@ const handleCreateOrder = async (payload: {
      SEARCH
   =============================== */
 
-  const filteredRequests = requests.filter((r) => {
-    if (!search) return true;
+  // const filteredRequests = requests.filter((r) => {
+  //   if (!search) return true;
 
-    const text =
-      `${r.request_id} ${r.status} ${r.requestor?.firstname ?? ""}`.toLowerCase();
+  //   const text =
+  //     `${r.request_id} ${r.status} ${r.requestor?.firstname ?? ""}`.toLowerCase();
 
-    return text.includes(search.toLowerCase());
-  });
+  //   return text.includes(search.toLowerCase());
+  // });
 
   if (loading) return <p>Loading requests...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
@@ -209,7 +235,9 @@ const handleCreateOrder = async (payload: {
             type="text"
             placeholder="Search requests..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value)
+            }}
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
           />
 
@@ -239,7 +267,7 @@ const handleCreateOrder = async (payload: {
       </div>
 
       {/* TABLE */}
-      <RequestsTable requests={filteredRequests} onView={setSelected} />
+      <RequestsTable requests={requests} onView={setSelected} />
 
       {/* PAGINATION */}
       {meta && meta.last_page > 1 && (
@@ -272,10 +300,14 @@ const handleCreateOrder = async (payload: {
         <ViewOrderModal
           isOpen={true}
           request={selected}
-          onClose={() => setSelected(null)}
+          onClose={() => {
+            setSelected(null);
+            setStockErrors([]);
+          }}
           onConfirm={handleConfirmRequest}
           onShip={handleShipRequest}
           onReceive={handleReceiveRequest}
+          stockErrors={stockErrors}
         />
       )}
 
@@ -284,6 +316,7 @@ const handleCreateOrder = async (payload: {
         isOpen={isOpen}
         onClose={closeModal}
         onSubmit={handleCreateOrder}
+        
       />
     </div>
   );

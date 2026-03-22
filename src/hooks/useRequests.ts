@@ -6,7 +6,8 @@ import { Request } from "../types/request";
 export function useRequests(
   filter: "ACTIVE" | "ALL",
   page: number,
-  isAdmin = false
+  isAdmin = false,
+  search: string,
 ){
   const [requests, setRequests] = useState<Request[]>([]);
   const [meta, setMeta] = useState<any>(null);
@@ -21,8 +22,9 @@ export function useRequests(
         ? await RequestService.getAll({
             filter,
             page,
+            search
           })
-        : await getRequests(filter, page);
+        : await getRequests(filter, page, search);
 
       const data = isAdmin ? res : res.data;
 
@@ -41,7 +43,7 @@ export function useRequests(
 
   useEffect(() => {
     fetchRequests();
-  }, [filter, page, isAdmin]);
+  }, [filter, page, isAdmin, search]);
 
   return {
     requests,
