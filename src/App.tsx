@@ -13,6 +13,7 @@
   import Dashboard from "./pages/Admin/Dashboard";
   import Home from "./pages/Dashboard/Home";
   import Inventory from "./pages/Dashboard/Inventory";
+  import Report from "./pages/Dashboard/Report";
   import { ToastProvider } from "./context/ToastContext";
   import AccountSettings from "./pages/AccounSettings";
   import ProtectedRoute from "./routes/ProtectedRoute";
@@ -50,8 +51,9 @@
                     <Route path="/home" element={<Home />} />
                   </Route>
 
-                  <Route element={<ProtectedRoute allowedRoles={["ACCOUNTING", "OPERATION"]} />}>
+                  <Route element={<ProtectedRoute allowedRoles={["ACCOUNTING"]} />}>
                     <Route path="/inventory" element={<Inventory />} />
+                    <Route path="/report" element={<Report />} />
                   </Route>
 
                   {/* Others Page */}

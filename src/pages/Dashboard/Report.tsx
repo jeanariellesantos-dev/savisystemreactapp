@@ -1,0 +1,351 @@
+import { useState, useEffect } from "react";
+import Input from "../../components/form/input/InputField";
+import Label from "../../components/form/Label";
+import Select from "../../components/form/Select";
+import { useToast } from "../../context/ToastContext";
+import Button from "../../components/ui/button/Button";
+import { ReportService } from "../../services/reportService";
+import { DealershipService } from "../../services/dealershipService";
+
+export default function InventoryReportPage() {
+  const { showToast } = useToast();
+
+  const [data, setData] = useState<any[]>([]);
+  const [filterType, setFilterType] = useState<"month" | "range">("month");
+  const [dealerships, setDealerships] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [filters, setFilters] = useState({
+    dealership_id: "",
+    month: "",
+    start_date: "",
+    end_date: "",
+  });
+
+  const isInvalid =
+  !filters.dealership_id ||
+  (filterType === "month" && !filters.month) ||
+  (filterType === "range" && (!filters.start_date || !filters.end_date));
+  /* ================= FETCH ================= */
+  const loadReport = async () => {
+    try {
+      setLoading(true);
+      const res = await ReportService.getInventoryReport(filters);
+      setData(res.data);
+    } catch {
+      showToast("Failed to load report", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    DealershipService.getAll().then(setDealerships);
+  }, []);
+
+  /* ================= TOTALS ================= */
+  const totals = {
+    ordered: data.reduce((s, i) => s + i.ordered, 0),
+    delivered: data.reduce((s, i) => s + i.actual_deliver, 0),
+    balance: data.reduce((s, i) => s + i.ending_balance, 0),
+  };
+
+  /* ================= UI ================= */
+  return (
+    <div className="rounded-2xl border bg-white p-4 dark:bg-gray-900 dark:border-gray-800">
+
+      {/* ================= HEADER ================= */}
+      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:justify-between sm:items-center">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            Inventory Report
+          </h3>
+          <p className="text-xs text-gray-500">
+            Per dealership stock movement summary
+          </p>
+        </div>
+
+      </div>
+
+{/* ================= FILTERS ================= */}
+
+<div className="mb-4 rounded-2xl border bg-gray-50/70 dark:bg-gray-800/50 p-4 space-y-4">
+
+  {/* HEADER */}
+  <div>
+    <h4 className="text-sm font-semibold text-gray-700 dark:text-white">
+      Filters
+    </h4>
+    <p className="text-xs text-gray-500">
+      Select dealership and reporting period
+    </p>
+  </div>
+
+  {/* GRID */}
+  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+
+    {/* DEALERSHIP */}
+    <div className="sm:col-span-4">
+      <Label>Dealership</Label>
+      <Select
+        value={filters.dealership_id}
+        placeholder="Select dealership..."
+        options={dealerships.map((d) => ({
+          value: String(d.id),
+          label: d.dealership_name,
+        }))}
+        onChange={(value) =>
+          setFilters({ ...filters, dealership_id: value })
+        }
+      />
+    </div>
+
+    {/* FILTER TYPE */}
+    <div className="sm:col-span-3">
+      <Label>Report Type</Label>
+      <div className="flex rounded-lg border overflow-hidden">
+        <button
+          className={`flex-1 py-2 text-xs h-[43px] font-medium transition ${
+            filterType === "month"
+              ? "bg-blue-500 text-white"
+              : "bg-white dark:bg-gray-900 dark:text-gray-400"
+          }`}
+          onClick={() => {
+            setFilterType("month");
+            setFilters({ ...filters, start_date: "", end_date: "" });
+          }}
+        >
+          Monthly
+        </button>
+
+        <button
+          className={`flex-1 py-2 text-xs font-medium transition ${
+            filterType === "range"
+              ? "bg-blue-500 text-white"
+              : "bg-white dark:bg-gray-900 dark:text-gray-400"
+          }`}
+          onClick={() => {
+            setFilterType("range");
+            setFilters({ ...filters, month: "" });
+          }}
+        >
+          Range
+        </button>
+      </div>
+    </div>
+
+    {/* MONTH */}
+    {filterType === "month" && (
+      <div className="sm:col-span-3">
+        <Label>Month</Label>
+        <Input
+          type="month"
+          value={filters.month}
+          onChange={(e) =>
+            setFilters({ ...filters, month: e.target.value })
+          }
+        />
+      </div>
+    )}
+
+    {/* DATE RANGE */}
+    {filterType === "range" && (
+      <div className="sm:col-span-5">
+        <Label>Date Range</Label>
+
+        <div className="flex items-center gap-2">
+
+          <Input
+            type="date"
+            value={filters.start_date}
+            onChange={(e) =>
+              setFilters({ ...filters, start_date: e.target.value })
+            }
+          />
+
+          <span className="text-gray-400 text-xs">to</span>
+
+          <Input
+            type="date"
+            value={filters.end_date}
+            onChange={(e) =>
+              setFilters({ ...filters, end_date: e.target.value })
+            }
+          />
+        </div>
+      </div>
+    )}
+
+{/* ACTIONS */}
+<div className="sm:col-span-12 flex flex-col sm:flex-row justify-between gap-3 pt-2 border-t">
+
+  {/* LEFT SIDE (PRIMARY ACTIONS) */}
+  <div className="flex gap-2 w-full sm:w-auto">
+
+    <Button
+      disabled={isInvalid || loading}
+      onClick={loadReport}
+      className="w-full sm:w-auto"
+    >
+      {loading ? "Generating..." : "📊 Generate"}
+    </Button>
+
+    <Button
+      variant="outline"
+      onClick={() =>
+        setFilters({
+          dealership_id: "",
+          month: "",
+          start_date: "",
+          end_date: "",
+        })
+      }
+    >
+      Reset
+    </Button>
+  </div>
+
+  {/* RIGHT SIDE (EXPORT ACTIONS) */}
+  <div className="flex gap-2 w-full sm:w-auto">
+
+    <Button
+      variant="outline"
+      disabled={isInvalid || loading || data.length === 0}
+      onClick={async () => {
+        const res = await ReportService.exportInventoryExcel(filters);
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `Inventory_Report_${Date.now()}.xlsx`;
+        link.click();
+      }}
+    >
+      📥 Excel
+    </Button>
+
+    <Button
+      variant="outline"
+      disabled={isInvalid || loading || data.length === 0}
+      onClick={async () => {
+        const res = await ReportService.exportInventoryPdf(filters);
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `Inventory_Report_${Date.now()}.pdf`;
+        link.click();
+      }}
+    >
+      🧾 PDF
+    </Button>
+
+  </div>
+
+</div>
+
+  </div>
+</div>
+
+      {/* ================= KPI CARDS ================= */}
+      {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+
+        <div className="rounded-xl border p-3 bg-gray-50 dark:bg-gray-800">
+          <p className="text-xs text-gray-500">Total Ordered</p>
+          <h4 className="text-lg font-semibold">{totals.ordered}</h4>
+        </div>
+
+        <div className="rounded-xl border p-3 bg-gray-50 dark:bg-gray-800">
+          <p className="text-xs text-gray-500">Total Delivered</p>
+          <h4 className="text-lg font-semibold">{totals.delivered}</h4>
+        </div>
+
+        <div className="rounded-xl border p-3 bg-gray-50 dark:bg-gray-800">
+          <p className="text-xs text-gray-500">Total Balance</p>
+          <h4 className="text-lg font-semibold">{totals.balance}</h4>
+        </div>
+      </div> */}
+
+      {/* ================= TABLE ================= */}
+<div className="border rounded-xl overflow-hidden">
+
+  {/* SCROLLABLE TABLE */}
+  <div className="max-h-[400px] overflow-auto">
+
+    <table className="w-full">
+
+      {/* HEADER */}
+      <thead className="sticky top-0 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+        <tr>
+          <th className="py-3 px-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+            Products
+          </th>
+          <th className="py-3 px-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+            Unit
+          </th>
+          <th className="py-3 px-3 text-right text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+            Ordered
+          </th>
+          <th className="py-3 px-3 text-right text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+            Actual Deliver
+          </th>
+          <th className="py-3 px-3 text-right text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+            Ending Balance
+          </th>
+        </tr>
+      </thead>
+
+      {/* BODY */}
+      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+
+        {loading ? (
+          <tr>
+            <td colSpan={5} className="py-6 text-center text-gray-500 text-theme-sm">
+              Loading report...
+            </td>
+          </tr>
+        ) : data.length === 0 ? (
+          <tr>
+            <td colSpan={5} className="py-6 text-center text-gray-500 text-theme-sm">
+              No data found
+            </td>
+          </tr>
+        ) : (
+          data.map((item, i) => (
+            <tr
+              key={i}
+              className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+            >
+              {/* PRODUCT */}
+              <td className="py-2 px-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                {item.product}
+              </td>
+
+              {/* UNIT */}
+              <td className="py-2 px-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                {item.unit}
+              </td>
+
+              {/* ORDERED */}
+              <td className="py-2 px-3 text-right text-gray-500 text-theme-sm dark:text-gray-400">
+                {item.ordered}
+              </td>
+
+              {/* ACTUAL */}
+              <td className="py-2 px-3 text-right text-gray-500 text-theme-sm dark:text-gray-400">
+                {item.actual_deliver}
+              </td>
+
+              {/* ENDING BALANCE */}
+              <td className="py-2 px-3 text-right font-medium text-gray-700 dark:text-white">
+                {item.ending_balance}
+              </td>
+            </tr>
+          ))
+        )}
+
+      </tbody>
+    </table>
+  </div>
+</div>
+    </div>
+  );
+}

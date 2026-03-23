@@ -23,6 +23,7 @@ import {
   RoleIcon,
   AccountsIcon,
   InventoryIcon,
+  PaperPlaneIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -61,6 +62,12 @@ const navItems: NavItem[] = [
   icon: <InventoryIcon />,
   name: "Inventory",
   path: "/inventory",
+  roles: ["ACCOUNTING"], // ✅ custom role control
+  },
+    {
+  icon: <PageIcon />,
+  name: "Reports",
+  path: "/report",
   roles: ["ACCOUNTING"], // ✅ custom role control
   },
     {
