@@ -63,6 +63,15 @@ export default function InventoryReportPage() {
   setData([]); // 🔥 prevents UI crash
 }, [filters.report_type]);
 
+useEffect(() => {
+  if (dealerships?.length > 0) {
+    setFilters((prev) => ({
+      ...prev,
+      dealership_id: String(dealerships[0].id),
+    }));
+  }
+}, [dealerships]);
+
   /* ================= TOTALS ================= */
 
 const totals = {
