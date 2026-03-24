@@ -9,6 +9,7 @@ import { InventoryService } from "../../services/inventoryService";
 import { DealershipService } from "../../services/dealershipService";
 import { getRoleFlags } from "../../components/utils/authHelper";
 import { Dealership } from "../../types/dealership";
+import {ProductService } from "../../services/productService";
 
 export default function InventoryPage() {
   const { showToast } = useToast();
@@ -16,6 +17,8 @@ export default function InventoryPage() {
   const [movements, setMovements] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [dealerships, setDealerships] = useState<Dealership[]>([]);
+  const [unitsCache, setUnitsCache] = useState<Record<number, any[]>>({});
+  const [units, setUnits] = useState<any[]>([]);
   
   const [meta, setMeta] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +45,7 @@ export default function InventoryPage() {
 
       setMovements(res.data);
       setMeta(res);
+      preloadUnits(res.data);
 
     } catch {
       showToast("Failed to load inventory", "error");
@@ -49,6 +53,24 @@ export default function InventoryPage() {
       setLoading(false);
     }
   };
+
+  const preloadUnits = async (products: any[]) => {
+    const newCache: Record<number, any[]> = {};
+
+    await Promise.all(
+      products.map(async (p) => {
+        try {
+          const res = await ProductService.getUnits(p.id);
+          newCache[p.id] = res;
+        } catch {
+          newCache[p.id] = [];
+        }
+      })
+    );
+    console.log(newCache);
+    setUnitsCache(newCache);
+  };
+
 
   useEffect(() => {
     loadData();
@@ -129,8 +151,11 @@ export default function InventoryPage() {
         <InventoryTable movements={movements}
           onSelect={(p: any) => {
             setSelectedProduct(p);
+            const cachedUnits = unitsCache[p.id] || [];
+            setUnits(cachedUnits);
             setModalOpen(true);
-        }} />
+          }}
+        />
       )}
 
       {/* PAGINATION */}
@@ -181,6 +206,7 @@ export default function InventoryPage() {
             isOpen={modalOpen}
             product={selectedProduct}
             dealerships={dealerships}
+            units={units}
             onClose={() => setModalOpen(false)}
             onSubmit={handleCreate}
         />

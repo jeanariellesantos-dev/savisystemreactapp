@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Fragment } from "react";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import Select from "../../components/form/Select";
@@ -20,6 +21,7 @@ export default function InventoryReportPage() {
     month: "",
     start_date: "",
     end_date: "",
+    report_type: "SUMMARY",
   });
 
   const isInvalid =
@@ -30,8 +32,16 @@ export default function InventoryReportPage() {
   const loadReport = async () => {
     try {
       setLoading(true);
+
+      setData([]); // 🔥 IMPORTANT FIX
       const res = await ReportService.getInventoryReport(filters);
-      setData(res.data);
+
+      if (res.data.type === "MONTHLY") {
+        setData(res.data.data); // array of months
+      } else {
+        setData(res.data.data); // normal flat data
+      }
+
     } catch {
       showToast("Failed to load report", "error");
     } finally {
@@ -39,16 +49,28 @@ export default function InventoryReportPage() {
     }
   };
 
+  const isMonthly = filters.report_type === "MONTHLY";
+
+  const flatData = isMonthly
+    ? data.flatMap((m: any) => m.data || [])
+    : data || [];
+
   useEffect(() => {
     DealershipService.getAll().then(setDealerships);
   }, []);
 
+  useEffect(() => {
+  setData([]); // 🔥 prevents UI crash
+}, [filters.report_type]);
+
   /* ================= TOTALS ================= */
-  const totals = {
-    ordered: data.reduce((s, i) => s + i.ordered, 0),
-    delivered: data.reduce((s, i) => s + i.actual_deliver, 0),
-    balance: data.reduce((s, i) => s + i.ending_balance, 0),
-  };
+
+const totals = {
+  ordered: flatData.reduce((s, i) => s + (i.ordered || 0), 0),
+  delivered: flatData.reduce((s, i) => s + (i.delivered || 0), 0),
+  adjustment: flatData.reduce((s, i) => s + (i.adjustment || 0), 0),
+  balance: flatData.reduce((s, i) => s + (i.ending || 0), 0),
+};
 
   /* ================= UI ================= */
   return (
@@ -112,7 +134,12 @@ export default function InventoryReportPage() {
           }`}
           onClick={() => {
             setFilterType("month");
-            setFilters({ ...filters, start_date: "", end_date: "" });
+              setFilters({
+                ...filters,
+                report_type: "SUMMARY", // ✅ monthly input = summary
+                start_date: "",
+                end_date: "",
+              });
           }}
         >
           Monthly
@@ -124,10 +151,14 @@ export default function InventoryReportPage() {
               ? "bg-blue-500 text-white"
               : "bg-white dark:bg-gray-900 dark:text-gray-400"
           }`}
-          onClick={() => {
-            setFilterType("range");
-            setFilters({ ...filters, month: "" });
-          }}
+            onClick={() => {
+              setFilterType("range");
+              setFilters({
+                ...filters,
+                report_type: "MONTHLY", // ✅ range = monthly breakdown
+                month: "",
+              });
+            }}
         >
           Range
         </button>
@@ -198,6 +229,7 @@ export default function InventoryReportPage() {
           month: "",
           start_date: "",
           end_date: "",
+          report_type: "SUMMARY",
         })
       }
     >
@@ -276,6 +308,9 @@ export default function InventoryReportPage() {
       <thead className="sticky top-0 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
         <tr>
           <th className="py-3 px-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+            Category
+          </th>
+          <th className="py-3 px-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400">
             Products
           </th>
           <th className="py-3 px-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400">
@@ -285,64 +320,127 @@ export default function InventoryReportPage() {
             Ordered
           </th>
           <th className="py-3 px-3 text-right text-theme-xs font-medium text-gray-500 dark:text-gray-400">
-            Actual Deliver
+            Delivered
           </th>
           <th className="py-3 px-3 text-right text-theme-xs font-medium text-gray-500 dark:text-gray-400">
-            Ending Balance
+            Adjustment
+          </th>
+          <th className="py-3 px-3 text-right text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+            Ending
           </th>
         </tr>
       </thead>
 
       {/* BODY */}
-      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+<tbody className="divide-y divide-gray-100 dark:divide-gray-800">
 
-        {loading ? (
-          <tr>
-            <td colSpan={5} className="py-6 text-center text-gray-500 text-theme-sm">
-              Loading report...
-            </td>
-          </tr>
-        ) : data.length === 0 ? (
-          <tr>
-            <td colSpan={5} className="py-6 text-center text-gray-500 text-theme-sm">
-              No data found
-            </td>
-          </tr>
-        ) : (
-          data.map((item, i) => (
-            <tr
-              key={i}
-              className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-            >
-              {/* PRODUCT */}
-              <td className="py-2 px-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                {item.product}
-              </td>
+  {loading ? (
+    <tr>
+      <td colSpan={7} className="py-6 text-center text-gray-500">
+        Loading report...
+      </td>
+    </tr>
 
-              {/* UNIT */}
-              <td className="py-2 px-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                {item.unit}
-              </td>
+  ) : !data || data.length === 0 ? (
+    <tr>
+      <td colSpan={7} className="py-6 text-theme-xs text-center text-gray-500">
+        No data found
+      </td>
+    </tr>
 
-              {/* ORDERED */}
-              <td className="py-2 px-3 text-right text-gray-500 text-theme-sm dark:text-gray-400">
-                {item.ordered}
-              </td>
+  ) : Array.isArray(data) && data[0]?.data ? (
 
-              {/* ACTUAL */}
-              <td className="py-2 px-3 text-right text-gray-500 text-theme-sm dark:text-gray-400">
-                {item.actual_deliver}
-              </td>
+    data.map((monthData: any, idx: number) => (
+      <Fragment key={idx}>
 
-              {/* ENDING BALANCE */}
-              <td className="py-2 px-3 text-right font-medium text-gray-700 dark:text-white">
-                {item.ending_balance}
-              </td>
-            </tr>
-          ))
-        )}
+        {/* 🔹 MONTH HEADER */}
+      <tr>
+        <td colSpan={7} className="px-3 py-2 bg-gray-50 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-theme-s font-semibold text-gray-700 dark:text-white">
+              {monthData?.month}
+            </span>
+            {/* <span className="text-xs text-gray-400">
+              {(monthData?.data || []).length} items
+            </span> */}
+          </div>
+        </td>
+      </tr>
 
-      </tbody>
+      {(monthData?.data || []).map((item: any, i: number) => (
+        <tr
+          key={`${idx}-${i}`}
+          className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+        >
+          <td className="py-2 px-3 text-theme-xs text-gray-600 dark:text-gray-300">
+            {item.category}
+          </td>
+          <td className="py-2 px-3 text-theme-xs font-medium text-gray-800 dark:text-white">
+            {item.product}
+          </td>
+          <td className="py-2 px-3 text-theme-xs text-gray-500">{item.unit}</td>
+
+          <td className="py-2 px-3 text-theme-xs text-right text-gray-700">
+            {item.ordered}
+          </td>
+
+          <td className="py-2 px-3 text-theme-xs text-right text-blue-600">
+            {item.delivered}
+          </td>
+
+          <td className="py-2 px-3 text-theme-xs text-right text-yellow-600">
+            {item.adjustment}
+          </td>
+
+          <td className="py-2 px-3 text-theme-xs text-right font-semibold text-gray-900 dark:text-white">
+            {item.ending}
+          </td>
+        </tr>
+      ))}
+
+      </Fragment>
+    ))
+
+  ) : (
+
+    data.map((item: any, i: number) => (
+      <tr
+        key={i}
+        className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+      >
+        <td className="py-2 px-3 text-theme-xs text-gray-600 dark:text-gray-300">
+          {item.category}
+        </td>
+
+        <td className="py-2 px-3 text-theme-xs font-medium text-gray-800 dark:text-white">
+          {item.product}
+        </td>
+
+        <td className="py-2 px-3 text-theme-xs text-gray-500">
+          {item.unit}
+        </td>
+
+        <td className="py-2 px-3 text-theme-xs text-right text-gray-700">
+          {item.ordered}
+        </td>
+
+        <td className="py-2 px-3 text-theme-xs text-right text-blue-600">
+          {item.delivered}
+        </td>
+
+        <td className="py-2 px-3 text-theme-xs text-right text-yellow-600">
+          {item.adjustment}
+        </td>
+
+        <td className="py-2 px-3 text-theme-xs text-right font-semibold text-gray-900 dark:text-white">
+          {item.ending}
+        </td>
+      </tr>
+    ))
+
+  )}
+
+</tbody>
     </table>
   </div>
 </div>
