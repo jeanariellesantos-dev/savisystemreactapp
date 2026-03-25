@@ -24,6 +24,7 @@ export default function ProductModal({
 }: Props) {
   const [form, setForm] = useState({
     product_name: "",
+    stock: 0,
     category_id: "",
     unit_ids: [] as number[],
   });
@@ -32,12 +33,14 @@ export default function ProductModal({
     if (product) {
       setForm({
         product_name: product.product_name,
+        stock: product.stock,
         category_id: String(product.category?.id ?? ""),
         unit_ids: product.units?.map((u) => u.id) ?? [],
       });
     } else {
       setForm({
         product_name: "",
+        stock: 0,
         category_id: "",
         unit_ids: [],
       });
@@ -99,6 +102,21 @@ export default function ProductModal({
             </select>
           </div>
 
+          {/* STOCK */}
+          <div>
+            <label className="text-sm font-medium block mb-2 dark:text-gray-400">
+              Stock
+            </label>
+              <input
+                value={form.stock}
+                type="number"
+                min={0}
+                placeholder="Quantity"
+                className="w-full mb-3 border p-2"
+                onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
+              />
+          </div>
+
           {/* UNITS (Checkbox grid) */}
           <div>
             <label className="text-sm font-medium block mb-3 dark:text-gray-400">
@@ -139,6 +157,7 @@ export default function ProductModal({
             onClick={() =>
               onSubmit({
                 product_name: form.product_name,
+                stock: form.stock,
                 category_id: Number(form.category_id),
                 unit_ids: form.unit_ids,
               })

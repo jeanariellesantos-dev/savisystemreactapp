@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useToast } from "../../context/ToastContext";
 import CategoryTable from "../../components/categories/CategoryTable";
 import CategoryModal from "../../components/categories/CategoryModal";
-import PageMeta from "../../components/common/PageMeta";
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { CategoryService } from "../../services/adminService";
 import { Category } from "../../types/category";
 import Button from "../../components/ui/button/Button";
@@ -12,8 +10,15 @@ export default function ManageCategories() {
   const { showToast } = useToast();
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [meta, setMeta] = useState<any>(null);
+
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const [filters, setFilters] = useState({
+    search: "",
+  });
+
   const [selected, setSelected] = useState<Category | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -22,8 +27,16 @@ export default function ManageCategories() {
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const res = await CategoryService.getAll();
-      setCategories(res);
+
+      const res = await CategoryService.getAll({
+        page,
+        per_page: 10,
+        ...filters,
+      });
+
+      setCategories(res.data); // ✅ paginated data
+      setMeta(res);            // ✅ pagination meta
+
     } catch {
       showToast("Failed to load categories", "error");
     } finally {
@@ -33,14 +46,13 @@ export default function ManageCategories() {
 
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, [page, filters]);
 
   /* ================= SAVE ================= */
 
   const handleSave = async (data: {
     name: string;
     slug: string;
-    // is_active: boolean;
   }) => {
     try {
       if (selected) {
@@ -71,20 +83,9 @@ export default function ManageCategories() {
     }
   };
 
-  /* ================= SEARCH ================= */
-
-  const filteredCategories = categories.filter((c) => {
-    if (!search) return true;
-
-    const text = `${c.name} ${c.slug ?? ""}`.toLowerCase();
-    return text.includes(search.toLowerCase());
-  });
-
-  if (loading)
-    return <p className="p-6 text-gray-500 dark:text-gray-400">Loading categories...</p>;
+  /* ================= UI ================= */
 
   return (
-    <>
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
       {/* HEADER */}
@@ -97,46 +98,70 @@ export default function ManageCategories() {
           <input
             type="text"
             placeholder="Search category..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={filters.search}
+            onChange={(e) => {
+              setPage(1); // ✅ reset page
+              setFilters({ search: e.target.value });
+            }}
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
           />
 
-          <Button size="sm" variant="primary"
-                      className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
-          onClick={() => {
-            setSelected(null);
-            setModalOpen(true);
-            
-          }}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-             Create Category
+          <Button
+            size="sm"
+            variant="primary"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
+            onClick={() => {
+              setSelected(null);
+              setModalOpen(true);
+            }}
+          >
+            + Create Category
           </Button>
         </div>
       </div>
 
       {/* TABLE */}
-      <CategoryTable
-        categories={filteredCategories}
-        onEdit={(cat) => {
-          setSelected(cat);
-          setModalOpen(true);
-        }}
-        onToggle={handleToggleStatus}
-      />
+      {loading ? (
+        <p className="p-6 text-gray-500 dark:text-gray-400">
+          Loading categories...
+        </p>
+      ) : (
+        <CategoryTable
+          categories={categories} // ✅ NO FILTER
+          onEdit={(cat) => {
+            setSelected(cat);
+            setModalOpen(true);
+          }}
+          onToggle={handleToggleStatus}
+        />
+      )}
+
+      {/* PAGINATION */}
+      {meta && meta.last_page > 1 && (
+        <div className="flex items-center justify-between mt-4">
+
+          <button
+            disabled={meta.current_page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
+          >
+            Previous
+          </button>
+
+          <div className="text-sm text-gray-600 dark:text-gray-300">
+            Page <b>{meta.current_page}</b> of <b>{meta.last_page}</b>
+          </div>
+
+          <button
+            disabled={meta.current_page === meta.last_page}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
+          >
+            Next
+          </button>
+
+        </div>
+      )}
 
       {/* MODAL */}
       {modalOpen && (
@@ -150,7 +175,7 @@ export default function ManageCategories() {
           onSubmit={handleSave}
         />
       )}
+
     </div>
-    </>
   );
 }

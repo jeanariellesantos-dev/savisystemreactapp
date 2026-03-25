@@ -14,6 +14,7 @@ import {
   PieChartIcon,
   PlugInIcon,
   TableIcon,
+  BoxIconLine,
   SettingsIcon,
   UserCircleIcon,
   FileIcon,
@@ -21,6 +22,8 @@ import {
   DealershipIcon,
   RoleIcon,
   AccountsIcon,
+  InventoryIcon,
+  PaperPlaneIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -44,6 +47,7 @@ type NavItem = {
   path?: string;
   adminOnly?: boolean;
   normalOnly?: boolean;
+  roles?: Role[];
   subItems?: { name: string; path: string;adminOnly?: boolean; normalOnly?: boolean; pro?: boolean; new?: boolean }[];
 };
 
@@ -54,7 +58,19 @@ const navItems: NavItem[] = [
     path: "/home",
     normalOnly: true,
   },
-    {
+  {
+  icon: <InventoryIcon />,
+  name: "Inventory",
+  path: "/inventory",
+  roles: ["ACCOUNTING"], 
+  },
+  {
+  icon: <PageIcon />,
+  name: "Reports",
+  path: "/report",
+  roles: ["ACCOUNTING"], 
+  },
+  {
     icon: <GridIcon />,
     name: "Dashboard",
     path: "/admin",
@@ -67,16 +83,27 @@ const navItems: NavItem[] = [
     adminOnly: true,
   },
   {
-    icon: <ListIcon />,
-    name: "Categories",
-    path: "/admin/categories",
+    icon: <InventoryIcon />,
+    name: "Inventory",
+    path: "/admin/inventory",
     adminOnly: true,
-  }
-  ,
+  },
   {
     icon: <BoxCubeIcon />,
     name: "Products",
     path: "/admin/products",
+    adminOnly: true,
+  },
+  {
+    icon: <PageIcon />,
+    name: "Reports",
+    path: "/admin/report",
+    adminOnly: true,
+  },
+  {
+    icon: <ListIcon />,
+    name: "Categories",
+    path: "/admin/categories",
     adminOnly: true,
   },
   {
@@ -361,6 +388,10 @@ const AppSidebar: React.FC = () => {
 
 const filteredNavItems = navItems
   .filter((item) => {
+    // ✅ Role-based filter (NEW)
+    if (item.roles && userRole) {
+      return item.roles.includes(userRole);
+    }
     if (item.adminOnly) return isAdmin(userRole);
     if (item.normalOnly) return !isAdmin(userRole);
     return true; // visible to both

@@ -18,6 +18,7 @@ import Button from "../../components/ui/button/Button";
 export default function RecentRequests() {
   const { isOpen, openModal, closeModal } = useModal();
   const [selected, setSelected] = useState<Request | null>(null);
+  const [stockErrors, setStockErrors] = useState<any[]>([]);
   const { showToast } = useToast();
 
   const [page, setPage] = useState(1);
@@ -25,14 +26,24 @@ export default function RecentRequests() {
   const [filter, setFilter] = useState<"ACTIVE" | "ALL">("ACTIVE");
   const [search, setSearch] = useState("");    
 
-  const { requests, meta, loading, error, refreshRequests } = useRequests(filter, page);
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { requests, meta, loading, error, refreshRequests } = useRequests(filter, page, false, debouncedSearch);
 
   const { isAccounting, isOperations } = getRoleFlags();
 
     // ADD THIS HERE
-  useEffect(() => {
-    setPage(1);
-  }, [filter]);
+useEffect(() => {
+  setPage(1);
+}, [filter, debouncedSearch]); // ✅ correct
 
 const handleConfirmRequest = async ({
   requestId,
@@ -50,6 +61,7 @@ const handleConfirmRequest = async ({
   }[];
 }) => {
   try {
+     setStockErrors([]); // clear old errors first
 
     const payload = {
       requestId,
@@ -58,7 +70,14 @@ const handleConfirmRequest = async ({
       items,
     };
 
-    await confirmRequest(payload);
+    const res = await confirmRequest(payload);
+
+    const insufficient = res.data.errors?.insufficient_products || [];
+
+    if (insufficient.length > 0) {
+      setStockErrors(insufficient);
+      return; // ✅ keeps modal open only when there ARE errors
+    }
 
     const messages: Record<string, string> = {
       APPROVED: "Request approved successfully",
@@ -75,9 +94,20 @@ const handleConfirmRequest = async ({
     setSelected(null);
     refreshRequests();
 
-  } catch (error) {
-    console.error(error);
+  } catch (error:any) {
+    const insufficient =
+      error?.response?.data?.errors?.insufficient_products;
+
+    if (insufficient) {
+      setStockErrors(insufficient);
+      return;
+    }
+    
     showToast("Failed to process request", "error");
+    throw error;
+
+    // console.error(error);
+   
   }
 };
 
@@ -166,15 +196,6 @@ const handleCreateOrder = async (payload: {
         }
       };
 
-    const filteredRequests = requests.filter((r) => {
-        if (search) {
-          const text =
-            `${r.request_id} ${r.status} ${r.requestor?.firstname ?? ""}`.toLowerCase();
-          if (!text.includes(search.toLowerCase())) return false;
-        }
-        return true;
-      });
-
   if (loading) return <p>Loading requests...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -200,7 +221,9 @@ const handleCreateOrder = async (payload: {
           type="text"
           placeholder="Search requests..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value)
+          }}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
         />
 
@@ -231,8 +254,8 @@ const handleCreateOrder = async (payload: {
         </div>
       </div>
 
-    <RequestsTable requests={filteredRequests} onView={setSelected} />
-          {meta && meta.last_page > 1 && (
+    <RequestsTable requests={requests} onView={setSelected} />
+      {meta && meta.last_page > 1 && (
         <div className="flex items-center justify-between mt-4">
           <button
             disabled={meta.current_page === 1}
@@ -264,11 +287,15 @@ const handleCreateOrder = async (payload: {
         <ViewOrderModal
           isOpen={true}
           request={selected}
-          onClose={() => setSelected(null)}
+          onClose={() => {
+            setSelected(null);
+            setStockErrors([]);
+          }}
           onConfirm={handleConfirmRequest}
           onShip={handleShipRequest}
           onReceive={handleReceiveRequest}
-        
+          stockErrors={stockErrors} 
+          setStockErrors={setStockErrors}
         />
       )}
     </div>
