@@ -31,7 +31,7 @@
     return (
         <ToastProvider>
           <>
-            <Router  basename="/savisystemreactapp">
+            <Router  basename="/">
               <ScrollToTop />
               <Routes>
                 {/* Admin Layout */}
