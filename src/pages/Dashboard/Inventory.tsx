@@ -30,6 +30,8 @@ export default function InventoryPage() {
 
   const { isInventory, isAccounting } = getRoleFlags();
 
+  
+
   /* ================= FETCH ================= */
 
   const loadData = async () => {
@@ -67,7 +69,6 @@ export default function InventoryPage() {
         }
       })
     );
-    console.log(newCache);
     setUnitsCache(newCache);
   };
 
@@ -99,10 +100,10 @@ export default function InventoryPage() {
 
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Inventory Movements
+            Inventory
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Track stock in, out, and adjustments
+            Create stock in, out, and adjustments
           </p>
         </div>
 

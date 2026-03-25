@@ -12,11 +12,18 @@ export default function ManageUsers() {
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [dealerships, setDealerships] = useState<any[]>([]);
+  const [meta, setMeta] = useState<any>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const [filters, setFilters] = useState({
+    search: "",
+  });
+
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [isCreateMode, setIsCreateMode] = useState(false);
   const [confirmPasswordModal, setConfirmPasswordModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [originalForm, setOriginalForm] = useState<any>(null);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
@@ -37,8 +44,17 @@ export default function ManageUsers() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const data = await UserService.getAll();
-      setUsers(data);
+
+      const res = await UserService.getAll({
+        page,
+        per_page: 10,
+        search: debouncedSearch,
+        ...filters,
+      });
+
+      setUsers(res.data); // ✅ paginated
+      setMeta(res);
+
     } catch {
       showToast("Failed to load users", "error");
     } finally {
@@ -50,24 +66,40 @@ export default function ManageUsers() {
 
   const loadRoles = async () => {
     try {
-      const data = await RoleService.getAll();
-      setRoles(data);
+      const res = await RoleService.getAll();
+      setRoles(res.data);
     } catch {
       showToast("Failed to load roles", "error");
     }
   };
 
+  /* ================= LOAD DEALERSHIPS ================= */
+
   const loadDealerships = async () => {
     try {
-      const data = await DealershipService.getAll();
-      setDealerships(data);
+      const res = await DealershipService.getAll();
+      setDealerships(res.data);
     } catch {
       showToast("Failed to load dealerships", "error");
     }
   };
 
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+
+  useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearch(filters.search);
+    setPage(1); // reset page when searching
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [filters.search]);
+
   useEffect(() => {
     loadUsers();
+  }, [page, debouncedSearch]);
+
+  useEffect(() => {
     loadRoles();
     loadDealerships();
   }, []);
@@ -86,66 +118,34 @@ export default function ManageUsers() {
       password: "",
       confirmPassword: "",
     });
-    setIsCreateMode(true);
-   setEditingUser(null);
-  setIsUserModalOpen(true);
 
+    setIsCreateMode(true);
+    setEditingUser(null);
+    setIsUserModalOpen(true);
   };
 
   /* ================= OPEN EDIT ================= */
 
-    const openEdit = (user: any) => {
-
-      const data = {
-        employee_number: user.employee_number ?? "",
-        firstname: user.firstname ?? "",
-        lastname: user.lastname ?? "",
-        email: user.email ?? "",
-        mobile: user.mobile ?? "",
-        dealership_id: user.dealership_id ?? "",
-        role_id: user.role_id ?? "",
-      };
-
-      setForm({
-        ...data,
-        password: "",
-        confirmPassword: "",
-      });
-
-      setOriginalForm(data);
-      setIsCreateMode(false);
-      setEditingUser(user);
-      setIsUserModalOpen(true); 
+  const openEdit = (user: any) => {
+    const data = {
+      employee_number: user.employee_number ?? "",
+      firstname: user.firstname ?? "",
+      lastname: user.lastname ?? "",
+      email: user.email ?? "",
+      mobile: user.mobile ?? "",
+      dealership_id: user.dealership_id ?? "",
+      role_id: user.role_id ?? "",
     };
 
+    setForm({ ...data, password: "", confirmPassword: "" });
+    setOriginalForm(data);
 
-      /* ================= OPEN CHANGES ================= */
-    const hasUserInfoChanged = () => {
+    setIsCreateMode(false);
+    setEditingUser(user);
+    setIsUserModalOpen(true);
+  };
 
-      if (!originalForm) return false;
-
-      const infoChanged =
-        form.employee_number !== originalForm.employee_number ||
-        form.firstname !== originalForm.firstname ||
-        form.lastname !== originalForm.lastname ||
-        form.email !== originalForm.email ||
-        form.mobile !== originalForm.mobile ||
-        form.dealership_id !== originalForm.dealership_id ||
-        String(form.role_id) !== String(originalForm.role_id);
-
-      const passwordFilled =
-        form.password.trim() !== "" ||
-        form.confirmPassword.trim() !== "";
-
-      return infoChanged || passwordFilled;
-    };
-
-
-    const hasChanges = isCreateMode ? true : hasUserInfoChanged();
-
-
-
-  /* ================= SAVE LOGIC ================= */
+  /* ================= SAVE ================= */
 
   const handleSave = () => {
     if (isCreateMode) {
@@ -157,7 +157,6 @@ export default function ManageUsers() {
       return;
     }
 
-    // EDIT MODE
     if (form.password) {
       if (form.password !== form.confirmPassword) {
         showToast("Passwords do not match", "error");
@@ -170,21 +169,9 @@ export default function ManageUsers() {
     submitUpdate();
   };
 
-  /* ================= CREATE ================= */
-
   const submitCreate = async () => {
     try {
-      await UserService.create({
-        employee_number: form.employee_number,
-        firstname: form.firstname,
-        lastname: form.lastname,
-        email: form.email,
-        mobile: form.mobile,
-        role_id: form.role_id,
-        dealership_id: form.dealership_id,
-        password: form.password,
-      });
-
+      await UserService.create({ ...form });
       showToast("Account created successfully", "success");
       closeModal();
       loadUsers();
@@ -193,183 +180,125 @@ export default function ManageUsers() {
     }
   };
 
-  /* ================= UPDATE ================= */
-
   const submitUpdate = async () => {
-
-  if (!editingUser) return;
-
-      const infoChanged =
-        form.employee_number !== originalForm.employee_number ||
-        form.firstname !== originalForm.firstname ||
-        form.lastname !== originalForm.lastname ||
-        form.email !== originalForm.email ||
-        form.mobile !== originalForm.mobile ||
-        form.dealership_id !== originalForm.dealership_id ||
-        String(form.role_id) !== String(originalForm.role_id);
-
-      const passwordFilled =
-        form.password.trim() !== "";
-
-      if (!infoChanged && !passwordFilled) {
-        showToast("No changes detected", "error");
-        return;
-      }
+    if (!editingUser) return;
 
     try {
-
-      await UserService.update(editingUser.id, {
-        employee_number: form.employee_number,
-        firstname: form.firstname,
-        lastname: form.lastname,
-        email: form.email,
-        role_id: form.role_id,
-        dealership_id: form.dealership_id,
-        mobile: form.mobile,
-        password: form.password,
-      });
-
-      showToast("User info updated successfully", "success");
-
+      await UserService.update(editingUser.id, { ...form });
+      showToast("User updated successfully", "success");
       closeModal();
       loadUsers();
-
-    } catch (err: any) {
-
-      // BACKEND VALIDATION ERROR
-      if (err.response?.data?.message) {
-        showToast(err.response.data.message, "error");
-      } else {
-        showToast("Update failed", "error");
-      }
-
+    } catch {
+      showToast("Update failed", "error");
     }
   };
 
+  /* ================= TOGGLE ================= */
 
-  /* ================= TOGGLE STATUS ================= */
+  const handleToggle = async (user: any) => {
+    try {
+      await UserService.toggleStatus(user.id);
+      showToast("User status updated", "success");
+      loadUsers();
+    } catch {
+      showToast("Failed to update user status", "error");
+    }
+  };
 
-const handleToggle = async (user: any) => {
-  try {
-    await UserService.toggleStatus(user.id);
+  /* ================= CLOSE ================= */
 
-    showToast(
-      user.is_active
-        ? "User deactivated successfully"
-        : "User activated successfully",
-      "success"
-    );
-
-    loadUsers();
-  } catch {
-    showToast("Failed to update user status", "error");
-  }
-};
-
-
-  /* ================= CLOSE MODAL ================= */
-
-    const closeModal = () => {
-      setEditingUser(null);
-      setIsCreateMode(false);
-      setConfirmPasswordModal(false);
-      setIsUserModalOpen(false);  
-    };
-
-
-  /* ================= SEARCH ================= */
-
-  const filteredUsers = users.filter((u) =>
-    `${u.employee_number} ${u.firstname} ${u.lastname} ${u.email} ${u.role}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
-
-  /* ================= LOADING ================= */
-
-  if (loading) {
-    return (
-      <div className="p-6 text-gray-500 dark:text-gray-400">
-        Loading users...
-      </div>
-    );
-  }
+  const closeModal = () => {
+    setEditingUser(null);
+    setIsCreateMode(false);
+    setConfirmPasswordModal(false);
+    setIsUserModalOpen(false);
+  };
 
   /* ================= UI ================= */
 
+  if (loading) {
+    return <div className="p-6 text-gray-500">Loading users...</div>;
+  }
+
   return (
-    <>
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
-        {/* HEADER */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Manage Users
-          </h3>
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+          Manage Users
+        </h3>
 
-          <div className="flex items-center gap-3">
-            <input
-              placeholder="Search user..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
-            />
+        <div className="flex items-center gap-3">
+          <input
+            placeholder="Search user..."
+            value={filters.search}
+            onChange={(e) => {
+              setPage(1);
+              setFilters({ search: e.target.value });
+            }}
+            className="rounded-lg border px-3 py-2 text-sm"
+          />
 
-            <Button 
-              size="sm" 
-              variant="primary" 
-              className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:opacity-90 transition"
-              onClick={openCreate}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Create User
-            </Button>
-          </div>
+          <Button size="sm" onClick={openCreate}>
+            + Create User
+          </Button>
         </div>
-
-        {/* TABLE */}
-        <UsersTable
-          users={filteredUsers}
-          onEdit={openEdit}
-          onToggle={handleToggle}
-        />
-
-        {/* ACCOUNT MODAL */}
-        {isUserModalOpen && (
-          <UsersModal
-            isOpen={true}
-            mode={isCreateMode ? "create" : "edit"}
-            onClose={closeModal}
-            form={form}
-            setForm={setForm}
-            onSave={handleSave}
-            roles={roles}
-            dealerships={dealerships}
-            hasChanges={hasChanges}
-          />
-        )}
-
-        {/* PASSWORD CONFIRMATION */}
-        {confirmPasswordModal && (
-          <ConfirmPasswordModal
-            isOpen={true}
-            onCancel={() => setConfirmPasswordModal(false)}
-            onConfirm={() => submitUpdate()}
-          />
-        )}
       </div>
-    </>
+
+      {/* TABLE */}
+      <UsersTable
+        users={users} // ✅ NO FILTER
+        onEdit={openEdit}
+        onToggle={handleToggle}
+      />
+
+      {/* PAGINATION */}
+      {meta && meta.last_page > 1 && (
+        <div className="flex justify-between mt-4">
+          <button
+            disabled={meta.current_page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Prev
+          </button>
+
+          <span>
+            Page {meta.current_page} of {meta.last_page}
+          </span>
+
+          <button
+            disabled={meta.current_page === meta.last_page}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* MODALS */}
+      {isUserModalOpen && (
+        <UsersModal
+          isOpen={true}
+          mode={isCreateMode ? "create" : "edit"}
+          onClose={closeModal}
+          form={form}
+          setForm={setForm}
+          onSave={handleSave}
+          roles={roles}
+          dealerships={dealerships}
+          hasChanges={true}
+        />
+      )}
+
+      {confirmPasswordModal && (
+        <ConfirmPasswordModal
+          isOpen={true}
+          onCancel={() => setConfirmPasswordModal(false)}
+          onConfirm={submitUpdate}
+        />
+      )}
+
+    </div>
   );
 }
