@@ -109,9 +109,16 @@ export const RequestService = {
 ========================================================= */
 
 export const UserService = {
-  async getAll(): Promise<any[]> {
-    const { data } = await URL_API.get("/admin/users");
-    return data;
+  async getAll(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+  }): Promise<any> {
+    const res = await URL_API.get("/admin/users", {
+      params, 
+    });
+
+    return res.data;
   },
 
   async create(payload: any): Promise<any> {
@@ -136,9 +143,16 @@ export const UserService = {
 ========================================================= */
 
 export const ProductService = {
-  async getAll(): Promise<Product[]> {
-    const { data } = await URL_API.get("/admin/products");
-    return data;
+  async getAll(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+  }): Promise<any> {
+    const res = await URL_API.get("/admin/products", {
+      params, 
+    });
+
+    return res.data;
   },
 
   async create(payload: ProductPayload): Promise<Product> {
@@ -158,6 +172,7 @@ export const ProductService = {
   async toggleStatus(id: number): Promise<void> {
     await URL_API.patch(`/admin/products/${id}/toggle-status`);
   },
+
 };
 
 
@@ -166,9 +181,16 @@ export const ProductService = {
 ========================================================= */
 
 export const CategoryService = {
-  async getAll(): Promise<Category[]> {
-    const { data } = await URL_API.get("/admin/categories");
-    return data;
+  async getAll(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+  }): Promise<any> {
+    const res = await URL_API.get("/admin/categories", {
+      params, // ✅ THIS IS THE FIX
+    });
+
+    return res.data;
   },
 
   async getById(id: number): Promise<Category> {
@@ -201,9 +223,16 @@ export const CategoryService = {
 ========================================================= */
 
 export const DealershipService = {
-  async getAll(): Promise<Dealership[]> {
-    const { data } = await URL_API.get("/admin/dealerships");
-    return data;
+  async getAll(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+  }): Promise<any> {
+    const res = await URL_API.get("/admin/dealerships", {
+      params, 
+    });
+
+    return res.data;
   },
 
   async create(payload: DealershipPayload): Promise<Dealership> {
@@ -231,11 +260,17 @@ export const DealershipService = {
 ========================================================= */
 
 export const RoleService = {
-  async getAll(): Promise<Role[]> {
-    const { data } = await URL_API.get("/admin/roles");
-    return data;
-  },
+  async getAll(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+  }): Promise<any> {
+    const res = await URL_API.get("/admin/roles", {
+      params,
+    });
 
+    return res.data;
+  },
   async create(payload: RolePayload): Promise<Role> {
     const { data } = await URL_API.post("/admin/roles", payload);
     return data;
@@ -302,5 +337,42 @@ export const RequestWorkflowService = {
 
     return data;
   },
+
+};
+
+/* =========================================================
+  INVENTORY MOVEMENT
+========================================================= */
+
+export const InventoryService = {
+
+  /* ================= GET ALL ================= */
+  getAll: async (params: any) => {
+    const response = await URL_API.get("admin/inventory", {
+      params,
+    });
+
+    return response.data;
+  },
+
+  /* ================= CREATE ================= */
+  create: async (data: {
+    product_id: number;
+    dealership_id: number;
+    type: "IN" | "OUT" | "ADJUSTMENT";
+    quantity: number;
+    remarks?: string;
+  }) => {
+    const response = await URL_API.post("/inventory", data);
+    return response.data;
+  },
+
+
+    /* ================= REVERSE ================= */
+  reverse: async (id: number) => {
+    const response = await URL_API.post(`/admin/inventory/${id}/reverse`);
+    return response.data;
+  },
+
 
 };

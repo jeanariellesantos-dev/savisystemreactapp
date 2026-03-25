@@ -23,6 +23,7 @@ import {
   RoleIcon,
   AccountsIcon,
   InventoryIcon,
+  PaperPlaneIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -61,9 +62,15 @@ const navItems: NavItem[] = [
   icon: <InventoryIcon />,
   name: "Inventory",
   path: "/inventory",
-  roles: ["ACCOUNTING"], // ✅ custom role control
+  roles: ["ACCOUNTING"], 
   },
-    {
+  {
+  icon: <PageIcon />,
+  name: "Reports",
+  path: "/report",
+  roles: ["ACCOUNTING"], 
+  },
+  {
     icon: <GridIcon />,
     name: "Dashboard",
     path: "/admin",
@@ -76,16 +83,27 @@ const navItems: NavItem[] = [
     adminOnly: true,
   },
   {
-    icon: <ListIcon />,
-    name: "Categories",
-    path: "/admin/categories",
+    icon: <InventoryIcon />,
+    name: "Inventory",
+    path: "/admin/inventory",
     adminOnly: true,
-  }
-  ,
+  },
   {
     icon: <BoxCubeIcon />,
     name: "Products",
     path: "/admin/products",
+    adminOnly: true,
+  },
+  {
+    icon: <PageIcon />,
+    name: "Reports",
+    path: "/admin/report",
+    adminOnly: true,
+  },
+  {
+    icon: <ListIcon />,
+    name: "Categories",
+    path: "/admin/categories",
     adminOnly: true,
   },
   {

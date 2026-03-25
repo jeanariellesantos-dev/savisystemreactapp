@@ -13,12 +13,15 @@
   import Dashboard from "./pages/Admin/Dashboard";
   import Home from "./pages/Dashboard/Home";
   import Inventory from "./pages/Dashboard/Inventory";
+  import Report from "./pages/Dashboard/Report";
   import { ToastProvider } from "./context/ToastContext";
   import AccountSettings from "./pages/AccounSettings";
   import ProtectedRoute from "./routes/ProtectedRoute";
   import ManageRequests from "./pages/Admin/ManageRequests";
+  import ManageInventory from "./pages/Admin/ManageInventory";
   import ManageCategories from "./pages/Admin/ManageCategories";
   import ManageProducts from "./pages/Admin/ManageProducts";
+  import ManageReport from "./pages/Admin/ManageReport";
   import ManageUnits from "./pages/Admin/ManageUnits";
   import ManageDealerships from "./pages/Admin/ManageDealerships";
   import ManageRoles from "./pages/Admin/ManageRoles";
@@ -36,9 +39,11 @@
                   {/* ADMIN ONLY */}
                   <Route element={<ProtectedRoute adminOnly />}>
                     <Route path="/admin" element={<Dashboard />} />
+                    <Route path="/admin/inventory" element={<ManageInventory />} />
                     <Route path="/admin/requests" element={<ManageRequests />} />
                     <Route path="/admin/categories" element={<ManageCategories />} />
                     <Route path="/admin/products" element={<ManageProducts />} />
+                    <Route path="/admin/report" element={<ManageReport/>} />
                     <Route path="/admin/units" element={<ManageUnits />} />
                     <Route path="/admin/dealerships" element={<ManageDealerships />} />
                     <Route path="/admin/roles" element={<ManageRoles />} />
@@ -50,8 +55,9 @@
                     <Route path="/home" element={<Home />} />
                   </Route>
 
-                  <Route element={<ProtectedRoute allowedRoles={["ACCOUNTING", "OPERATION"]} />}>
+                  <Route element={<ProtectedRoute allowedRoles={["ACCOUNTING"]} />}>
                     <Route path="/inventory" element={<Inventory />} />
+                    <Route path="/report" element={<Report />} />
                   </Route>
 
                   {/* Others Page */}

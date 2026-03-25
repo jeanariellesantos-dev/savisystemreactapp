@@ -3,7 +3,7 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import Select from "../form/Select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function InventoryMovementModal({
   isOpen,
@@ -11,6 +11,7 @@ export default function InventoryMovementModal({
   product,
   onSubmit,
   dealerships,
+  units,
 }: any) {
 
   const [form, setForm] = useState({
@@ -18,6 +19,7 @@ export default function InventoryMovementModal({
     quantity: 1,
     remarks: "",
     dealership_id: "", 
+    unit_id: "", // ✅ NEW
   });
 
   const [showConfirm, setShowConfirm] = useState(false);
@@ -26,8 +28,27 @@ export default function InventoryMovementModal({
 
 const isInvalid =
   !form.quantity ||
-  form.quantity < 1 ||
-  !form.dealership_id; // ✅ require dealership
+  !form.dealership_id ||
+  !form.unit_id;;
+   // ✅ require dealership
+
+  useEffect(() => {
+  if (dealerships?.length > 0) {
+    setForm((prev) => ({
+      ...prev,
+      dealership_id: dealerships[0].id,
+    }));
+  }
+}, [dealerships]);
+
+useEffect(() => {
+  if (units?.length > 0) {
+    setForm((prev) => ({
+      ...prev,
+      unit_id: units[0].id,
+    }));
+  }
+}, [units]);
 
   return (
     <>
@@ -78,7 +99,6 @@ const isInvalid =
             <div>
               <Label>Quantity</Label>
               <Input
-                min={1}
                 type="number"
                 value={form.quantity}
                 onChange={(e) =>
@@ -89,6 +109,22 @@ const isInvalid =
                 }
               />
             </div>
+
+            {/* UNIT */}
+          <div>
+            <Label>Unit</Label>
+            <Select
+              value={form.unit_id}
+              placeholder="Select unit"
+              options={(units || []).map((u: any) => ({
+                value: u.id,
+                label: u.name,
+              }))}
+              onChange={(value) =>
+                setForm({ ...form, unit_id: value })
+              }
+            />
+          </div>
 
             {/* DEALERSHIP */}
             <div>
