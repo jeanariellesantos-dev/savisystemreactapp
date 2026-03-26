@@ -114,10 +114,11 @@ const handleConfirmRequest = async ({
 const handleCreateOrder = async (payload: {
   requestor_id: number;
   items: OrderItem[];
+  remarks: string;
 }) => {
     try {
    
-      const { requestor_id, items } = payload;
+      const { requestor_id, items, remarks } = payload;
 
       const formatted = {
         requestor_id,
@@ -127,6 +128,7 @@ const handleCreateOrder = async (payload: {
           unit_id: i.unitId,
           quantity: i.quantity,
         })),
+        remarks,
       };
 
       await createOrder(formatted);

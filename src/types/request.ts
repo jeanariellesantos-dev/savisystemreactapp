@@ -10,6 +10,7 @@ export type CreateOrderPayload = {
   requestor_id: number;
   status: string;
   items: CreateOrderItem[];
+  remarks: string;
 };
 
 export type RequestAction = "APPROVED" | "REJECTED" | "ON_HOLD" | "CANCELLED";
