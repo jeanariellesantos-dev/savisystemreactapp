@@ -118,12 +118,12 @@ const navItems: NavItem[] = [
     path: "/admin/dealerships",
     adminOnly: true,
   },
-  {
-    icon: <RoleIcon />,
-    name: "Roles",
-    path: "/admin/roles",
-    adminOnly: true,
-  },
+  // {
+  //   icon: <RoleIcon />,
+  //   name: "Roles",
+  //   path: "/admin/roles",
+  //   adminOnly: true,
+  // },
   {
     icon: <AccountsIcon />,
     name: "Users",
