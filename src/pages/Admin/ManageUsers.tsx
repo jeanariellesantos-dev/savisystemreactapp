@@ -5,6 +5,9 @@ import ConfirmPasswordModal from "../../components/users/ConfirmPasswordModal";
 import { UserService, RoleService, DealershipService } from "../../services/adminService";
 import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/button/Button";
+import { User } from "../../types/user";
+import { Modal } from "../../components/ui/modal";
+
 
 export default function ManageUsers() {
   const { showToast } = useToast();
@@ -26,6 +29,9 @@ export default function ManageUsers() {
   const [confirmPasswordModal, setConfirmPasswordModal] = useState(false);
   const [originalForm, setOriginalForm] = useState<any>(null);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [form, setForm] = useState({
     employee_number: "",
@@ -200,13 +206,44 @@ export default function ManageUsers() {
       await UserService.toggleStatus(user.id);
       showToast("User status updated", "success");
       loadUsers();
-    } catch {
-      showToast("Failed to update user status", "error");
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong";
+
+      showToast(message, "error");
     }
   };
 
-  /* ================= CLOSE ================= */
+/* ================= DELETE ================= */
+  const handleDelete = (user: User) => {
+  setSelectedUser(user);
+  setShowDeleteModal(true);
+};
 
+const confirmDelete = async () => {
+  if (!selectedUser) return;
+
+  try {
+    await UserService.delete(selectedUser.id);
+
+    // refresh list
+    loadUsers();
+
+    setShowDeleteModal(false);
+    setSelectedUser(null);
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Something went wrong";
+
+    showToast(message, "error");
+  }
+};
+
+  /* ================= CLOSE ================= */
   const closeModal = () => {
     setEditingUser(null);
     setIsCreateMode(false);
@@ -248,9 +285,10 @@ export default function ManageUsers() {
 
       {/* TABLE */}
       <UsersTable
-        users={users} // ✅ NO FILTER
+        users={users} 
         onEdit={openEdit}
         onToggle={handleToggle}
+        onDelete={handleDelete} 
       />
 
       {/* PAGINATION */}
@@ -276,6 +314,8 @@ export default function ManageUsers() {
         </div>
       )}
 
+      
+
       {/* MODALS */}
       {isUserModalOpen && (
         <UsersModal
@@ -297,6 +337,48 @@ export default function ManageUsers() {
           onCancel={() => setConfirmPasswordModal(false)}
           onConfirm={submitUpdate}
         />
+      )}
+
+      {showDeleteModal && selectedUser && (
+        <Modal
+          isOpen
+          onClose={() => setShowDeleteModal(false)}
+          className="max-w-md"
+        >
+          <div className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Delete User
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold">
+                {selectedUser.firstname} {selectedUser.lastname}
+              </span>
+              ?
+            </p>
+
+            <p className="mt-1 text-xs text-red-500">
+              This action cannot be undone.
+            </p>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 text-sm rounded-lg border dark:border-gray-700"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
 
     </div>

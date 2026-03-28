@@ -8,15 +8,18 @@ import {
 import Badge from "../ui/badge/Badge";
 import { Request } from "../../types/request";
 import { formatDateTime } from "../utils/date";
-
+import { getRoleFlags } from "../utils/authHelper";
 import { getStatusBadgeColor, formatStatusLabel } from "../utils/statusHelper";
 
 type Props = {
   requests: Request[];
   onView: (request: Request) => void;
+  onDelete?: (request: Request) => void;
 };
 
-export default function RequestsTable({ requests, onView }: Props) {
+const { isAdministrator } = getRoleFlags();
+
+export default function RequestsTable({ requests, onView, onDelete}: Props) {
   return (
     <div className="max-w-full overflow-x-auto">
       <Table>
@@ -91,7 +94,10 @@ export default function RequestsTable({ requests, onView }: Props) {
               </TableCell>
 
               {/* Operation */}
-              <TableCell className="py-2 text-center text-gray-500 text-theme-sm dark:text-gray-400">
+            <TableCell className="py-2 text-center text-gray-500 text-theme-sm dark:text-gray-400">
+              <div className="flex justify-center items-center gap-2">
+
+                {/* VIEW */}
                 <button
                   onClick={() => onView(req)}
                   className="
@@ -106,18 +112,42 @@ export default function RequestsTable({ requests, onView }: Props) {
                   "
                   title="View details"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 </button>
-              </TableCell>
+
+                {/* 🗑 DELETE (ADMIN ONLY) */}
+                {isAdministrator && (
+                  <button
+                    onClick={() => onDelete?.(req)}
+                    className="
+                      inline-flex items-center justify-center
+                      w-9 h-9
+                      rounded-lg
+                      border border-gray-200
+                      text-red-600
+                      hover:bg-red-600 hover:text-white
+                      dark:border-gray-700
+                      transition
+                    "
+                    title="Delete request"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7v12m6-12v12M10 3h4" />
+                    </svg>
+                  </button>
+                )}
+
+              </div>
+            </TableCell>
             </TableRow>
           ))}
 

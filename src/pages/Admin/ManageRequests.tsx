@@ -17,6 +17,7 @@ import {
 
 import { RequestWorkflowService } from "../../services/adminService";
 
+
 import { ShipmentForm } from "../../types/shipment";
 import { Request, RequestAction } from "../../types/request";
 import { OrderItem } from "../../types/orderItem";
@@ -28,6 +29,9 @@ export default function ManageRequests() {
 
   const [selected, setSelected] = useState<Request | null>(null);
   const [stockErrors, setStockErrors] = useState<any[]>([]);
+
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
  
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<"ACTIVE" | "ALL">("ALL");
@@ -205,6 +209,32 @@ const handleCreateOrder = async (payload: {
   };
 
   /* ===============================
+     DELETE
+  =============================== */
+  const handleDelete = (req: Request) => {
+    setSelectedRequest(req);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedRequest) return;
+
+    try {
+      await RequestWorkflowService.delete(selectedRequest.id);
+
+      showToast("Request deleted successfully", "success");
+
+      refreshRequests();
+      setShowDeleteModal(false);
+      setSelectedRequest(null);
+
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to delete request", "error");
+    }
+  };
+  
+  /* ===============================
      SEARCH
   =============================== */
 
@@ -269,7 +299,7 @@ const handleCreateOrder = async (payload: {
       </div>
 
       {/* TABLE */}
-      <RequestsTable requests={requests} onView={setSelected} />
+      <RequestsTable requests={requests} onView={setSelected} onDelete={handleDelete}/>
 
       {/* PAGINATION */}
       {meta && meta.last_page > 1 && (
@@ -321,6 +351,47 @@ const handleCreateOrder = async (payload: {
         onSubmit={handleCreateOrder}
         
       />
+
+    {showDeleteModal && selectedRequest && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-lg">
+
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Delete Request
+          </h3>
+
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Are you sure you want to delete request{" "}
+            <span className="font-semibold">
+              #{selectedRequest.request_id}
+            </span>
+            ?
+          </p>
+
+          <p className="mt-1 text-xs text-red-500">
+            This action cannot be undone.
+          </p>
+
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              className="px-4 py-2 text-sm rounded-lg border dark:border-gray-700"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={confirmDelete}
+              className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700"
+            >
+              Delete
+            </button>
+          </div>
+
+        </div>
+      </div>
+    )}
+
     </div>
   );
 }

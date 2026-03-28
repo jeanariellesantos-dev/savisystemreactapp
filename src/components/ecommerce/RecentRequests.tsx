@@ -256,7 +256,11 @@ const handleCreateOrder = async (payload: {
         </div>
       </div>
 
-    <RequestsTable requests={requests} onView={setSelected} />
+      <RequestsTable
+        requests={requests}
+        onView={setSelected}
+        onDelete={() => {}}
+      />
       {meta && meta.last_page > 1 && (
         <div className="flex items-center justify-between mt-4">
           <button
