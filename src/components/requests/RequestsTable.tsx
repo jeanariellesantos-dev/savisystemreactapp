@@ -5,6 +5,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { useState, useEffect} from "react";
 import Badge from "../ui/badge/Badge";
 import { Request } from "../../types/request";
 import { formatDateTime } from "../utils/date";
@@ -16,10 +17,14 @@ type Props = {
   onView: (request: Request) => void;
   onDelete?: (request: Request) => void;
 };
-
-const { isAdministrator } = getRoleFlags();
-
 export default function RequestsTable({ requests, onView, onDelete}: Props) {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const { isAdministrator } = getRoleFlags();
+    setIsAdmin(isAdministrator);
+  }, []);
+
   return (
     <div className="max-w-full overflow-x-auto">
       <Table>
@@ -119,7 +124,7 @@ export default function RequestsTable({ requests, onView, onDelete}: Props) {
                 </button>
 
                 {/* 🗑 DELETE (ADMIN ONLY) */}
-                {isAdministrator && (
+                {typeof onDelete === "function" && (
                   <button
                     onClick={() => onDelete?.(req)}
                     className="
