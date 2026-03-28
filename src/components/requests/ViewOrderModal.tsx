@@ -747,16 +747,16 @@ return (
         </p>
 
         <TextArea
-        value={actionRemarks}
-        onChange={(val)=>{
-        setActionRemarks(val);
-        if(rejectError)setRejectError(null);
-        }}
-        placeholder={
-        confirmAction==="REJECTED"
-        ?"Provide rejection reason..."
-        :"Optional remarks..."
-        }
+          value={actionRemarks}
+          onChange={(val)=>{
+          setActionRemarks(val);
+          if(rejectError)setRejectError(null);
+          }}
+          placeholder={
+          confirmAction==="REJECTED"
+          ?"Provide rejection reason..."
+          :"Optional remarks..."
+          }
         />
 
         {rejectError && (

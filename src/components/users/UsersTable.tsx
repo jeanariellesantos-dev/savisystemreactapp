@@ -6,24 +6,16 @@ import {
   TableRow,
 } from "../ui/table";
 import Badge from "../ui/badge/Badge";
-
-type User = {
-  id: number;
-  employee_number: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  role: string;
-  is_active: boolean;
-};
+import { User } from "../../types/user";
 
 type Props = {
   users: User[];
   onEdit: (user: User) => void;
   onToggle: (user: User) => void;
+  onDelete: (user: User) => void;
 };
 
-export default function UsersTable({ users, onEdit, onToggle }: Props) {
+export default function UsersTable({ users, onEdit, onToggle, onDelete }: Props) {
   return (
     <div className="max-w-full overflow-x-auto">
       <Table>
@@ -161,6 +153,36 @@ export default function UsersTable({ users, onEdit, onToggle }: Props) {
                       </svg>
                     )}
                   </button>
+
+                   {/* DELETE BUTTON BUTTON */}
+                  <button
+                  onClick={() => onDelete(user)}
+                  className="
+                    inline-flex items-center justify-center
+                    w-9 h-9
+                    rounded-lg
+                    border border-gray-200
+                    text-red-600
+                    hover:bg-red-600 hover:text-white
+                    dark:border-gray-700
+                    transition
+                  "
+                  title="Delete"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 7h12M9 7v12m6-12v12M10 3h4"
+                    />
+                  </svg>
+                </button>
 
                 </div>
               </TableCell>

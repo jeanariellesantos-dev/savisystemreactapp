@@ -11,6 +11,14 @@ export type Unit = {
 };
 
 export const ProductService = {
+
+  async getAll(): Promise<any> {
+    const res = await URL_API.get("/products/all");
+    return res.data;
+  },
+
+
+
   async getByCategory(categoryId: number): Promise<Product[]> {
     const { data } = await URL_API.get("/products", {
       params: { category_id: categoryId },

@@ -68,7 +68,7 @@ const navItems: NavItem[] = [
   icon: <PageIcon />,
   name: "Reports",
   path: "/report",
-  roles: ["ACCOUNTING"], 
+  roles: ["ACCOUNTING","SUPERVISOR","CLUSTER_HEAD"], 
   },
   {
     icon: <GridIcon />,

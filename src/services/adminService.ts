@@ -131,6 +131,11 @@ export const UserService = {
     return data;
   },
 
+  async delete(id: number): Promise<any> {
+    const { data } = await URL_API.delete(`/admin/users/${id}`);
+    return data;
+  },
+
   async toggleStatus(id: number) {
     const { data } = await URL_API.patch(`/admin/users/${id}/toggle`);
     return data;
@@ -333,6 +338,14 @@ export const RequestWorkflowService = {
     const { data } = await URL_API.post(
       `admin/requests/${requestId}/receive`,
       payload
+    );
+
+    return data;
+  },
+
+  async delete(requestId: number) {
+    const { data } = await URL_API.delete(
+      `/admin/requests/${requestId}`
     );
 
     return data;

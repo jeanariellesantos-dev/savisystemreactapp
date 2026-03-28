@@ -20,7 +20,9 @@ export const getRequestPermissions = (status: string) => {
 
     // ================= ORDER =================
     canEditOrder:
-      (isAdministrator || isAccounting) && status === "PENDING_ACCOUNTING",
+      ((isAccounting || isAdministrator) && status === "PENDING_ACCOUNTING") ||
+      ((isSupervisor  || isAdministrator) && status === "PENDING_SUPERVISOR") ||
+      ((isClusterHead  || isAdministrator) && status === "PENDING_CLUSTER_HEAD"),
 
     // ================= APPROVAL =================
     canApproveReject:

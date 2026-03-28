@@ -57,6 +57,9 @@
 
                   <Route element={<ProtectedRoute allowedRoles={["ACCOUNTING"]} />}>
                     <Route path="/inventory" element={<Inventory />} />
+                  </Route>
+
+                  <Route element={<ProtectedRoute allowedRoles={["ACCOUNTING","SUPERVISOR","CLUSTER_HEAD"]} />}>
                     <Route path="/report" element={<Report />} />
                   </Route>
 
