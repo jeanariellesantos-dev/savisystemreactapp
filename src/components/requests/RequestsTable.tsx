@@ -17,8 +17,6 @@ type Props = {
   onView: (request: Request) => void;
   onDelete?: (request: Request) => void;
 };
-
-
 export default function RequestsTable({ requests, onView, onDelete}: Props) {
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -26,7 +24,7 @@ export default function RequestsTable({ requests, onView, onDelete}: Props) {
     const { isAdministrator } = getRoleFlags();
     setIsAdmin(isAdministrator);
   }, []);
-  
+
   return (
     <div className="max-w-full overflow-x-auto">
       <Table>
@@ -126,7 +124,7 @@ export default function RequestsTable({ requests, onView, onDelete}: Props) {
                 </button>
 
                 {/* 🗑 DELETE (ADMIN ONLY) */}
-                {isAdmin && (
+                {typeof onDelete === "function" && (
                   <button
                     onClick={() => onDelete?.(req)}
                     className="
