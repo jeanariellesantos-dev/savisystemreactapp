@@ -181,8 +181,13 @@ export default function ManageUsers() {
       showToast("Account created successfully", "success");
       closeModal();
       loadUsers();
-    } catch {
-      showToast("Failed to create user", "error");
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong";
+
+      showToast(message, "error");
     }
   };
 
@@ -293,28 +298,30 @@ const confirmDelete = async () => {
 
       {/* PAGINATION */}
       {meta && meta.last_page > 1 && (
-        <div className="flex justify-between mt-4">
+        <div className="flex items-center justify-between mt-4">
+
           <button
             disabled={meta.current_page === 1}
             onClick={() => setPage((p) => p - 1)}
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
           >
-            Prev
+            Previous
           </button>
 
-          <span>
-            Page {meta.current_page} of {meta.last_page}
-          </span>
+          <div className="text-sm text-gray-600 dark:text-gray-300">
+            Page <b>{meta.current_page}</b> of <b>{meta.last_page}</b>
+          </div>
 
           <button
             disabled={meta.current_page === meta.last_page}
             onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50"
           >
             Next
           </button>
+
         </div>
       )}
-
-      
 
       {/* MODALS */}
       {isUserModalOpen && (
